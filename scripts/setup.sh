@@ -17,8 +17,8 @@ sudo apt install -y openssh-client cifs-utils git netcat-openbsd
 # 2. Python пакеты (с обходом защиты системы)
 echo ""
 echo "2️⃣ Python пакеты..."
-pip3 install --user --break-system-packages yamllint pyyaml requests 2>/dev/null || \
-    pip3 install --user yamllint pyyaml requests
+pip3 install --user --break-system-packages yamllint pyyaml requests mcp-proxy 2>/dev/null || \
+    pip3 install --user yamllint pyyaml requests mcp-proxy
 
 # 3. Создание директорий
 echo ""
@@ -75,12 +75,13 @@ fi
 # 7. MCP для Home Assistant
 echo ""
 echo "7️⃣ MCP сервер для Home Assistant..."
-if command -v npx &> /dev/null; then
-    echo "✅ Node.js/npx доступен"
+
+# Проверить установлен ли mcp-proxy
+if command -v mcp-proxy &> /dev/null; then
+    MCP_VERSION=$(mcp-proxy --version 2>&1 | grep -oP '\d+\.\d+\.\d+' || echo "unknown")
+    echo "✅ mcp-proxy установлен (версия: $MCP_VERSION)"
 else
-    echo "⚠️  Node.js не установлен. Установите для работы MCP:"
-    echo "   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
-    echo "   sudo apt-get install -y nodejs"
+    echo "⚠️  mcp-proxy не найден (должен был установиться выше)"
 fi
 
 if [ -f "$PROJECT_ROOT/.cursor/mcp.json.example" ] && [ ! -f "$PROJECT_ROOT/.cursor/mcp.json" ]; then

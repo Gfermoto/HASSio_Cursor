@@ -31,9 +31,9 @@
 
 - ✅ Системные пакеты (SSH, CIFS, Git, netcat)
 - ✅ Python пакеты (yamllint, pyyaml, requests)
+- ✅ **mcp-proxy** - MCP сервер для Home Assistant
 - ✅ Pre-commit хуки (автопроверка перед коммитом)
 - ✅ SSH ключ для подключения к HA
-- ✅ Проверка Node.js для MCP
 - ✅ Права на все скрипты
 
 ```bash
