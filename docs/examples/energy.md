@@ -25,7 +25,7 @@ automation:
         entity_id:
           - switch.socket_1
           - switch.socket_2
-```text
+```
 
 ## 2. Ночной режим
 
@@ -42,7 +42,7 @@ automation:
           temperature: 19
       - service: light.turn_off
         entity_id: all
-```text
+```
 
 ## 3. Мониторинг потребления
 
@@ -55,4 +55,4 @@ sensor:
         unit_of_measurement: "₽"
         value_template: >
           {{ states('sensor.daily_energy')|float * 5.0 }}
-```text
+```

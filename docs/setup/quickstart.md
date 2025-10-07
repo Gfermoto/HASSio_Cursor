@@ -9,7 +9,7 @@
 ```bash
 git clone https://github.com/Gfermoto/HASSio_Cursor.git
 cd HASSio_Cursor
-```text
+```
 
 ---
 
@@ -21,7 +21,7 @@ cp config.yml.example config.yml
 
 # Интерактивная настройка
 ./scripts/configure.sh
-```text
+```
 
 Вам будет предложено выбрать режим:
 
@@ -35,7 +35,7 @@ cp config.yml.example config.yml
 
 ```bash
 sudo ./scripts/mount.sh
-```text
+```
 
 Папка `config/` будет содержать конфигурацию вашего Home Assistant.
 
@@ -47,7 +47,7 @@ sudo ./scripts/mount.sh
 
 ```bash
 ./ha
-```text
+```
 
 **Что делать дальше:**
 

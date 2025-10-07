@@ -17,7 +17,7 @@ code config/configuration.yaml
 
 # 3. Развернуть (всё автоматически!)
 ./scripts/deploy.sh
-```text
+```
 
 **Скрипт deploy.sh делает:**
 
@@ -40,7 +40,7 @@ ssh -F .ssh/config hassio "ha backups list"
 
 # Если последний старый - создать новый
 ssh -F .ssh/config hassio "ha backups new --name='before-changes'"
-```text
+```
 
 ### Редактирование
 
@@ -50,7 +50,7 @@ code config/
 
 # Или конкретный файл
 code config/configuration.yaml
-```text
+```
 
 ### Развертывание
 
@@ -58,7 +58,7 @@ code config/configuration.yaml
 
 ```bash
 ./scripts/deploy.sh
-```text
+```
 
 **Ручной (если хотите контроль):**
 
@@ -82,7 +82,7 @@ ssh -F .ssh/config hassio "ha core restart"
 
 # 6. Логи
 ./scripts/view_logs.sh
-```text
+```
 
 ---
 
@@ -95,7 +95,7 @@ cd config/
 git log --oneline              # Найти последний рабочий коммит
 git revert HEAD                # Откатить последнее изменение
 ./scripts/deploy.sh            # Применить откат
-```text
+```
 
 ### Уровень 2: Локальный бэкап
 
@@ -103,7 +103,7 @@ git revert HEAD                # Откатить последнее измен�
 ./scripts/restore.sh
 # Выбрать последний рабочий бэкап
 # Перезагрузить HA
-```text
+```
 
 ### Уровень 3: Снапшот HA (полное восстановление)
 
@@ -113,7 +113,7 @@ ssh -F .ssh/config hassio "ha backups list"
 
 # Восстановить
 ssh -F .ssh/config hassio "ha backups restore SLUG"
-```text
+```
 
 ---
 
@@ -136,7 +136,7 @@ code config/configuration.yaml
 
 # 5. Проверить логи
 ./scripts/view_logs.sh
-```text
+```
 
 ### Изменение автоматизации
 
@@ -149,7 +149,7 @@ code config/automations.yaml
 
 # 3. Проверить что работает
 # (тестировать триггеры вручную в HA)
-```text
+```
 
 ### Обновление секретов
 
@@ -162,7 +162,7 @@ yamllint config/secrets.yaml
 
 # 3. Перезагрузить (secrets не в Git!)
 ssh -F .ssh/config hassio "ha core restart"
-```text
+```
 
 ### Массовые изменения
 
@@ -187,7 +187,7 @@ git merge experimental
 # 6. Если не ОК - откатить
 git checkout main
 git branch -D experimental
-```text
+```
 
 ---
 
@@ -204,7 +204,7 @@ ssh -F .ssh/config hassio "grep 'homeassistant.components.mqtt' /config/home-ass
 
 # За последний час
 ssh -F .ssh/config hassio "tail -1000 /config/home-assistant.log | grep ERROR"
-```text
+```
 
 ### Проверка конфигурации
 
@@ -221,7 +221,7 @@ logger:
   default: info
   logs:
     homeassistant.core: debug
-```text
+```
 
 ---
 
@@ -255,7 +255,7 @@ git branch -d new-feature
 # Если не OK - удалить ветку
 git checkout main
 git branch -D new-feature
-```text
+```
 
 ### Просмотр истории
 
@@ -273,7 +273,7 @@ git blame configuration.yaml
 
 # Изменения между коммитами
 git diff HEAD~1 HEAD
-```text
+```
 
 ---
 
@@ -313,4 +313,4 @@ code config/            # Редактировать
 ./scripts/view_logs.sh  # Логи
 ./scripts/restore.sh    # Откатить
 ./scripts/check.sh      # Проверить статус
-```text
+```

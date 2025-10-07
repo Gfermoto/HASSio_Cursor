@@ -22,7 +22,7 @@ automation:
         data:
           temperature: >
             {{ 25 - (states('sensor.outdoor_temperature')|float * 0.5) }}
-```text
+```
 
 ## 2. Ночное снижение
 
@@ -37,7 +37,7 @@ automation:
         data:
           entity_id: all
           temperature: 18
-```text
+```
 
 ## 3. Защита от перегрева
 
@@ -51,6 +51,6 @@ automation:
     action:
       - service: climate.turn_off
         entity_id: climate.wthermostat
-```text
+```
 
 **Полное руководство:** [Оптимизация отопления](../guides/heating-optimization.md)
