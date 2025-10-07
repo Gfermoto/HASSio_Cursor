@@ -74,9 +74,9 @@ code config/              # Редактировать
 
 ## 📖 Документация
 
-- **[docs/SETUP.md](docs/SETUP.md)** - Полная инструкция по настройке MCP, SSH и SAMBA
-- **[docs/COMMANDS.md](docs/COMMANDS.md)** - Справочник команд
-- **[docs/WORKFLOW.md](docs/WORKFLOW.md)** - Рабочий процесс и best practices
+- **[docs/setup/SETUP.md](docs/setup/SETUP.md)** - Полная инструкция по настройке MCP, SSH и SAMBA
+- **[docs/reference/COMMANDS.md](docs/reference/COMMANDS.md)** - Справочник команд
+- **[docs/reference/WORKFLOW.md](docs/reference/WORKFLOW.md)** - Рабочий процесс и best practices
 - **[SECURITY.md](SECURITY.md)** - 🔒 Безопасность и публикация
 
 ## 💻 Главное меню
