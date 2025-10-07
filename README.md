@@ -1,9 +1,11 @@
 # 🏠 Home Assistant Cursor Integration
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation](https://img.shields.io/badge/docs-MkDocs-blue)](https://gfermoto.github.io/HASSio_Cursor)
+[![Documentation](https://img.shields.io/badge/docs-live-brightgreen)](https://gfermoto.github.io/HASSio_Cursor)
+[![GitHub Pages](https://github.com/Gfermoto/HASSio_Cursor/workflows/Deploy%20Documentation/badge.svg)](https://github.com/Gfermoto/HASSio_Cursor/actions)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Compatible-41BDF5.svg)](https://www.home-assistant.io/)
+[![Release](https://img.shields.io/github/v/release/Gfermoto/HASSio_Cursor)](https://github.com/Gfermoto/HASSio_Cursor/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/Gfermoto/HASSio_Cursor?style=social)](https://github.com/Gfermoto/HASSio_Cursor/stargazers)
 
 Профессиональная среда разработки для Home Assistant с AI-ассистентом, интеграцией MCP, SSH и SAMBA.
@@ -123,16 +125,22 @@ MCP уже настроен и работает! Просто спросите A
 
 ## 📚 Документация
 
-- 📖 [Полная документация](https://gfermoto.github.io/HASSio_Cursor)
-- ⚡ [Быстрый старт](docs/setup/quickstart.md)
-- 🔬 [Первый аудит](docs/guides/first-audit.md)
-- 📋 [Справочник команд](docs/reference/COMMANDS.md)
+- 📖 **[Полная документация](https://gfermoto.github.io/HASSio_Cursor)** ← начните здесь!
+- ⚡ [Быстрый старт](docs/setup/quickstart.md) - 5 минут
+- 🔬 [Первый аудит](docs/guides/first-audit.md) - оцените систему
+- 🌡️ [Оптимизация отопления](docs/guides/heating-optimization.md) - экономьте до 30%
+- 🔒 [Безопасность](docs/guides/security.md) - умные оповещения
+- 📋 [Справочник команд](docs/reference/COMMANDS.md) - все команды
 
 ---
 
 ## 🤝 Вклад в проект
 
 Мы рады любой помощи! См. [CONTRIBUTING.md](CONTRIBUTING.md)
+
+- 🐛 [Сообщить об ошибке](https://github.com/Gfermoto/HASSio_Cursor/issues/new)
+- 💡 [Предложить улучшение](https://github.com/Gfermoto/HASSio_Cursor/issues/new)
+- 📖 [Улучшить документацию](https://github.com/Gfermoto/HASSio_Cursor/edit/main/docs/)
 
 ---
 
@@ -142,9 +150,26 @@ MCP уже настроен и работает! Просто спросите A
 
 ---
 
+## 🔗 Полезные ссылки
+
+- 📚 [Документация](https://gfermoto.github.io/HASSio_Cursor)
+- 📦 [Releases](https://github.com/Gfermoto/HASSio_Cursor/releases)
+- 📝 [Changelog](CHANGELOG.md)
+- 🔒 [Security Policy](SECURITY.md)
+- 🤝 [Contributing Guide](CONTRIBUTING.md)
+
+---
+
 ## 🌟 Поддержка проекта
 
-Если проект был полезен, поставьте ⭐ на GitHub!
+Если проект был полезен:
+
+- ⭐ Поставьте звезду на GitHub
+- 📢 Расскажите друзьям
+- 🐛 Сообщите об ошибках
+- 💡 Предложите улучшения
+
+**Спасибо за использование HASSio Cursor!** 🎉
 
 ## 📊 Статус
 
