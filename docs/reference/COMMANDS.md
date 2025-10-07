@@ -12,7 +12,7 @@
 
 ```bash
 ./setup.sh
-```
+```text
 
 **Что делает:**
 
@@ -29,7 +29,7 @@
 
 ```bash
 ./mount.sh
-```
+```text
 
 **Что делает:**
 
@@ -41,7 +41,7 @@
 
 ```bash
 sudo umount /mnt/hassio
-```
+```text
 
 ---
 
@@ -51,7 +51,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./check.sh
-```
+```text
 
 **Проверяет:**
 
@@ -70,7 +70,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./scripts/setup_samba.sh
-```
+```text
 
 **Создаёт:** `.samba-credentials` с username/password
 
@@ -82,7 +82,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./scripts/deploy.sh
-```
+```text
 
 **Что делает (автоматически):**
 
@@ -101,7 +101,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./scripts/backup.sh
-```
+```text
 
 **Создаёт:** `backups/config_YYYYMMDD_HHMMSS.tar.gz`
 **Хранение:** 7 дней (старые удаляются автоматически)
@@ -114,7 +114,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./scripts/restore.sh
-```
+```text
 
 **Интерактивно:**
 
@@ -132,7 +132,7 @@ sudo umount /mnt/hassio
 
 ```bash
 ./scripts/view_logs.sh
-```
+```text
 
 **Интерактивное меню:**
 
@@ -151,13 +151,13 @@ sudo umount /mnt/hassio
 
 ```bash
 ssh -F .ssh/config hassio
-```
+```text
 
 ### Выполнение команды без входа
 
 ```bash
 ssh -F .ssh/config hassio "КОМАНДА"
-```
+```text
 
 ### Полезные команды HA
 
@@ -167,7 +167,7 @@ ssh -F .ssh/config hassio "КОМАНДА"
 ssh -F .ssh/config hassio "ha core info"
 ssh -F .ssh/config hassio "ha host info"
 ssh -F .ssh/config hassio "ha os info"
-```
+```text
 
 **Управление:**
 
@@ -176,7 +176,7 @@ ssh -F .ssh/config hassio "ha core restart"
 ssh -F .ssh/config hassio "ha core check"
 ssh -F .ssh/config hassio "ha core update"
 ssh -F .ssh/config hassio "ha core rebuild"
-```
+```text
 
 **Add-ons:**
 
@@ -184,7 +184,7 @@ ssh -F .ssh/config hassio "ha core rebuild"
 ssh -F .ssh/config hassio "ha addons list"
 ssh -F .ssh/config hassio "ha addons info ADDON"
 ssh -F .ssh/config hassio "ha addons restart ADDON"
-```
+```text
 
 **Логи:**
 
@@ -192,7 +192,7 @@ ssh -F .ssh/config hassio "ha addons restart ADDON"
 ssh -F .ssh/config hassio "tail -f /config/home-assistant.log"
 ssh -F .ssh/config hassio "grep ERROR /config/home-assistant.log"
 ssh -F .ssh/config hassio "ha core logs"
-```
+```text
 
 **Снапшоты:**
 
@@ -200,7 +200,7 @@ ssh -F .ssh/config hassio "ha core logs"
 ssh -F .ssh/config hassio "ha backups list"
 ssh -F .ssh/config hassio "ha backups new --name='manual'"
 ssh -F .ssh/config hassio "ha backups restore SLUG"
-```
+```text
 
 ---
 
@@ -212,7 +212,7 @@ ssh -F .ssh/config hassio "ha backups restore SLUG"
 ./mount.sh                          # Монтировать
 sudo umount /mnt/hassio             # Размонтировать
 mountpoint /mnt/hassio              # Проверить статус
-```
+```text
 
 ### Работа с файлами
 
@@ -221,14 +221,14 @@ ls config/                          # Список файлов
 cat config/configuration.yaml       # Просмотр файла
 code config/                        # Открыть в Cursor
 nano config/automations.yaml        # Редактировать в nano
-```
+```text
 
 ### Проверка
 
 ```bash
 df -h | grep hassio                 # Информация о монтировании
 mount | grep hassio                 # Детали монтирования
-```
+```text
 
 ---
 
@@ -240,13 +240,13 @@ mount | grep hassio                 # Детали монтирования
 yamllint config/configuration.yaml
 yamllint config/*.yaml
 yamllint -d relaxed config/*.yaml   # Мягкая проверка
-```
+```text
 
 ### Проверка через HA
 
 ```bash
 ssh -F .ssh/config hassio "ha core check"
-```
+```text
 
 ---
 
@@ -259,7 +259,7 @@ cd config/
 git init
 git config user.name "Your Name"
 git config user.email "your@email.com"
-```
+```text
 
 ### Ежедневное использование
 
@@ -277,7 +277,7 @@ git commit -m "Описание изменений"  # Закоммитить
 
 git log --oneline                   # История
 git log --oneline --graph           # История с графом
-```
+```text
 
 ### Откат изменений
 
@@ -285,7 +285,7 @@ git log --oneline --graph           # История с графом
 git checkout -- configuration.yaml  # Откатить файл
 git revert HEAD                     # Откатить последний коммит
 git reset --hard HEAD~1             # Удалить последний коммит (осторожно!)
-```
+```text
 
 ---
 
@@ -295,28 +295,28 @@ git reset --hard HEAD~1             # Удалить последний комм
 
 **Мониторинг:**
 
-```
+```text
 "Какая температура в доме?"
 "Покажи все устройства"
 "Какая влажность?"
 "Покажи все термостаты"
-```
+```text
 
 **Управление:**
 
-```
+```text
 "Включи свет SONOFF"
 "Выключи свет на кухне"
 "Установи температуру 22 градуса в спальне"
 "Включи отопление"
-```
+```text
 
 **Камеры:**
 
-```
+```text
 "Покажи снимок с входной камеры"
 "Сделай снапшот с камеры в саду"
-```
+```text
 
 ---
 
@@ -333,13 +333,13 @@ alias hacheck='ssh -F ~/HASSio/.ssh/config hassio "ha core check"'
 alias hamount='cd ~/HASSio && ./mount.sh'
 alias haedit='code ~/HASSio/config/'
 alias hadeploy='cd ~/HASSio && ./scripts/deploy.sh'
-```
+```text
 
 **Применить:**
 
 ```bash
 source ~/.bashrc
-```
+```text
 
 **Использование:**
 
@@ -351,7 +351,7 @@ harestart       # = перезагрузить
 hamount         # = смонтировать
 haedit          # = открыть в Cursor
 hadeploy        # = развернуть изменения
-```
+```text
 
 ---
 
@@ -361,7 +361,7 @@ hadeploy        # = развернуть изменения
 
 ```bash
 ./check.sh
-```
+```text
 
 ### Детальная проверка
 
@@ -377,7 +377,7 @@ ssh -F .ssh/config hassio "df -h /config"
 
 # Версия HA
 ssh -F .ssh/config hassio "ha core info" | grep version
-```
+```text
 
 ---
 
@@ -387,19 +387,19 @@ ssh -F .ssh/config hassio "ha core info" | grep version
 
 ```bash
 scp -F .ssh/config hassio:/config/secrets.yaml ./backup/
-```
+```text
 
 ### С локального на сервер
 
 ```bash
 scp -F .ssh/config ./new_automation.yaml hassio:/config/
-```
+```text
 
 **Или через SAMBA (проще):**
 
 ```bash
 cp new_file.yaml config/
-```
+```text
 
 ---
 
@@ -409,7 +409,7 @@ cp new_file.yaml config/
 
 ```bash
 curl -sf https://your-domain.com && echo "✅ Доступен" || echo "❌ Недоступен"
-```
+```text
 
 ### Использование ресурсов
 
@@ -417,14 +417,14 @@ curl -sf https://your-domain.com && echo "✅ Доступен" || echo "❌ Н�
 ssh -F .ssh/config hassio "top -bn1 | head -20"
 ssh -F .ssh/config hassio "free -h"
 ssh -F .ssh/config hassio "df -h"
-```
+```text
 
 ### Логи в реальном времени
 
 ```bash
 ./scripts/view_logs.sh
 # Выбрать пункт 5
-```
+```text
 
 ---
 
@@ -454,4 +454,4 @@ code config/
 
 # Восстановление
 ./scripts/restore.sh
-```
+```text

@@ -14,7 +14,7 @@
 
 ## 📋 Рекомендуемая схема подключения
 
-```
+```text
 Интернет
     ↓
 [Белый IP / Домен]
@@ -31,7 +31,7 @@ MikroTik Router (Проброс портов)
 │  Home Assistant                  │
 │  192.168.1.XXX:8123              │
 └─────────────────────────────────┘
-```
+```text
 
 ---
 
@@ -93,7 +93,7 @@ MikroTik Router (Проброс портов)
   to-addresses=192.168.1.20 \
   to-ports=22 \
   comment="SSH to Home Assistant"
-```
+```text
 
 ### Настройка Reverse Proxy (Nginx)
 
@@ -140,7 +140,7 @@ server {
         proxy_set_header Connection "upgrade";
     }
 }
-```
+```text
 
 #### Получение SSL сертификата
 
@@ -153,7 +153,7 @@ sudo certbot --nginx -d hassio.yourdomain.com
 
 # Автообновление (уже настроено)
 sudo certbot renew --dry-run
-```
+```text
 
 ---
 
@@ -195,7 +195,7 @@ sudo certbot renew --dry-run
   to-addresses=192.168.1.20 \
   to-ports=22 \
   comment="SSH Direct"
-```
+```text
 
 ---
 
@@ -252,7 +252,7 @@ sudo certbot renew --dry-run
   action=add-src-to-address-list \
   address-list=ssh_stage1 \
   address-list-timeout=1m
-```
+```text
 
 ### 2. Rate limiting для веб-доступа
 
@@ -265,7 +265,7 @@ sudo certbot renew --dry-run
   connection-limit=50,32 \
   action=drop \
   comment="Limit HTTPS connections per IP"
-```
+```text
 
 ### 3. Разрешить только из определённых стран (опционально)
 
@@ -284,7 +284,7 @@ sudo certbot renew --dry-run
   src-address-list=!allowed_countries \
   action=drop \
   comment="Block non-RU"
-```
+```text
 
 ---
 
@@ -296,12 +296,12 @@ sudo certbot renew --dry-run
 
 В панели управления доменом (например, CloudFlare, Reg.ru):
 
-```
+```text
 Тип: A
 Имя: hassio
 Значение: ВАШ_БЕЛЫЙ_IP
 TTL: 300
-```
+```text
 
 Результат: `hassio.yourdomain.com` → `ВАШ_БЕЛЫЙ_IP`
 
@@ -313,7 +313,7 @@ dig hassio.yourdomain.com
 
 # Windows
 nslookup hassio.yourdomain.com
-```
+```text
 
 ---
 
@@ -344,7 +344,7 @@ samba:
   username: "homeassistant"
   password: "your_password"
   local_ip: "192.168.1.20"
-```
+```text
 
 ---
 
@@ -358,7 +358,7 @@ nmap -p 443,80,22 ВАШ_БЕЛЫЙ_IP
 
 # Или онлайн
 # https://www.yougetsignal.com/tools/open-ports/
-```
+```text
 
 ### 2. Проверка доступа
 
@@ -371,7 +371,7 @@ ssh root@ВАШ_БЕЛЫЙ_IP
 
 # Или через домен
 ssh root@hassio.yourdomain.com
-```
+```text
 
 ### 3. Проверка SSL сертификата
 
@@ -381,7 +381,7 @@ openssl s_client -connect hassio.yourdomain.com:443 -servername hassio.yourdomai
 
 # Или через браузер
 # https://www.ssllabs.com/ssltest/
-```
+```text
 
 ---
 
@@ -398,7 +398,7 @@ openssl s_client -connect hassio.yourdomain.com:443 -servername hassio.yourdomai
 
 # Проверить WAN интерфейс
 /interface print
-```
+```text
 
 ### SSL не работает
 
@@ -416,7 +416,7 @@ openssl s_client -connect hassio.yourdomain.com:443 -servername hassio.yourdomai
      use_x_forwarded_for: true
      trusted_proxies:
        - 192.168.1.5  # IP вашего Reverse Proxy
-   ```
+```text
 
 2. Перезапустите Home Assistant
 
@@ -432,7 +432,7 @@ openssl s_client -connect hassio.yourdomain.com:443 -servername hassio.yourdomai
 
 # Смотреть активные подключения
 /ip firewall connection print where dst-port=443
-```
+```text
 
 ### Логи Nginx
 
@@ -445,7 +445,7 @@ sudo tail -f /var/log/nginx/error.log
 
 # Только ошибки HA
 sudo tail -f /var/log/nginx/error.log | grep hassio
-```
+```text
 
 ---
 
