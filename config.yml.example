@@ -1,0 +1,44 @@
+# Пример конфигурации Home Assistant проекта
+# Скопируйте этот файл в config.yml и используйте scripts/configure.sh
+
+# Режим работы (устанавливается через scripts/configure.sh)
+mode: "mixed"  # local | global | mixed
+
+# Home Assistant Server
+server:
+  url: "https://your-ha-server.com"
+  hostname: "your-ha-server.com"
+  local_ip: "192.168.1.XXX"  # Узнайте в HA: Settings → System → Network
+  
+# SSH Settings
+ssh:
+  use_local: true  # true = локальная сеть, false = интернет
+  port_external: 2222
+  port_internal: 22
+  user: "root"
+  key_path: ".ssh/id_hassio"
+
+# SAMBA Settings  
+samba:
+  use_local: true  # true = локальная сеть, false = интернет
+  username: "homeassistant"
+  password: "your_samba_password"  # Из Samba add-on configuration
+  share: "config"
+  mount_point: "/mnt/hassio"
+
+# MCP Settings
+mcp:
+  use_local: false  # true = локальная сеть, false = интернет
+  token: "your_mcp_token_here"  # Из .cursor/mcp.json
+  endpoint_global: "https://your-ha-server.com/mcp_server/sse"
+  endpoint_local: "http://192.168.1.XXX:8123/mcp_server/sse"
+
+# Backup Settings
+backup:
+  retention_days: 7
+  path: "backups"
+
+# Paths
+paths:
+  project_root: "/home/YOUR_USERNAME/HASSio"
+  config_link: "config"
