@@ -49,8 +49,46 @@ chmod 644 "${SSH_KEY}.pub"
 # 5. Права на скрипты
 echo ""
 echo "5️⃣ Права на скрипты..."
-cd /home/gfer/HASSio/scripts
-chmod +x *.sh
+cd "$PROJECT_ROOT/scripts" || exit 1
+chmod +x ./*.sh
+chmod +x "$PROJECT_ROOT/ha"
+
+# 6. Pre-commit хуки
+echo ""
+echo "6️⃣ Pre-commit хуки..."
+if command -v pre-commit &> /dev/null; then
+    echo "✅ pre-commit уже установлен"
+else
+    echo "Установка pre-commit..."
+    pip3 install --user --break-system-packages pre-commit 2>/dev/null || \
+        pip3 install --user pre-commit
+fi
+
+cd "$PROJECT_ROOT" || exit 1
+if [ -f .pre-commit-config.yaml ]; then
+    pre-commit install
+    echo "✅ Git хуки установлены"
+else
+    echo "⚠️  .pre-commit-config.yaml не найден"
+fi
+
+# 7. MCP для Home Assistant
+echo ""
+echo "7️⃣ MCP сервер для Home Assistant..."
+if command -v npx &> /dev/null; then
+    echo "✅ Node.js/npx доступен"
+else
+    echo "⚠️  Node.js не установлен. Установите для работы MCP:"
+    echo "   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
+    echo "   sudo apt-get install -y nodejs"
+fi
+
+if [ -f "$PROJECT_ROOT/.cursor/mcp.json.example" ] && [ ! -f "$PROJECT_ROOT/.cursor/mcp.json" ]; then
+    echo ""
+    echo "📝 Создайте конфигурацию MCP:"
+    echo "   cp .cursor/mcp.json.example .cursor/mcp.json"
+    echo "   nano .cursor/mcp.json  # и добавьте ваш токен"
+fi
 
 echo ""
 echo "======================================================"
