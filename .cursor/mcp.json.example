@@ -8,6 +8,9 @@
       "env": {
         "API_ACCESS_TOKEN": "YOUR_MCP_TOKEN_HERE"
       }
+    },
+    "HASSio_Cursor Docs": {
+      "url": "https://gitmcp.io/Gfermoto/HASSio_Cursor"
     }
   }
 }

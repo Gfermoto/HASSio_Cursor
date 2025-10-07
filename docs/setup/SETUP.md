@@ -504,6 +504,9 @@ cat .cursor/mcp.json
       "env": {
         "API_ACCESS_TOKEN": "..."
       }
+    },
+    "HASSio_Cursor Docs": {
+      "url": "https://gitmcp.io/Gfermoto/HASSio_Cursor"
     }
   }
 }
