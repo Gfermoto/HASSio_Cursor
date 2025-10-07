@@ -140,7 +140,7 @@ automation:
       - service: shell_command.run_audit
 
 shell_command:
-  run_audit: "/home/gfer/HASSio/scripts/audit.sh"
+  run_audit: "~/HASSio/scripts/audit.sh"
 ```text
 
 ---

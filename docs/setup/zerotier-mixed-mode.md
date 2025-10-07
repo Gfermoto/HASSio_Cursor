@@ -148,7 +148,7 @@ sudo zerotier-cli listnetworks
 ## 📝 Настройка config.yml для смешанного режима
 
 ```yaml
-# /home/gfer/HASSio/config.yml
+# ~/HASSio/config.yml
 
 mode: "mixed"  # Автоматическое определение
 
@@ -358,7 +358,7 @@ Host hassio-local
     HostName 192.168.1.20
     User root
     Port 22
-    IdentityFile /home/gfer/HASSio/.ssh/id_hassio
+    IdentityFile ~/.ssh/id_hassio
     ConnectTimeout 2
 
 # ZeroTier доступ (приоритет 2)
@@ -366,7 +366,7 @@ Host hassio-zt
     HostName 10.147.20.100
     User root
     Port 22
-    IdentityFile /home/gfer/HASSio/.ssh/id_hassio
+    IdentityFile ~/.ssh/id_hassio
     ConnectTimeout 5
 
 # Глобальный доступ (приоритет 3)
@@ -374,14 +374,14 @@ Host hassio-global
     HostName YOUR_WHITE_IP
     User root
     Port 22
-    IdentityFile /home/gfer/HASSio/.ssh/id_hassio
+    IdentityFile ~/.ssh/id_hassio
 
 # Автоматический выбор
 Host hassio
     HostName 192.168.1.20
     User root
     Port 22
-    IdentityFile /home/gfer/HASSio/.ssh/id_hassio
+    IdentityFile ~/.ssh/id_hassio
     # Скрипты автоматически изменят HostName
 ```
 

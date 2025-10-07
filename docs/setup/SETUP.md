@@ -17,7 +17,7 @@
 Выполните:
 
 ```bash
-cd /home/gfer/HASSio
+cd ~/HASSio
 chmod +x scripts/*.sh
 ./scripts/setup.sh
 ```
@@ -173,7 +173,7 @@ interface: ""
 Выполните:
 
 ```bash
-cd /home/gfer/HASSio
+cd ~/HASSio
 chmod +x scripts/*.sh
 ./scripts/setup_samba.sh
 ```text
@@ -297,7 +297,7 @@ HostName 192.168.1.50
 Выполните:
 
 ```bash
-cd /home/gfer/HASSio
+cd ~/HASSio
 ssh -F .ssh/config hassio
 ```text
 
@@ -340,7 +340,7 @@ exit
 Выполните:
 
 ```bash
-cd /home/gfer/HASSio
+cd ~/HASSio
 ./mount.sh
 ```text
 
@@ -349,7 +349,7 @@ cd /home/gfer/HASSio
 ```text
 🔌 Монтирование шары 'config'...
 ✅ Смонтировано!
-✅ Создана ссылка: /home/gfer/HASSio/config → /mnt/hassio
+✅ Создана ссылка: ~/HASSio/config → /mnt/hassio
 
 📂 Содержимое /mnt/hassio (папка config из HA):
 configuration.yaml
@@ -518,7 +518,7 @@ cat .cursor/mcp.json
 ### О SAMBA монтировании
 
 - `/mnt/hassio` - физическая точка монтирования
-- `/home/gfer/HASSio/config/` - символическая ссылка на `/mnt/hassio`
+- `~/HASSio/config/` - символическая ссылка на `/mnt/hassio`
 - Оба пути ведут к **одним и тем же файлам**!
 
 ### О SSH ключах

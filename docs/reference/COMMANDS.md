@@ -326,13 +326,13 @@ git reset --hard HEAD~1             # Удалить последний комм
 
 ```bash
 # Home Assistant
-alias ha='ssh -F /home/gfer/HASSio/.ssh/config hassio'
-alias halog='ssh -F /home/gfer/HASSio/.ssh/config hassio "tail -f /config/home-assistant.log"'
-alias harestart='ssh -F /home/gfer/HASSio/.ssh/config hassio "ha core restart"'
-alias hacheck='ssh -F /home/gfer/HASSio/.ssh/config hassio "ha core check"'
-alias hamount='cd /home/gfer/HASSio && ./mount.sh'
-alias haedit='code /home/gfer/HASSio/config/'
-alias hadeploy='cd /home/gfer/HASSio && ./scripts/deploy.sh'
+alias ha='ssh -F ~/HASSio/.ssh/config hassio'
+alias halog='ssh -F ~/HASSio/.ssh/config hassio "tail -f /config/home-assistant.log"'
+alias harestart='ssh -F ~/HASSio/.ssh/config hassio "ha core restart"'
+alias hacheck='ssh -F ~/HASSio/.ssh/config hassio "ha core check"'
+alias hamount='cd ~/HASSio && ./mount.sh'
+alias haedit='code ~/HASSio/config/'
+alias hadeploy='cd ~/HASSio && ./scripts/deploy.sh'
 ```text
 
 **Применить:**

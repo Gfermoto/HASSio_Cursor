@@ -243,7 +243,7 @@ git add .
 git commit -m "Add new feature"
 
 # Тестировать
-cd /home/gfer/HASSio
+cd ~/HASSio
 ./scripts/deploy.sh
 
 # Если OK - смержить
