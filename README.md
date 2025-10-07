@@ -1,7 +1,7 @@
 # 🏠 Home Assistant Cursor Integration
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation](https://img.shields.io/badge/docs-live-brightgreen)](https://gfermoto.github.io/HASSio_Cursor)
+[![Documentation](https://img.shields.io/badge/docs-live-brightgreen)][docs]
 [![GitHub Pages](https://github.com/Gfermoto/HASSio_Cursor/workflows/Deploy%20Documentation/badge.svg)](https://github.com/Gfermoto/HASSio_Cursor/actions)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Compatible-41BDF5.svg)](https://www.home-assistant.io/)
@@ -31,6 +31,7 @@
 ```
 
 **Или напрямую:**
+
 ```bash
 ./scripts/configure.sh    # Настроить режим
 ./scripts/mount.sh        # Смонтировать
@@ -40,7 +41,7 @@ code config/              # Редактировать
 
 ## 📂 Структура
 
-```
+```text
 /home/gfer/HASSio/
 ├── README.md             # Обзор проекта
 ├── docs/                 # Документация для разработчиков
@@ -74,6 +75,7 @@ code config/              # Редактировать
 ```
 
 **Интерактивное меню со всеми функциями:**
+
 1. Настроить режим (локальный/глобальный/смешанный)
 2. Смонтировать конфиги
 3. Проверить статус
@@ -85,6 +87,7 @@ code config/              # Редактировать
 9. Размонтировать
 
 **Режимы работы:**
+
 - 🏠 **Локальный** - всё через локальную сеть (быстро, только дома)
 - 🌍 **Глобальный** - всё через интернет (медленнее, работает везде)
 - 🔀 **Смешанный** - SSH/SAMBA локально, MCP глобально (рекомендуется!)
@@ -109,7 +112,7 @@ code config/configuration.yaml
 
 MCP уже настроен и работает! Просто спросите AI:
 
-```
+```text
 "Какая температура в доме?"
 "Включи свет на кухне"
 "Покажи все термостаты"
@@ -180,5 +183,8 @@ MCP уже настроен и работает! Просто спросите A
 ## 🔗 Ссылки
 
 После настройки `config.yml`:
+
 - Home Assistant: см. `config.yml`
 - MCP Server: см. `.cursor/mcp.json`
+
+[docs]: https://gfermoto.github.io/HASSio_Cursor

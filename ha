@@ -1,6 +1,8 @@
 #!/bin/bash
 # Главный скрипт управления Home Assistant
 
+set -euo pipefail
+
 SCRIPT_DIR="/home/gfer/HASSio/scripts"
 
 show_menu() {
@@ -30,35 +32,35 @@ while true; do
     case $choice in
         1)
             echo "⚙️  Настройка режима работы..."
-            $SCRIPT_DIR/configure.sh
+            "${SCRIPT_DIR}/configure.sh"
             ;;
         2)
             echo "🔌 Монтирование..."
-            sudo $SCRIPT_DIR/mount.sh
+            sudo "${SCRIPT_DIR}/mount.sh"
             ;;
         3)
             echo "🔍 Проверка статуса..."
-            $SCRIPT_DIR/check.sh
+            "${SCRIPT_DIR}/check.sh"
             ;;
         4)
             echo "🚀 Развертывание изменений..."
-            $SCRIPT_DIR/deploy.sh
+            "${SCRIPT_DIR}/deploy.sh"
             ;;
         5)
             echo "💾 Создание бэкапа..."
-            $SCRIPT_DIR/backup.sh
+            "${SCRIPT_DIR}/backup.sh"
             ;;
         6)
             echo "🔄 Восстановление..."
-            $SCRIPT_DIR/restore.sh
+            "${SCRIPT_DIR}/restore.sh"
             ;;
         7)
             echo "📋 Логи..."
-            $SCRIPT_DIR/view_logs.sh
+            "${SCRIPT_DIR}/view_logs.sh"
             ;;
         8)
             echo "🔬 Запуск аудита..."
-            $SCRIPT_DIR/audit.sh
+            "${SCRIPT_DIR}/audit.sh"
             ;;
         9)
             echo "🔌 Размонтирование..."
@@ -75,5 +77,5 @@ while true; do
     esac
 
     echo ""
-    read -p "Нажмите Enter для продолжения..."
+    read -r -p "Нажмите Enter для продолжения..."
 done
