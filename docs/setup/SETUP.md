@@ -561,4 +561,4 @@ cat .cursor/mcp.json
 
 - **[COMMANDS.md](COMMANDS.md)** - Справочник всех команд
 - **[WORKFLOW.md](WORKFLOW.md)** - Рабочий процесс разработки
-- **README.md** - Обзор проекта
+- [**README.md**](../../README.md) - Обзор проекта

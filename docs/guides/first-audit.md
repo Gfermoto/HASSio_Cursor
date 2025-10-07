@@ -32,7 +32,7 @@
 ./scripts/audit.sh
 ```
 
-Скрипт соберёт данные через MCP и сохранит отчёт в `audits/audit_ДАТА.md`
+Скрипт соберёт данные через MCP и сохранит отчёт в `audits/audit_ДАТА.md` (файл создаётся автоматически)
 
 ---
 
@@ -41,7 +41,7 @@
 Откройте отчёт в Cursor:
 
 ```bash
-cursor audits/audit_YYYY-MM-DD_HH-MM-SS.md
+cursor audits/audit_YYYY-MM-DD_HH-MM-SS.md  # откроется последний отчёт
 ```
 
 **Попросите AI:**
