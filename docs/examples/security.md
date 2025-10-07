@@ -24,7 +24,7 @@ automation:
           data:
             photo:
               - url: "http://ha:8123/api/camera_proxy/camera.street"
-```
+```text
 
 ## 2. Автоматический свет
 
@@ -41,6 +41,6 @@ automation:
       - delay: "00:03:00"
       - service: light.turn_off
         entity_id: light.entrance
-```
+```text
 
 **Полное руководство:** [Безопасность умного дома](../guides/security.md)

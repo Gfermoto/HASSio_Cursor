@@ -16,7 +16,7 @@
 - 🤝 CONTRIBUTING.md с правилами участия
 - 🔒 SECURITY.md с инструкциями по безопасности
 - 📚 Полная документация на MkDocs
-- 🌐 GitHub Pages: https://gfermoto.github.io/HASSio_Cursor
+- 🌐 [GitHub Pages](https://gfermoto.github.io/HASSio_Cursor)
 
 #### Скрипты (13 шт)
 

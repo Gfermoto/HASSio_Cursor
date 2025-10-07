@@ -48,7 +48,7 @@ automation:
         entity_id: light.street_lights
         data:
           brightness: 255
-```
+```text
 
 ### Машина во дворе
 
@@ -71,7 +71,7 @@ automation:
             inline_keyboard:
               - "Открыть ворота:/open_gate"
               - "Игнорировать:/ignore"
-```
+```text
 
 ---
 
@@ -126,7 +126,7 @@ automation:
         entity_id:
           - light.entrance
           - light.garden_thermal_infrared
-```
+```text
 
 ---
 
@@ -151,7 +151,7 @@ automation:
             inline_keyboard:
               - "Открыть:/open_door"
               - "Говорить:/talk"
-```
+```text
 
 ### Умные замки
 
@@ -170,7 +170,7 @@ automation:
     action:
       - service: lock.lock
         entity_id: lock.door_lock
-```
+```text
 
 ---
 
@@ -225,7 +225,7 @@ automation:
           option: "Дома"
       - service: alarm_control_panel.alarm_disarm
         entity_id: alarm_control_panel.home
-```
+```text
 
 ---
 
@@ -262,7 +262,7 @@ cards:
       - binary_sensor.street_ptz_smart_motion_human
       - binary_sensor.vto2111_invite
     hours_to_show: 24
-```
+```text
 
 ---
 
@@ -295,7 +295,7 @@ script:
       - service: notify.telegram
         data:
           message: "✅ Все камеры работают"
-```
+```text
 
 ---
 

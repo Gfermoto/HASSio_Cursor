@@ -168,7 +168,7 @@ pre-commit run --all-files
 ## 💬 Вопросы?
 
 - 💬 [GitHub Discussions](https://github.com/Gfermoto/HASSio_Cursor/discussions)
-- 📧 Email: gfermoto@gmail.com
+- 📧 Email: <gfermoto@gmail.com>
 - 🐛 [Issues](https://github.com/Gfermoto/HASSio_Cursor/issues)
 
 ---

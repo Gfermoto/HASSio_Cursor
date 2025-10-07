@@ -51,7 +51,7 @@ automation:
             {% else %}
               16
             {% endif %}
-```
+```text
 
 **Результат:** Экономия 15-20%
 
@@ -90,7 +90,7 @@ automation:
             - climate.living_room_thermostat
             - climate.kitchen_thermostat
           temperature: 22
-```
+```text
 
 **Результат:** Экономия 5-10% ночью
 
@@ -150,7 +150,7 @@ automation:
           message: >
             Дисбаланс температур: {{ states('sensor.temperature_balance') }}°C
             Проверьте балансировочные краны!
-```
+```text
 
 ---
 
@@ -184,7 +184,7 @@ cards:
     entities:
       - entity: sensor.temperature_balance
         name: Средний дисбаланс
-```
+```text
 
 ---
 
@@ -222,7 +222,7 @@ automation:
       - service: climate.turn_on
         target:
           entity_id: "{{ trigger.entity_id|replace('sensor.', 'climate.')|replace('_temperature_floor', '') }}"
-```
+```text
 
 ---
 
