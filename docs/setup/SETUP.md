@@ -189,13 +189,13 @@ chmod +x scripts/*.sh
 
 ```bash
 nano .ssh/config
-```text
+```
 
 Найдите строку:
 
 ```text
 HostName 192.168.1.50
-```text
+```
 
 Замените `192.168.1.50` на **ВАШ IP из шага 4**!
 
