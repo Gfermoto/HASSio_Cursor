@@ -59,4 +59,3 @@ fi
 
 # Backup
 export BACKUP_DAYS=$(get_config "retention_days")
-

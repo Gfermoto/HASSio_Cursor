@@ -19,4 +19,3 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "Скопируйте config.yml.example в config.yml и заполните данные"
     exit 1
 fi
-

@@ -6,36 +6,36 @@ rules:
   line-length:
     max: 120
     level: warning
-  
+
   indentation:
     spaces: 2
     indent-sequences: true
-  
+
   comments:
     min-spaces-from-content: 1
     require-starting-space: true
-  
+
   comments-indentation: {}
-  
+
   document-start: disable
-  
+
   empty-lines:
     max: 2
     max-start: 0
     max-end: 1
-  
+
   truthy:
     allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
     check-keys: false
-  
+
   brackets:
     min-spaces-inside: 0
     max-spaces-inside: 1
-  
+
   colons:
     max-spaces-before: 0
     max-spaces-after: 1
-  
+
   commas:
     max-spaces-before: 0
     min-spaces-after: 1
@@ -46,4 +46,3 @@ ignore: |
   deps/
   tts/
   *.pyc
-

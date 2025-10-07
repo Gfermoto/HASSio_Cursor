@@ -20,7 +20,7 @@ if [ -f "$SSH_DIR/config" ]; then
     else
         SSH_TARGET="hassio"
     fi
-    
+
     if ssh -F "$SSH_DIR/config" -o ConnectTimeout=2 -o BatchMode=yes "$SSH_TARGET" "echo OK" &>/dev/null; then
         echo "✅ SSH работает ($SSH_HOST:$SSH_PORT)"
     else
@@ -46,4 +46,3 @@ if [ -f "$CURSOR_DIR/mcp.json" ]; then
 fi
 
 echo ""
-

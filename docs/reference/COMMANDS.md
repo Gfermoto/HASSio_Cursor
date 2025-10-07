@@ -92,7 +92,7 @@ sudo umount /mnt/hassio
 ./scripts/backup.sh
 ```
 
-**Создаёт:** `backups/config_YYYYMMDD_HHMMSS.tar.gz`  
+**Создаёт:** `backups/config_YYYYMMDD_HHMMSS.tar.gz`
 **Хранение:** 7 дней (старые удаляются автоматически)
 
 ---
@@ -412,4 +412,3 @@ code config/
 # Восстановление
 ./scripts/restore.sh
 ```
-

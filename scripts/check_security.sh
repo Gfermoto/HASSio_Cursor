@@ -27,7 +27,7 @@ else
         "backups/"
         "config/"
     )
-    
+
     for pattern in "${REQUIRED_PATTERNS[@]}"; do
         # Экранировать спецсимволы для grep
         escaped_pattern=$(echo "$pattern" | sed 's/\./\\./g; s/\*/\\*/g')
@@ -70,7 +70,7 @@ echo ""
 if [ -d .git ]; then
     echo "3️⃣ Проверка staged файлов..."
     STAGED=$(git diff --cached --name-only)
-    
+
     if [ -z "$STAGED" ]; then
         echo "   ℹ️  Нет staged файлов"
     else
@@ -93,14 +93,14 @@ fi
 # 4. Поиск чувствительных данных в staged файлах
 if [ -d .git ] && [ -n "$STAGED" ]; then
     echo "4️⃣ Поиск утечек в staged файлах..."
-    
+
     # Загрузить config.yml если существует для проверки
     if [ -f config.yml ]; then
         # Извлечь реальные значения из config.yml
         REAL_IP=$(grep "local_ip:" config.yml | sed 's/.*: *"\?\([^"]*\)"\?/\1/' | sed 's/^ *//;s/ *$//' | head -1)
         REAL_HOSTNAME=$(grep "hostname:" config.yml | sed 's/.*: *"\?\([^"]*\)"\?/\1/' | sed 's/^ *//;s/ *$//' | head -1)
         REAL_PASSWORD=$(grep "password:" config.yml | grep -v "your_" | sed 's/.*: *"\?\([^"]*\)"\?/\1/' | sed 's/^ *//;s/ *$//' | head -1)
-        
+
         # Проверить IP (но игнорировать примеры типа 192.168.1.XXX или 192.168.1.100)
         if [ -n "$REAL_IP" ] && [ "$REAL_IP" != "192.168.1.XXX" ]; then
             if git diff --cached | grep -q "$REAL_IP"; then
@@ -108,7 +108,7 @@ if [ -d .git ] && [ -n "$STAGED" ]; then
                 ERRORS=$((ERRORS + 1))
             fi
         fi
-        
+
         # Проверить hostname
         if [ -n "$REAL_HOSTNAME" ] && [ "$REAL_HOSTNAME" != "your-domain.com" ]; then
             if git diff --cached | grep -q "$REAL_HOSTNAME"; then
@@ -116,7 +116,7 @@ if [ -d .git ] && [ -n "$STAGED" ]; then
                 ERRORS=$((ERRORS + 1))
             fi
         fi
-        
+
         # Проверить пароль
         if [ -n "$REAL_PASSWORD" ] && [ "$REAL_PASSWORD" != "your_password" ]; then
             if git diff --cached | grep -q "$REAL_PASSWORD"; then
@@ -125,7 +125,7 @@ if [ -d .git ] && [ -n "$STAGED" ]; then
             fi
         fi
     fi
-    
+
     # Поиск токенов (JWT начинается с eyJ)
     if git diff --cached | grep -q "eyJ[A-Za-z0-9]"; then
         # Проверить что это не в примерах
@@ -134,7 +134,7 @@ if [ -d .git ] && [ -n "$STAGED" ]; then
             ERRORS=$((ERRORS + 1))
         fi
     fi
-    
+
     if [ $ERRORS -eq 0 ]; then
         echo "   ✅ Утечек не обнаружено"
     fi
@@ -179,4 +179,3 @@ else
     echo ""
     exit 1
 fi
-

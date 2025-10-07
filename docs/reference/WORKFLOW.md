@@ -304,4 +304,3 @@ code config/            # Редактировать
 ./scripts/restore.sh    # Откатить
 ./scripts/check.sh      # Проверить статус
 ```
-

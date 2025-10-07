@@ -59,23 +59,23 @@ echo ""
 if [ -d config/.git ]; then
     echo "4️⃣ Сохранение изменений в Git..."
     cd config/
-    
+
     if git diff --quiet && git diff --cached --quiet; then
         echo "⚠️  Нет изменений для коммита"
     else
         git add -A
-        
+
         echo "Введите сообщение коммита (или Enter для автоматического):"
         read -r COMMIT_MSG
-        
+
         if [ -z "$COMMIT_MSG" ]; then
             COMMIT_MSG="Config update $(date '+%Y-%m-%d %H:%M')"
         fi
-        
+
         git commit -m "$COMMIT_MSG"
         echo "✅ Изменения сохранены в Git"
     fi
-    
+
     cd ..
     echo ""
 fi
@@ -134,4 +134,3 @@ echo "   - Проверьте логи: ./scripts/view_logs.sh"
 echo "   - Откройте HA: $HA_URL"
 echo "   - Если что-то сломалось: ./scripts/restore.sh"
 echo ""
-

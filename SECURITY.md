@@ -109,4 +109,3 @@ git commit -m "Remove sensitive data"
 ---
 
 **Дата последней проверки:** автоматически при `git commit` (если настроен pre-commit hook)
-

@@ -1,14 +1,13 @@
 {
-    "mcpServers": {
-      "home-assistant": {
-        "command": "mcp-proxy",
-        "args": [
-          "https://YOUR_HA_SERVER/mcp_server/sse"
-        ],
-        "env": {
-          "API_ACCESS_TOKEN": "YOUR_MCP_TOKEN_HERE"
-        }
+  "mcpServers": {
+    "home-assistant": {
+      "command": "mcp-proxy",
+      "args": [
+        "https://YOUR_HA_SERVER/mcp_server/sse"
+      ],
+      "env": {
+        "API_ACCESS_TOKEN": "YOUR_MCP_TOKEN_HERE"
       }
     }
   }
-
+}

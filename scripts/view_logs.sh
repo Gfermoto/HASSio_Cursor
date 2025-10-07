@@ -64,4 +64,3 @@ case $choice in
 esac
 
 echo ""
-

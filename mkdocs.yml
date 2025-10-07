@@ -1,0 +1,91 @@
+site_name: HASSio Cursor
+site_description: Профессиональные инструменты для управления и аудита Home Assistant
+site_author: Gfermoto
+site_url: https://gfermoto.github.io/HASSio_Cursor
+
+repo_name: Gfermoto/HASSio_Cursor
+repo_url: https://github.com/Gfermoto/HASSio_Cursor
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Тёмная тема
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Светлая тема
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search:
+      lang: ru
+  - mermaid2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.keys
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - def_list
+  - toc:
+      permalink: true
+
+nav:
+  - 🏠 Главная: index.md
+  - 📖 Установка:
+      - Быстрый старт: setup/quickstart.md
+      - Детальная установка: setup/SETUP.md
+  - 📚 Руководства:
+      - Первый аудит: guides/first-audit.md
+      - Оптимизация отопления: guides/heating-optimization.md
+      - Безопасность умного дома: guides/security.md
+  - 💡 Примеры:
+      - Отопление: examples/heating.md
+      - Безопасность: examples/security.md
+      - Энергосбережение: examples/energy.md
+  - 📋 Справочник:
+      - Команды: reference/COMMANDS.md
+      - Рабочий процесс: reference/WORKFLOW.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Gfermoto/HASSio_Cursor
+
+copyright: Copyright &copy; 2025 Gfermoto

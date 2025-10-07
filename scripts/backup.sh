@@ -38,19 +38,18 @@ if [ -f "$BACKUP_DIR/config_$TIMESTAMP.tar.gz" ]; then
     SIZE=$(du -h "$BACKUP_DIR/config_$TIMESTAMP.tar.gz" | cut -f1)
     echo "✅ Бэкап создан: config_$TIMESTAMP.tar.gz ($SIZE)"
     echo "📂 Путь: $BACKUP_DIR/config_$TIMESTAMP.tar.gz"
-    
+
     # Показать последние 5 бэкапов
     echo ""
     echo "📋 Последние бэкапы:"
     ls -lht "$BACKUP_DIR"/config_*.tar.gz 2>/dev/null | head -5 | awk '{print "   " $9 " (" $5 ")"}'
-    
+
     # Удалить старые бэкапы (старше 7 дней)
     find "$BACKUP_DIR" -name "config_*.tar.gz" -mtime +7 -delete
-    
+
     echo ""
     echo "💡 Для восстановления: ./scripts/restore.sh"
 else
     echo "❌ Ошибка создания бэкапа"
     exit 1
 fi
-

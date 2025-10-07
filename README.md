@@ -1,14 +1,22 @@
 # 🏠 Home Assistant Cursor Integration
 
-Проект для работы с Home Assistant через Cursor AI с использованием MCP, SSH и SAMBA.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-MkDocs-blue)](https://gfermoto.github.io/HASSio_Cursor)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Compatible-41BDF5.svg)](https://www.home-assistant.io/)
+[![GitHub Stars](https://img.shields.io/github/stars/Gfermoto/HASSio_Cursor?style=social)](https://github.com/Gfermoto/HASSio_Cursor/stargazers)
+
+Профессиональная среда разработки для Home Assistant с AI-ассистентом, интеграцией MCP, SSH и SAMBA.
 
 ## ✨ Возможности
 
-- **MCP** - управление устройствами через AI в Cursor ✅
-- **SSH** - прямой доступ к серверу Home Assistant
-- **SAMBA** - редактирование конфигов как локальных файлов
-- **Git** - версионирование изменений
-- **Автобэкапы** - безопасное развертывание
+- 🤖 **AI-powered** - управление устройствами через MCP в Cursor
+- 🔬 **Smart Audit** - глубокий анализ системы с рекомендациями
+- 🔧 **SSH/SAMBA** - прямой доступ к конфигурации
+- 💾 **Auto-backup** - безопасное развертывание с откатом
+- 📊 **Optimization** - экономия до 30% на отоплении
+- 🔒 **Security** - автопроверка утечек данных перед коммитом
+- 📚 **Documentation** - полная документация с примерами
 
 ## 🚀 Быстрый старт
 
@@ -113,12 +121,30 @@ MCP уже настроен и работает! Просто спросите A
 
 ---
 
-## 🆘 Помощь
+## 📚 Документация
 
-- Проблемы с установкой → `docs/SETUP.md` 
-- Вопросы по командам → `docs/COMMANDS.md`
-- Рабочий процесс → `docs/WORKFLOW.md`
-- Безопасность → `SECURITY.md`
+- 📖 [Полная документация](https://gfermoto.github.io/HASSio_Cursor)
+- ⚡ [Быстрый старт](docs/setup/quickstart.md)
+- 🔬 [Первый аудит](docs/guides/first-audit.md)
+- 📋 [Справочник команд](docs/reference/COMMANDS.md)
+
+---
+
+## 🤝 Вклад в проект
+
+Мы рады любой помощи! См. [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 📄 Лицензия
+
+[MIT License](LICENSE) - используйте свободно!
+
+---
+
+## 🌟 Поддержка проекта
+
+Если проект был полезен, поставьте ⭐ на GitHub!
 
 ## 📊 Статус
 

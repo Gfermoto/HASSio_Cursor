@@ -1,0 +1,49 @@
+repos:
+  # YAML валидация
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-c=.yamllint]
+        files: \.(yaml|yml)$
+
+  # Shell скрипты
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [-x]  # Следовать за source/includes
+
+  # Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.44.0
+    hooks:
+      - id: markdownlint-fix
+        args: [--disable, MD013, MD033, MD041]  # Отключить: длина строк, HTML, первый заголовок
+
+  # Общие проверки
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-yaml
+        exclude: ^(mkdocs\.yml|\.github/workflows/.*)$
+      - id: detect-private-key
+        exclude: ^(\.ssh/.*\.pub)$  # Разрешить публичные ключи
+      - id: end-of-file-fixer
+        exclude: ^(audits/|backups/|config/)
+      - id: trailing-whitespace
+        exclude: ^(audits/|backups/|config/)
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Проверка безопасности (наш скрипт)
+  - repo: local
+    hooks:
+      - id: check-security
+        name: Проверка чувствительных данных
+        entry: ./scripts/check_security.sh
+        language: script
+        pass_filenames: false
+        always_run: true

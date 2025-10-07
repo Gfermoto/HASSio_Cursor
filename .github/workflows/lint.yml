@@ -1,0 +1,70 @@
+name: Lint Code
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .yamllint
+          file_or_dir: |
+            config.yml.example
+            mkdocs.yml
+          strict: true
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Markdown Lint
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: .
+          config_file: .markdownlint.json
+          ignore_files: audits/
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for sensitive data
+        run: |
+          # Проверка что чувствительные файлы не в Git
+          if git ls-files | grep -E "^config\.yml$|^\.cursor/mcp\.json$"; then
+            echo "❌ Найдены чувствительные файлы в Git!"
+            exit 1
+          fi
+
+          # Проверка на токены/пароли в коде
+          if git grep -E "(password|token|secret).*=.*['\"][^'\"]{20,}" -- '*.sh' '*.py'; then
+            echo "❌ Найдены возможные секреты в коде!"
+            exit 1
+          fi
+
+          echo "✅ Проверка безопасности пройдена"

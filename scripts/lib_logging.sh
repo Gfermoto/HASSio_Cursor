@@ -25,4 +25,3 @@ log_warning() {
 log_info() {
     log "ℹ️  $1"
 }
-

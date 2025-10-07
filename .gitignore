@@ -4,6 +4,13 @@ config/
 # Backups
 backups/
 
+# Audits (отчёты с реальными данными системы)
+audits/
+!audits/.gitkeep
+
+# MkDocs build
+site/
+
 # Конфигурация (чувствительные данные!)
 config.yml
 .cursor/mcp.json
@@ -69,3 +76,4 @@ temp/
 
 # Samba credentials
 samba-credentials
+config

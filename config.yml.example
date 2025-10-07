@@ -9,7 +9,7 @@ server:
   url: "https://your-ha-server.com"
   hostname: "your-ha-server.com"
   local_ip: "192.168.1.XXX"  # Узнайте в HA: Settings → System → Network
-  
+
 # SSH Settings
 ssh:
   use_local: true  # true = локальная сеть, false = интернет
@@ -18,7 +18,7 @@ ssh:
   user: "root"
   key_path: ".ssh/id_hassio"
 
-# SAMBA Settings  
+# SAMBA Settings
 samba:
   use_local: true  # true = локальная сеть, false = интернет
   username: "homeassistant"
