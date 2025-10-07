@@ -20,7 +20,7 @@
 cd /home/gfer/HASSio
 chmod +x scripts/*.sh
 ./scripts/setup.sh
-```text
+```
 
 **Что произойдёт:**
 
