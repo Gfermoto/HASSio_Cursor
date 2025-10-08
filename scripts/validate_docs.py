@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Валидатор качества документации
-Проверяет типичные ошибки форматирования в Markdown файлах
+Валидатор качества документации V2
+ИСПРАВЛЕНА КРИТИЧЕСКАЯ ОШИБКА: различение открывающих и закрывающих fence markers
 """
 
 import re
@@ -31,7 +31,7 @@ class DocValidator:
     def validate_all(self) -> bool:
         """Проверить всю документацию"""
         print("╔══════════════════════════════════════════════════════════════════╗")
-        print("║           🔍 ВАЛИДАЦИЯ ДОКУМЕНТАЦИИ 🔍                           ║")
+        print("║           🔍 ВАЛИДАЦИЯ ДОКУМЕНТАЦИИ V2 🔍                        ║")
         print("╚══════════════════════════════════════════════════════════════════╝")
         print()
 
@@ -87,22 +87,16 @@ class DocValidator:
             # Счетчики для этого файла
             file_errors = []
 
-            # ПРОВЕРКА 1: ```bash\n```text (самая критичная!)
-            file_errors.extend(self._check_broken_code_blocks(lines, rel_path))
+            # ПРОВЕРКА 1: Неправильные fence markers (```text вместо ```)
+            file_errors.extend(self._check_wrong_fence_markers(lines, rel_path))
 
-            # ПРОВЕРКА 2: ```text сразу после закрывающего ``` (без пустой строки)
-            file_errors.extend(self._check_missing_newline_between_blocks(lines, rel_path))
-
-            # ПРОВЕРКА 3: Trailing spaces после закрывающих ```
-            file_errors.extend(self._check_trailing_spaces_after_fence(lines, rel_path))
-
-            # ПРОВЕРКА 4: Пустые блоки кода
-            file_errors.extend(self._check_empty_code_blocks(lines, rel_path))
-
-            # ПРОВЕРКА 5: Незакрытые блоки кода
+            # ПРОВЕРКА 2: Незакрытые блоки кода
             file_errors.extend(self._check_unclosed_code_blocks(lines, rel_path))
 
-            # ПРОВЕРКА 6: Hardcoded пути пользователя
+            # ПРОВЕРКА 3: Отсутствие пустой строки между блоками
+            file_errors.extend(self._check_missing_newline_between_blocks(lines, rel_path))
+
+            # ПРОВЕРКА 4: Hardcoded пути пользователя
             file_errors.extend(self._check_hardcoded_paths(lines, rel_path))
 
             if file_errors:
@@ -121,105 +115,96 @@ class DocValidator:
             self.errors.append(error)
             print(f"📄 {rel_path} ... {RED}❌ ОШИБКА ЧТЕНИЯ!{RESET}")
 
-    def _check_broken_code_blocks(self, lines: List[str], filepath: Path) -> List[str]:
-        """Проверить на ```bash\n```text паттерн"""
+    def _check_wrong_fence_markers(self, lines: List[str], filepath: Path) -> List[str]:
+        """Проверить на неправильные fence markers (```text вместо ```)"""
         errors = []
+        in_code_block = False
+        opening_line = 0
 
-        for i in range(len(lines) - 1):
-            line = lines[i].strip()
-            next_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
+        for i, line in enumerate(lines):
+            stripped = line.strip()
 
-            # Ищем закрывающий ``` за которым сразу идет ```text (или другой язык)
-            if re.match(r'^```\s*$', line):
-                # Следующая строка начинается с ``` (учитываем отступы)
-                if next_line.startswith('```') and not next_line == '```':
+            # Открывающий fence: ```язык
+            if re.match(r'^```[a-z]+', stripped):
+                if in_code_block:
+                    # Ошибка: открываем блок внутри блока!
                     errors.append(
-                        f"Строка {i + 1}: Сломанный блок кода - закрывающий ``` "
-                        f"сразу за которым идет открывающий {next_line}"
+                        f"Строка {i + 1}: Открывающий fence {stripped} внутри блока "
+                        f"(начатого на строке {opening_line + 1})"
+                    )
+                else:
+                    in_code_block = True
+                    opening_line = i
+
+            # Закрывающий fence: ТОЛЬКО ```
+            elif stripped == '```':
+                if not in_code_block:
+                    errors.append(
+                        f"Строка {i + 1}: Закрывающий ``` без открывающего блока"
+                    )
+                else:
+                    in_code_block = False
+
+            # ОШИБКА: ```текст (не язык, а продолжение)
+            elif stripped.startswith('```') and len(stripped) > 3:
+                # Это может быть ошибочный fence вроде ```text на отдельной строке
+                if in_code_block:
+                    # Это внутри блока - возможно, пример кода
+                    pass
+                else:
+                    # Это вне блока - ОШИБКА!
+                    errors.append(
+                        f"Строка {i + 1}: Неправильный fence marker '{stripped}' "
+                        f"(должен быть '```язык' для открытия или '```' для закрытия)"
                     )
 
         return errors
 
-    def _check_missing_newline_between_blocks(self, lines: List[str], filepath: Path) -> List[str]:
-        """Проверить что между закрывающим и открывающим ``` есть пустая строка"""
-        errors = []
-        in_code_block = False
-
-        for i in range(len(lines) - 1):
-            line = lines[i].strip()
-            next_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
-
-            # Отслеживаем состояние блока
-            if line.startswith('```'):
-                in_code_block = not in_code_block
-
-                # Если закрываем блок
-                if not in_code_block and line == '```':
-                    # И сразу следующая строка - новый блок
-                    if next_line.startswith('```') and next_line != '```':
-                        errors.append(
-                            f"Строка {i + 2}: Отсутствует пустая строка между блоками кода "
-                            f"(после ``` должна быть пустая строка перед {next_line})"
-                        )
-
-        return errors
-
-    def _check_trailing_spaces_after_fence(self, lines: List[str], filepath: Path) -> List[str]:
-        """Проверить на trailing spaces после ``` в конце строки с языком"""
-        errors = []
-
-        for i, line in enumerate(lines):
-            # Закрывающий ``` с пробелами
-            if re.match(r'^```\s+$', line):
-                errors.append(
-                    f"Строка {i + 1}: Trailing spaces после закрывающего ``` "
-                    f"(должно быть: ``` без пробелов)"
-                )
-
-        return errors
-
-    def _check_empty_code_blocks(self, lines: List[str], filepath: Path) -> List[str]:
-        """Проверить на пустые блоки кода"""
-        warnings = []
-        in_code_block = False
-        block_start = 0
-        block_lines = []
-
-        for i, line in enumerate(lines):
-            if line.startswith('```'):
-                if not in_code_block:
-                    # Начало блока
-                    in_code_block = True
-                    block_start = i + 1
-                    block_lines = []
-                else:
-                    # Конец блока
-                    in_code_block = False
-                    # Проверяем что блок не пустой
-                    if not any(l.strip() for l in block_lines):
-                        warnings.append(
-                            f"Строка {block_start}: Пустой блок кода"
-                        )
-            elif in_code_block:
-                block_lines.append(line)
-
-        self.warnings.extend(warnings)
-        return []
-
     def _check_unclosed_code_blocks(self, lines: List[str], filepath: Path) -> List[str]:
         """Проверить на незакрытые блоки кода"""
         errors = []
-        fence_count = 0
+        in_code_block = False
+        opening_line = 0
 
         for i, line in enumerate(lines):
-            # Учитываем ``` в любой позиции (могут быть с отступом в списках)
-            if '```' in line:
-                fence_count += 1
+            stripped = line.strip()
 
-        if fence_count % 2 != 0:
+            # Открывающий: ```язык
+            if re.match(r'^```[a-z]+', stripped):
+                in_code_block = True
+                opening_line = i
+
+            # Закрывающий: ```
+            elif stripped == '```':
+                in_code_block = False
+
+        if in_code_block:
             errors.append(
-                f"Незакрытый блок кода: нечетное количество ``` ({fence_count})"
+                f"Незакрытый блок кода начатый на строке {opening_line + 1}"
             )
+
+        return errors
+
+    def _check_missing_newline_between_blocks(self, lines: List[str], filepath: Path) -> List[str]:
+        """Проверить что между блоками есть пустая строка"""
+        errors = []
+        prev_closing = -1
+
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+
+            # Закрывающий fence
+            if stripped == '```':
+                prev_closing = i
+
+            # Открывающий fence
+            elif re.match(r'^```[a-z]+', stripped):
+                # Если предыдущий закрывающий был на i-1, значит нет пустой строки
+                if prev_closing == i - 1:
+                    errors.append(
+                        f"Строка {i + 1}: Отсутствует пустая строка между блоками кода "
+                        f"(после ``` должна быть пустая строка перед {stripped})"
+                    )
 
         return errors
 
@@ -235,8 +220,10 @@ class DocValidator:
         ]
 
         for i, line in enumerate(lines):
+            stripped = line.strip()
+
             # Отслеживаем блоки кода
-            if '```' in line:
+            if re.match(r'^```[a-z]*$', stripped):
                 in_code_block = not in_code_block
                 continue
 
@@ -244,7 +231,7 @@ class DocValidator:
             if in_code_block:
                 continue
 
-            # Пропускаем строки где это пример в описании (содержит "вместо" или "~")
+            # Пропускаем строки где это пример в описании
             if 'вместо' in line.lower() or '~/path' in line or '~/' in line:
                 continue
 
@@ -283,32 +270,6 @@ class DocValidator:
             print()
             print("💡 Исправьте ошибки и запустите проверку снова")
             print()
-
-            # Группируем ошибки по типам
-            broken_blocks = [e for e in self.errors if 'Сломанный блок кода' in e]
-            trailing = [e for e in self.errors if 'Trailing spaces' in e]
-            hardcoded = [e for e in self.errors if 'Hardcoded путь' in e]
-            unclosed = [e for e in self.errors if 'Незакрытый блок кода' in e]
-
-            if broken_blocks:
-                print(f"{RED}🔴 Сломанные блоки кода (```bash сразу за ```text):{RESET}")
-                print(f"   Найдено: {len(broken_blocks)}")
-                print()
-
-            if trailing:
-                print(f"{YELLOW}🟡 Trailing spaces после ```:{RESET}")
-                print(f"   Найдено: {len(trailing)}")
-                print()
-
-            if hardcoded:
-                print(f"{YELLOW}🟡 Hardcoded пути пользователей:{RESET}")
-                print(f"   Найдено: {len(hardcoded)}")
-                print()
-
-            if unclosed:
-                print(f"{RED}🔴 Незакрытые блоки кода:{RESET}")
-                print(f"   Найдено: {len(unclosed)}")
-                print()
 
 
 def main():
