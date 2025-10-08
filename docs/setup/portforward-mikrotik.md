@@ -448,7 +448,7 @@ openssl s_client -connect hassio.yourdomain.com:443 -servername hassio.yourdomai
      use_x_forwarded_for: true
      trusted_proxies:
        - 192.168.1.5  # IP вашего Reverse Proxy
-```
+   ```
 
 2. Перезапустите Home Assistant
 
