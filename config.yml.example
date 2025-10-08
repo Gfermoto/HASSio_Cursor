@@ -33,6 +33,18 @@ mcp:
   endpoint_global: "https://your-ha-server.com/mcp_server/sse"
   endpoint_local: "http://192.168.1.XXX:8123/mcp_server/sse"
 
+# n8n Integration (AI Agents)
+n8n:
+  enabled: false  # true = используете n8n
+  url: "http://192.168.1.XXX:5678"  # URL вашего n8n
+  # Webhooks для вызова workflow из HA (опционально)
+  webhooks:
+    butler_status: "http://192.168.1.XXX:5678/webhook/butler-status"
+  # Ollama для AI агентов (опционально)
+  ollama:
+    enabled: false
+    url: "http://192.168.1.XXX:11434"  # URL Ollama API
+
 # Backup Settings
 backup:
   retention_days: 7
