@@ -87,6 +87,7 @@ nav:
   - 🔗 Интеграции:
       - 🤖 AI Агенты n8n: integrations/n8n-ai-agents.md
       - 📚 Подключение n8n: integrations/n8n-integration.md
+      - 🤵 Пошаговое развертывание: integrations/n8n-butler-setup.md
 
 extra:
   social:
