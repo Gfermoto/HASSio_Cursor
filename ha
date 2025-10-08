@@ -19,14 +19,15 @@ show_menu() {
     echo "  7) 📋 Просмотр логов"
     echo "  8) 🔬 Запуск аудита"
     echo "  9) 📝 Проверить YAML"
-    echo " 10) 🔌 Размонтировать"
+    echo " 10) 📚 Проверить документацию"
+    echo " 11) 🔌 Размонтировать"
     echo "  0) ❌ Выход"
     echo ""
 }
 
 while true; do
     show_menu
-    read -p "Выберите действие (0-10): " -r choice
+    read -p "Выберите действие (0-11): " -r choice
     echo ""
     echo ""
 
@@ -68,6 +69,10 @@ while true; do
             INTERACTIVE_MODE=1 "${SCRIPT_DIR}/validate_yaml.sh"
             ;;
         10)
+            echo "📚 Проверка документации..."
+            python3 "${SCRIPT_DIR}/validate_docs.py" || true
+            ;;
+        11)
             echo "🔌 Размонтирование..."
             sudo umount /mnt/hassio 2>/dev/null && echo "✅ Размонтировано" || echo "⚠️  Не было смонтировано"
             rm -f /home/gfer/HASSio/config 2>/dev/null
