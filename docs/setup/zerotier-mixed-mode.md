@@ -385,6 +385,7 @@ https://hassio.yourdomain.com
 
 Файл `.ssh/config` будет содержать:
 
+```text
 # Локальный доступ (приоритет 1)
 Host hassio-local
     HostName 192.168.1.20
@@ -415,6 +416,7 @@ Host hassio
     Port 22
     IdentityFile ~/.ssh/id_hassio
     # Скрипты автоматически изменят HostName
+```
 
 ---
 
@@ -433,6 +435,7 @@ Host hassio
 
    В панели ZeroTier → Networks → Flow Rules:
 
+   ```text
    # Разрешить только известные устройства
    tag trusted
      id YOUR_LAPTOP_ID
@@ -441,6 +444,7 @@ Host hassio
 
    # Блокировать всё остальное
    drop not tag trusted;
+   ```
 
 2. **Регулярно проверять Members:**
    - Удалять старые/неиспользуемые устройства
@@ -566,10 +570,10 @@ fi
 
 ## 🎯 Итоговая схема вашей сети
 
+```text
 ┌─────────────────────────────────────────────────────────┐
 │               Ваша гибридная инфраструктура             │
 └─────────────────────────────────────────────────────────┘
-
                     ┌──────────────┐
                     │  ZeroTier    │
                     │   Network    │
@@ -583,12 +587,13 @@ fi
     └─────────┘       └─────────┘      └─────────┘
          ↓                 ↓                 ↓
     MikroTik          MikroTik         ZeroTier
-    + ZeroTier        + ZeroTier        клиент
+    - ZeroTier        - ZeroTier        клиент
          ↓                 ↓
     192.168.1.0       192.168.2.0
          ↓                 ↓
   Home Assistant    Home Assistant
-   + SSH/SAMBA      + SSH/SAMBA
+   - SSH/SAMBA      - SSH/SAMBA
+```
 
 Режимы подключения:
 ━━━━━ Локально (дома): 192.168.1.20 (быстро)
