@@ -65,7 +65,7 @@ while true; do
             ;;
         9)
             echo "📝 Проверка YAML файлов..."
-            "${SCRIPT_DIR}/validate_yaml.sh"
+            INTERACTIVE_MODE=1 "${SCRIPT_DIR}/validate_yaml.sh"
             ;;
         10)
             echo "🔌 Размонтирование..."

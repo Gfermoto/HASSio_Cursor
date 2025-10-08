@@ -38,10 +38,10 @@ rules:
     allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
     check-keys: false
 
-  # Кавычки (только когда необходимо)
+  # Кавычки (Home Assistant часто использует кавычки для Jinja2 и безопасности)
   quoted-strings:
     quote-type: double
-    required: only-when-needed
+    required: false  # Не требовать и не запрещать кавычки
     allow-quoted-quotes: true
 
   # Скобки и символы
