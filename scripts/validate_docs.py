@@ -226,6 +226,7 @@ class DocValidator:
     def _check_hardcoded_paths(self, lines: List[str], filepath: Path) -> List[str]:
         """Проверить на hardcoded пути пользователей"""
         errors = []
+        in_code_block = False
 
         # Паттерны для поиска
         patterns = [
@@ -234,8 +235,17 @@ class DocValidator:
         ]
 
         for i, line in enumerate(lines):
-            # Пропускаем если это внутри code block или уже использует ~
-            if '```' in line or line.strip().startswith('~'):
+            # Отслеживаем блоки кода
+            if '```' in line:
+                in_code_block = not in_code_block
+                continue
+
+            # Пропускаем код внутри блоков
+            if in_code_block:
+                continue
+
+            # Пропускаем строки где это пример в описании (содержит "вместо" или "~")
+            if 'вместо' in line.lower() or '~/path' in line or '~/' in line:
                 continue
 
             for pattern, message in patterns:
