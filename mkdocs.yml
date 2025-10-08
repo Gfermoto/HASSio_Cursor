@@ -82,6 +82,8 @@ nav:
   - 📋 Справочник:
       - Команды: reference/COMMANDS.md
       - Рабочий процесс: reference/WORKFLOW.md
+  - 📊 Анализаторы:
+      - Обзор: analyzers/README.md
 
 extra:
   social:
