@@ -88,33 +88,50 @@ if [ -f "$PROJECT_ROOT/docker-compose.yml" ] || [ -f "$PROJECT_ROOT/docker-compo
     echo ""
 fi
 
-# Проверяем конфигурации Home Assistant (если смонтировано)
-if [ -d "$PROJECT_ROOT/config" ] && mountpoint -q "$PROJECT_ROOT/config" 2>/dev/null; then
+# Проверяем конфигурации Home Assistant (если доступно)
+if [ -d "$PROJECT_ROOT/config" ] || [ -L "$PROJECT_ROOT/config" ]; then
     echo "🏠 Home Assistant конфигурации (config/):"
 
-    # Основные файлы
-    for file in "$PROJECT_ROOT/config"/configuration.yaml \
-                "$PROJECT_ROOT/config"/automations.yaml \
-                "$PROJECT_ROOT/config"/scripts.yaml \
-                "$PROJECT_ROOT/config"/scenes.yaml \
-                "$PROJECT_ROOT/config"/groups.yaml; do
+    # Находим ВСЕ .yaml и .yml файлы (включая через симлинки)
+    yaml_count=0
+
+    # Основные файлы в корне
+    for file in "$PROJECT_ROOT/config"/*.yaml "$PROJECT_ROOT/config"/*.yml; do
         if [ -f "$file" ]; then
-            check_file "$file"
+            # Пропускаем secrets.yaml (содержит чувствительные данные)
+            if [[ "$(basename "$file")" != "secrets.yaml" ]]; then
+                check_file "$file"
+                yaml_count=$((yaml_count + 1))
+            fi
         fi
     done
 
-    # Проверяем папку packages если есть
+    # Файлы в подпапках (packages, custom_components и т.д.)
     if [ -d "$PROJECT_ROOT/config/packages" ]; then
         for file in "$PROJECT_ROOT/config/packages"/*.yaml; do
             if [ -f "$file" ]; then
                 check_file "$file"
+                yaml_count=$((yaml_count + 1))
             fi
         done
     fi
 
-    echo ""
-elif [ -d "$PROJECT_ROOT/config" ]; then
-    echo "ℹ️  Папка config/ не смонтирована (запустите: ./ha → 2)"
+    # Custom components (только services.yaml)
+    if [ -d "$PROJECT_ROOT/config/custom_components" ]; then
+        for file in "$PROJECT_ROOT/config/custom_components"/*/services.yaml; do
+            if [ -f "$file" ]; then
+                check_file "$file"
+                yaml_count=$((yaml_count + 1))
+            fi
+        done
+    fi
+
+    if [ $yaml_count -eq 0 ]; then
+        echo "   ℹ️  YAML файлы не найдены (папка пуста или не смонтирована)"
+    else
+        echo "   ℹ️  Проверено $yaml_count YAML файлов (пропущен secrets.yaml)"
+    fi
+
     echo ""
 fi
 
