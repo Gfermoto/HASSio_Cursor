@@ -2,7 +2,7 @@
 # Валидация всех YAML файлов в проекте
 # Использует yamllint с конфигурацией из .yamllint
 
-set -euo pipefail
+set -uo pipefail  # Убрали -e чтобы продолжать проверку даже при ошибках
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -60,11 +60,14 @@ if [ -f "$PROJECT_ROOT/config.yml" ]; then
 fi
 
 # Проверяем примеры конфигурации
+echo "📋 Примеры и другие YAML:"
 if [ -f "$PROJECT_ROOT/config.yml.example" ]; then
-    echo "📋 Примеры конфигурации:"
     check_file "$PROJECT_ROOT/config.yml.example"
-    echo ""
 fi
+if [ -f "$PROJECT_ROOT/mkdocs.yml" ]; then
+    check_file "$PROJECT_ROOT/mkdocs.yml"
+fi
+echo ""
 
 # Проверяем GitHub workflows
 if [ -d "$PROJECT_ROOT/.github/workflows" ]; then
@@ -82,6 +85,36 @@ if [ -f "$PROJECT_ROOT/docker-compose.yml" ] || [ -f "$PROJECT_ROOT/docker-compo
     echo "🐳 Docker Compose:"
     [ -f "$PROJECT_ROOT/docker-compose.yml" ] && check_file "$PROJECT_ROOT/docker-compose.yml"
     [ -f "$PROJECT_ROOT/docker-compose.yaml" ] && check_file "$PROJECT_ROOT/docker-compose.yaml"
+    echo ""
+fi
+
+# Проверяем конфигурации Home Assistant (если смонтировано)
+if [ -d "$PROJECT_ROOT/config" ] && mountpoint -q "$PROJECT_ROOT/config" 2>/dev/null; then
+    echo "🏠 Home Assistant конфигурации (config/):"
+
+    # Основные файлы
+    for file in "$PROJECT_ROOT/config"/configuration.yaml \
+                "$PROJECT_ROOT/config"/automations.yaml \
+                "$PROJECT_ROOT/config"/scripts.yaml \
+                "$PROJECT_ROOT/config"/scenes.yaml \
+                "$PROJECT_ROOT/config"/groups.yaml; do
+        if [ -f "$file" ]; then
+            check_file "$file"
+        fi
+    done
+
+    # Проверяем папку packages если есть
+    if [ -d "$PROJECT_ROOT/config/packages" ]; then
+        for file in "$PROJECT_ROOT/config/packages"/*.yaml; do
+            if [ -f "$file" ]; then
+                check_file "$file"
+            fi
+        done
+    fi
+
+    echo ""
+elif [ -d "$PROJECT_ROOT/config" ]; then
+    echo "ℹ️  Папка config/ не смонтирована (запустите: ./ha → 2)"
     echo ""
 fi
 
@@ -108,7 +141,7 @@ else
     echo ""
 
     # Если запущен из ./ha (интерактивный режим), не выходить с ошибкой
-    if [ -n "${INTERACTIVE_MODE}" ]; then
+    if [ -n "${INTERACTIVE_MODE:-}" ]; then
         exit 0  # Возвращаемся в меню
     else
         exit 1  # Для CI/CD и скриптов - выход с ошибкой
