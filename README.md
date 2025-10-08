@@ -141,6 +141,7 @@ code config/                # Редактировать
 
 - 🌐 [Проброс портов MikroTik](docs/setup/portforward-mikrotik.md) - для белого IP
 - 🔐 [ZeroTier VPN + Mixed Mode](docs/setup/zerotier-mixed-mode.md) - гибридная сеть
+- 🔒 [SSH туннель для SAMBA](docs/setup/ssh-tunnel-samba.md) - безопасный доступ через интернет
 - 🏠 [Оптимизация отопления](docs/guides/heating-optimization.md) - экономия 30%
 
 ---
