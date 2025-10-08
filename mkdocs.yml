@@ -85,9 +85,8 @@ nav:
   - 📊 Анализаторы:
       - Обзор: analyzers/README.md
   - 🔗 Интеграции:
-      - 🚀 Быстрый старт n8n: integrations/n8n-quickstart.md
+      - 🤖 AI Агенты n8n: integrations/n8n-ai-agents.md
       - 📚 Подключение n8n: integrations/n8n-integration.md
-      - 💡 Сценарии n8n: integrations/n8n-scenarios.md
 
 extra:
   social:
