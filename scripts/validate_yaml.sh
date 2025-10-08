@@ -1,8 +1,9 @@
 #!/bin/bash
 # Валидация всех YAML файлов в проекте
 # Использует yamllint с конфигурацией из .yamllint
+# Универсальный скрипт - находит ВСЕ .yaml/.yml файлы автоматически
 
-set -uo pipefail  # Убрали -e чтобы продолжать проверку даже при ошибках
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -28,15 +29,14 @@ fi
 total_files=0
 passed_files=0
 failed_files=0
-failed_file_list=""  # Список файлов с ошибками
+failed_file_list=""
 
 # Функция проверки файла
 check_file() {
     local file=$1
-    local filename
-    filename=$(basename "$file")
+    local rel_path="${file#"$PROJECT_ROOT"/}"
 
-    echo -n "📄 $filename ... "
+    echo -n "📄 $rel_path ... "
 
     if yamllint "$file" >/dev/null 2>&1; then
         echo "✅"
@@ -48,85 +48,110 @@ check_file() {
         yamllint "$file" 2>&1 | sed 's/^/   /'
         echo ""
         failed_files=$((failed_files + 1))
-        failed_file_list="${failed_file_list}$filename, "
+        failed_file_list="${failed_file_list}$rel_path, "
     fi
     total_files=$((total_files + 1))
 }
 
-# Проверяем config.yml (главный файл конфигурации)
-if [ -f "$PROJECT_ROOT/config.yml" ]; then
-    echo "🔧 Конфигурация проекта:"
-    check_file "$PROJECT_ROOT/config.yml"
-    echo ""
-fi
-
-# Проверяем примеры конфигурации
-echo "📋 Примеры и другие YAML:"
-[ -f "$PROJECT_ROOT/config.yml.example" ] && check_file "$PROJECT_ROOT/config.yml.example"
-[ -f "$PROJECT_ROOT/mkdocs.yml" ] && check_file "$PROJECT_ROOT/mkdocs.yml"
+echo "🔍 Поиск всех YAML файлов в проекте..."
 echo ""
 
-# Проверяем GitHub workflows
-if [ -d "$PROJECT_ROOT/.github/workflows" ]; then
-    echo "⚙️  GitHub Actions workflows:"
-    for file in "$PROJECT_ROOT/.github/workflows"/*.yml "$PROJECT_ROOT/.github/workflows"/*.yaml; do
-        [ -f "$file" ] && check_file "$file"
-    done
-    echo ""
+# Находим ВСЕ .yaml и .yml файлы рекурсивно
+# -L следует за символическими ссылками (для config/)
+# Исключаем согласно .yamllint ignore
+yaml_files=$(find -L "$PROJECT_ROOT" -type f \( -name "*.yaml" -o -name "*.yml" \) 2>/dev/null | \
+    grep -v "\.git/" | \
+    grep -v "node_modules/" | \
+    grep -v "__pycache__/" | \
+    grep -v "\.venv/" | \
+    grep -v "/venv/" | \
+    grep -v "\.storage/" | \
+    grep -v "/backups/" | \
+    grep -v "/logs/" | \
+    grep -v "/deps/" | \
+    grep -v "/tts/" | \
+    grep -v "/audits/" | \
+    sort)
+
+# Подсчитываем файлы
+file_count=$(echo "$yaml_files" | grep -c . || echo "0")
+
+if [ "$file_count" -eq 0 ]; then
+    echo "⚠️  YAML файлы не найдены в проекте"
+    exit 0
 fi
 
-# Проверяем docker-compose файлы если есть
-if [ -f "$PROJECT_ROOT/docker-compose.yml" ] || [ -f "$PROJECT_ROOT/docker-compose.yaml" ]; then
-    echo "🐳 Docker Compose:"
-    [ -f "$PROJECT_ROOT/docker-compose.yml" ] && check_file "$PROJECT_ROOT/docker-compose.yml"
-    [ -f "$PROJECT_ROOT/docker-compose.yaml" ] && check_file "$PROJECT_ROOT/docker-compose.yaml"
-    echo ""
-fi
+echo "📊 Найдено YAML файлов: $file_count"
+echo ""
+echo "═══════════════════════════════════════════════════════════════════"
+echo ""
 
-# Проверяем конфигурации Home Assistant (если доступно)
-if [ -d "$PROJECT_ROOT/config" ] || [ -L "$PROJECT_ROOT/config" ]; then
-    echo "🏠 Home Assistant конфигурации (config/):"
+# Группируем файлы по категориям для красивого вывода
+config_project=""
+config_ha=""
+workflows=""
+other=""
 
-    # Находим ВСЕ .yaml и .yml файлы (включая через симлинки)
-    yaml_count=0
+while IFS= read -r file; do
+    [ -z "$file" ] && continue
 
-    # Основные файлы в корне
-    for file in "$PROJECT_ROOT/config"/*.yaml "$PROJECT_ROOT/config"/*.yml; do
-        if [ -f "$file" ]; then
-            # Пропускаем secrets.yaml (содержит чувствительные данные)
-            if [[ "$(basename "$file")" != "secrets.yaml" ]]; then
-                check_file "$file"
-                yaml_count=$((yaml_count + 1))
-            fi
-        fi
-    done
+    rel_path="${file#"$PROJECT_ROOT"/}"
 
-    # Файлы в подпапках (packages, custom_components и т.д.)
-    if [ -d "$PROJECT_ROOT/config/packages" ]; then
-        for file in "$PROJECT_ROOT/config/packages"/*.yaml; do
-            if [ -f "$file" ]; then
-                check_file "$file"
-                yaml_count=$((yaml_count + 1))
-            fi
-        done
+    # Пропускаем secrets.yaml (чувствительные данные)
+    if [[ "$file" == */secrets.yaml ]]; then
+        continue
     fi
 
-    # Custom components (только services.yaml)
-    if [ -d "$PROJECT_ROOT/config/custom_components" ]; then
-        for file in "$PROJECT_ROOT/config/custom_components"/*/services.yaml; do
-            if [ -f "$file" ]; then
-                check_file "$file"
-                yaml_count=$((yaml_count + 1))
-            fi
-        done
-    fi
-
-    if [ $yaml_count -eq 0 ]; then
-        echo "   ℹ️  YAML файлы не найдены (папка пуста или не смонтирована)"
+    # Категоризация для вывода
+    if [[ "$file" == "$PROJECT_ROOT/config.yml"* ]] || [[ "$file" == "$PROJECT_ROOT/mkdocs.yml" ]]; then
+        config_project="$config_project$file"$'\n'
+    elif [[ "$file" == *"/.github/workflows/"* ]]; then
+        workflows="$workflows$file"$'\n'
+    elif [[ "$file" == "$PROJECT_ROOT/config/"* ]]; then
+        config_ha="$config_ha$file"$'\n'
     else
-        echo "   ℹ️  Проверено $yaml_count YAML файлов (пропущен secrets.yaml)"
+        other="$other$file"$'\n'
     fi
+done <<< "$yaml_files"
 
+# Проверяем конфигурацию проекта
+if [ -n "$config_project" ]; then
+    echo "🔧 Конфигурация проекта:"
+    while IFS= read -r file; do
+        [ -n "$file" ] && check_file "$file"
+    done <<< "$config_project"
+    echo ""
+fi
+
+# Проверяем GitHub workflows
+if [ -n "$workflows" ]; then
+    echo "⚙️  GitHub Actions workflows:"
+    while IFS= read -r file; do
+        [ -n "$file" ] && check_file "$file"
+    done <<< "$workflows"
+    echo ""
+fi
+
+# Проверяем Home Assistant конфигурации
+if [ -n "$config_ha" ]; then
+    echo "🏠 Home Assistant конфигурации (config/):"
+    ha_count=0
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            check_file "$file"
+            ha_count=$((ha_count + 1))
+        fi
+    done <<< "$config_ha"
+    echo "   ℹ️  Проверено $ha_count файлов (secrets.yaml пропущен)"
+    echo ""
+fi
+
+# Проверяем другие YAML файлы
+if [ -n "$other" ]; then
+    echo "📁 Другие YAML файлы:"
+    while IFS= read -r file; do
+        [ -n "$file" ] && check_file "$file"
+    done <<< "$other"
     echo ""
 fi
 
@@ -137,9 +162,16 @@ echo "📊 Результаты:"
 echo "   Всего файлов:  $total_files"
 echo "   ✅ Успешно:    $passed_files"
 echo "   ❌ Ошибки:     $failed_files"
+
 if [ $failed_files -gt 0 ] && [ -n "$failed_file_list" ]; then
     echo ""
-    echo "   🔴 Файлы с ошибками: ${failed_file_list%, }"
+    echo "   🔴 Файлы с ошибками:"
+    # Показываем каждый файл на новой строке
+    IFS=',' read -ra FAILED_ARRAY <<< "$failed_file_list"
+    for item in "${FAILED_ARRAY[@]}"; do
+        item=$(echo "$item" | xargs)  # Trim spaces
+        [ -n "$item" ] && echo "      • $item"
+    done
 fi
 echo ""
 
