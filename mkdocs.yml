@@ -71,6 +71,10 @@ nav:
   - 📖 Установка:
       - Быстрый старт: setup/quickstart.md
       - Детальная установка: setup/SETUP.md
+      - После установки: setup/post-setup.md
+      - Проброс портов MikroTik: setup/portforward-mikrotik.md
+      - ZeroTier смешанный режим: setup/zerotier-mixed-mode.md
+      - SSH туннель для SAMBA: setup/ssh-tunnel-samba.md
   - 📚 Руководства:
       - Первый аудит: guides/first-audit.md
       - Оптимизация отопления: guides/heating-optimization.md
