@@ -84,6 +84,9 @@ nav:
       - Рабочий процесс: reference/WORKFLOW.md
   - 📊 Анализаторы:
       - Обзор: analyzers/README.md
+  - 🔗 Интеграции:
+      - n8n: integrations/n8n-integration.md
+      - Сценарии n8n: integrations/n8n-scenarios.md
 
 extra:
   social:
