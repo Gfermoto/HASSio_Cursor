@@ -68,7 +68,7 @@
 cd ~/HASSio
 chmod +x scripts/*.sh
 ./scripts/setup.sh
-```text
+```
 
 **Что произойдёт:**
 
@@ -79,9 +79,7 @@ chmod +x scripts/*.sh
 
 **В конце скопируйте SSH ключ!** Он выглядит так:
 
-```text
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsd... hassio-20251007
-```text
 
 ---
 
@@ -117,7 +115,7 @@ password: "ваш_надёжный_пароль_123"
 apks: []
 server:
   tcp_forwarding: false
-```text
+```
 
 **ВАЖНО:**
 
@@ -180,7 +178,7 @@ allow_hosts:
   - 192.168.0.0/16
   - fe80::/10
 interface: ""
-```text
+```
 
 **Пояснения:**
 
@@ -224,7 +222,7 @@ interface: ""
 cd ~/HASSio
 chmod +x scripts/*.sh
 ./scripts/setup_samba.sh
-```text
+```
 
 **Что произойдёт:**
 
@@ -237,13 +235,11 @@ chmod +x scripts/*.sh
 
 ```bash
 nano .ssh/config
-```text
+```
 
 Найдите строку:
 
-```text
 HostName 192.168.1.50
-```text
 
 Замените `192.168.1.50` на **ВАШ IP из шага 4**!
 
@@ -279,14 +275,12 @@ HostName 192.168.1.50
 
 **Добавить новое правило:**
 
-```text
 Название/Name: HA-SSH
 Внешний порт/External Port: 2222
 Внутренний IP/Internal IP: 192.168.X.X  ← ВАШ IP из шага 4!
 Внутренний порт/Internal Port: 22
 Протокол/Protocol: TCP
 Статус/Status: Включено/Enabled
-```text
 
 ### 6.4. Создать правила для SAMBA
 
@@ -294,43 +288,35 @@ HostName 192.168.1.50
 
 **Правило 1:**
 
-```text
 Название: HA-SAMBA-445
 Внешний порт: 445
 Внутренний IP: 192.168.X.X  ← ВАШ IP!
 Внутренний порт: 445
 Протокол: TCP
-```text
 
 **Правило 2:**
 
-```text
 Название: HA-SAMBA-139
 Внешний порт: 139
 Внутренний IP: 192.168.X.X
 Внутренний порт: 139
 Протокол: TCP
-```text
 
 **Правило 3:**
 
-```text
 Название: HA-SAMBA-137
 Внешний порт: 137
 Внутренний IP: 192.168.X.X
 Внутренний порт: 137
 Протокол: UDP
-```text
 
 **Правило 4:**
 
-```text
 Название: HA-SAMBA-138
 Внешний порт: 138
 Внутренний IP: 192.168.X.X
 Внутренний порт: 138
 Протокол: UDP
-```text
 
 ### 6.5. Сохранить настройки
 
@@ -347,7 +333,7 @@ HostName 192.168.1.50
 ```bash
 cd ~/HASSio
 ssh -F .ssh/config hassio
-```text
+```
 
 **Что должно произойти:**
 
@@ -363,7 +349,7 @@ ssh -F .ssh/config hassio
 
 ```bash
 ha core info
-```text
+```
 
 Должна показаться информация о версии Home Assistant.
 
@@ -371,7 +357,7 @@ ha core info
 
 ```bash
 exit
-```text
+```
 
 **Если подключение не удалось:**
 
@@ -390,11 +376,10 @@ exit
 ```bash
 cd ~/HASSio
 ./mount.sh
-```text
+```
 
 **Что должно произойти:**
 
-```text
 🔌 Монтирование шары 'config'...
 ✅ Смонтировано!
 ✅ Создана ссылка: ~/HASSio/config → /mnt/hassio
@@ -404,7 +389,6 @@ configuration.yaml
 automations.yaml
 scripts.yaml
 ...
-```text
 
 ### 8.2. Проверка
 
@@ -412,7 +396,7 @@ scripts.yaml
 
 ```bash
 ls config/
-```text
+```
 
 Должны увидеть файлы конфигурации Home Assistant:
 
@@ -435,16 +419,14 @@ ls config/
 
 ```bash
 ./check.sh
-```text
+```
 
 **Должно показать:**
 
-```text
 ✅ SSH работает
 ✅ SAMBA смонтирован
 ✅ Доступ к configuration.yaml
 ✅ MCP настроен
-```text
 
 **Если всё ✅ - поздравляю, настройка завершена!** 🎉
 
@@ -463,7 +445,7 @@ code config/configuration.yaml
 
 # Просмотр логов
 ./scripts/view_logs.sh
-```text
+```
 
 ---
 
@@ -473,31 +455,29 @@ code config/configuration.yaml
 
 #### Проверка 1: Add-on запущен?
 
-```text
 Home Assistant → Add-ons → Terminal & SSH → вкладка Info
 Статус должен быть: "Started"
-```text
 
 #### Проверка 2: Порт открыт?
 
 ```bash
 nc -zv your-domain.com 2222
 # Должно быть: succeeded!
-```text
+```
 
 #### Проверка 3: Ключ добавлен?
 
 ```bash
 cat .ssh/id_hassio.pub
 # Убедитесь что этот ключ в Configuration add-on
-```text
+```
 
 #### Проверка 4: Попробуйте с паролем
 
 ```bash
 ssh -F .ssh/config -o PreferredAuthentications=password hassio
 # Введите пароль из configuration add-on
-```text
+```
 
 ---
 
@@ -505,31 +485,29 @@ ssh -F .ssh/config -o PreferredAuthentications=password hassio
 
 #### Проверка 1: Add-on запущен?
 
-```text
 Home Assistant → Add-ons → Samba share → Info
 Статус: "Started"
-```text
 
 #### Проверка 2: Credentials правильные?
 
 ```bash
 cat .samba-credentials
 # Должно совпадать с Configuration add-on
-```text
+```
 
 #### Проверка 3: Порт открыт?
 
 ```bash
 nc -zv your-domain.com 445
 # Должно быть: succeeded!
-```text
+```
 
 #### Проверка 4: Попробуйте вручную
 
 ```bash
 sudo mount -t cifs //your-domain.com/config /mnt/hassio \
   -o username=homeassistant,password=your_password,uid=1000,gid=1000
-```text
+```
 
 ---
 
@@ -539,7 +517,7 @@ sudo mount -t cifs //your-domain.com/config /mnt/hassio \
 
 ```bash
 cat .cursor/mcp.json
-```text
+```
 
 Должен содержать:
 
@@ -558,7 +536,7 @@ cat .cursor/mcp.json
     }
   }
 }
-```text
+```
 
 **Перезапустите Cursor** если MCP не работает.
 
