@@ -35,37 +35,50 @@ check_file() {
     local filename
     filename=$(basename "$file")
 
-    total_files=$((total_files + 1))
-
     echo -n "📄 $filename ... "
 
     if yamllint "$file" >/dev/null 2>&1; then
         echo "✅"
-        passed_files=$((passed_files + 1))
+        return 0
     else
-        echo "❌"
-        failed_files=$((failed_files + 1))
+        echo "❌ ОШИБКА!"
         echo ""
         echo "   Ошибки:"
         yamllint "$file" 2>&1 | sed 's/^/   /'
         echo ""
+        return 1
     fi
 }
 
 # Проверяем config.yml (главный файл конфигурации)
 if [ -f "$PROJECT_ROOT/config.yml" ]; then
     echo "🔧 Конфигурация проекта:"
-    check_file "$PROJECT_ROOT/config.yml"
+    if check_file "$PROJECT_ROOT/config.yml"; then
+        passed_files=$((passed_files + 1))
+    else
+        failed_files=$((failed_files + 1))
+    fi
+    total_files=$((total_files + 1))
     echo ""
 fi
 
 # Проверяем примеры конфигурации
 echo "📋 Примеры и другие YAML:"
 if [ -f "$PROJECT_ROOT/config.yml.example" ]; then
-    check_file "$PROJECT_ROOT/config.yml.example"
+    if check_file "$PROJECT_ROOT/config.yml.example"; then
+        passed_files=$((passed_files + 1))
+    else
+        failed_files=$((failed_files + 1))
+    fi
+    total_files=$((total_files + 1))
 fi
 if [ -f "$PROJECT_ROOT/mkdocs.yml" ]; then
-    check_file "$PROJECT_ROOT/mkdocs.yml"
+    if check_file "$PROJECT_ROOT/mkdocs.yml"; then
+        passed_files=$((passed_files + 1))
+    else
+        failed_files=$((failed_files + 1))
+    fi
+    total_files=$((total_files + 1))
 fi
 echo ""
 
@@ -74,7 +87,12 @@ if [ -d "$PROJECT_ROOT/.github/workflows" ]; then
     echo "⚙️  GitHub Actions workflows:"
     for file in "$PROJECT_ROOT/.github/workflows"/*.yml "$PROJECT_ROOT/.github/workflows"/*.yaml; do
         if [ -f "$file" ]; then
-            check_file "$file"
+            if check_file "$file"; then
+                passed_files=$((passed_files + 1))
+            else
+                failed_files=$((failed_files + 1))
+            fi
+            total_files=$((total_files + 1))
         fi
     done
     echo ""
@@ -83,8 +101,22 @@ fi
 # Проверяем docker-compose файлы если есть
 if [ -f "$PROJECT_ROOT/docker-compose.yml" ] || [ -f "$PROJECT_ROOT/docker-compose.yaml" ]; then
     echo "🐳 Docker Compose:"
-    [ -f "$PROJECT_ROOT/docker-compose.yml" ] && check_file "$PROJECT_ROOT/docker-compose.yml"
-    [ -f "$PROJECT_ROOT/docker-compose.yaml" ] && check_file "$PROJECT_ROOT/docker-compose.yaml"
+    if [ -f "$PROJECT_ROOT/docker-compose.yml" ]; then
+        if check_file "$PROJECT_ROOT/docker-compose.yml"; then
+            passed_files=$((passed_files + 1))
+        else
+            failed_files=$((failed_files + 1))
+        fi
+        total_files=$((total_files + 1))
+    fi
+    if [ -f "$PROJECT_ROOT/docker-compose.yaml" ]; then
+        if check_file "$PROJECT_ROOT/docker-compose.yaml"; then
+            passed_files=$((passed_files + 1))
+        else
+            failed_files=$((failed_files + 1))
+        fi
+        total_files=$((total_files + 1))
+    fi
     echo ""
 fi
 
@@ -100,7 +132,12 @@ if [ -d "$PROJECT_ROOT/config" ] || [ -L "$PROJECT_ROOT/config" ]; then
         if [ -f "$file" ]; then
             # Пропускаем secrets.yaml (содержит чувствительные данные)
             if [[ "$(basename "$file")" != "secrets.yaml" ]]; then
-                check_file "$file"
+                if check_file "$file"; then
+                    passed_files=$((passed_files + 1))
+                else
+                    failed_files=$((failed_files + 1))
+                fi
+                total_files=$((total_files + 1))
                 yaml_count=$((yaml_count + 1))
             fi
         fi
@@ -110,7 +147,12 @@ if [ -d "$PROJECT_ROOT/config" ] || [ -L "$PROJECT_ROOT/config" ]; then
     if [ -d "$PROJECT_ROOT/config/packages" ]; then
         for file in "$PROJECT_ROOT/config/packages"/*.yaml; do
             if [ -f "$file" ]; then
-                check_file "$file"
+                if check_file "$file"; then
+                    passed_files=$((passed_files + 1))
+                else
+                    failed_files=$((failed_files + 1))
+                fi
+                total_files=$((total_files + 1))
                 yaml_count=$((yaml_count + 1))
             fi
         done
@@ -120,7 +162,12 @@ if [ -d "$PROJECT_ROOT/config" ] || [ -L "$PROJECT_ROOT/config" ]; then
     if [ -d "$PROJECT_ROOT/config/custom_components" ]; then
         for file in "$PROJECT_ROOT/config/custom_components"/*/services.yaml; do
             if [ -f "$file" ]; then
-                check_file "$file"
+                if check_file "$file"; then
+                    passed_files=$((passed_files + 1))
+                else
+                    failed_files=$((failed_files + 1))
+                fi
+                total_files=$((total_files + 1))
                 yaml_count=$((yaml_count + 1))
             fi
         done
