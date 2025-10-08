@@ -1,33 +1,50 @@
 ---
-# YAML Lint Configuration for Home Assistant
+# YAML Lint Configuration for HASSio_Cursor Project
+# Оптимизирована для Home Assistant конфигураций и проекта
+
 extends: default
 
 rules:
+  # Длина строки
   line-length:
     max: 120
     level: warning
+    allow-non-breakable-inline-mappings: true
 
+  # Отступы (стандарт для YAML и HA)
   indentation:
     spaces: 2
     indent-sequences: true
+    check-multi-line-strings: false
 
+  # Комментарии
   comments:
     min-spaces-from-content: 1
     require-starting-space: true
 
   comments-indentation: {}
 
+  # Разрешаем файлы без document-start (---)
   document-start: disable
 
+  # Пустые строки
   empty-lines:
     max: 2
     max-start: 0
     max-end: 1
 
+  # Булевы значения (HA использует on/off)
   truthy:
     allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
     check-keys: false
 
+  # Кавычки (только когда необходимо)
+  quoted-strings:
+    quote-type: double
+    required: only-when-needed
+    allow-quoted-quotes: true
+
+  # Скобки и символы
   brackets:
     min-spaces-inside: 0
     max-spaces-inside: 1
@@ -41,8 +58,39 @@ rules:
     min-spaces-after: 1
     max-spaces-after: 1
 
+  # HA не требует порядка ключей
+  key-ordering: disable
+
+  # Разрешаем дублирующиеся ключи в некоторых случаях
+  key-duplicates: enable
+
+  # Пустые значения допустимы
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+# Игнорируемые файлы и директории
 ignore: |
+  # Home Assistant специфичные
   .storage/
   deps/
   tts/
   *.pyc
+
+  # Git и системные
+  .git/
+  .github/
+  __pycache__/
+
+  # Node.js
+  node_modules/
+
+  # Python
+  venv/
+  .venv/
+
+  # Проект специфичные
+  audits/*.md
+  config/
+  backups/
+  logs/
