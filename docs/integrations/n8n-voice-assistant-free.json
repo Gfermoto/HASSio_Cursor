@@ -1,0 +1,363 @@
+{
+  "name": "🤖 Текстовый ассистент: HA + GigaChat (100% бесплатно)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {
+          "download": false,
+          "userIds": "YOUR_TELEGRAM_USER_ID"
+        }
+      },
+      "name": "Telegram: Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400],
+      "id": "telegram-trigger-001",
+      "webhookId": "voice-assistant-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "Прием текстовых сообщений от пользователя. ЗАМЕНИТЕ: YOUR_TELEGRAM_USER_ID, YOUR_TELEGRAM_CREDENTIAL_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Проверяем специальные команды\nconst text = $input.item.json.message.text;\nconst chatId = $input.item.json.message.chat.id;\n\nif (!text) {\n  return [{ json: { error: true, text: 'Отправьте текстовое сообщение', chat_id: chatId } }];\n}\n\nif (text === '/clear') {\n  return [{ json: { isCommand: true, command: 'clear', chat_id: chatId, text: '🗑️ Контекст диалога очищен' } }];\n}\n\nif (text === '/help') {\n  const helpText = `🤖 *Текстовый ассистент Home Assistant*\\n\\n*Команды управления:*\\n• Включи/выключи свет [комната]\\n• Сделай теплее/холоднее в [комната]\\n• Запусти сцену [название]\\n• Какая температура в [комната]?\\n• Покажи статус [устройство]\\n\\n*Системные команды:*\\n/help - эта справка\\n/clear - очистить контекст\\n\\n💡 *Совет:* Пишите естественным языком!\\n\\n📝 *Примеры:*\\n• \"Включи свет на кухне\"\\n• \"Сделай в спальне 22 градуса\"\\n• \"Запусти вечерний режим\"\\n• \"Выключи все светильники в доме\"`;\n  return [{ json: { isCommand: true, command: 'help', chat_id: chatId, text: helpText } }];\n}\n\nreturn [{ json: { isCommand: false, text: text, chat_id: chatId } }];"
+      },
+      "name": "Check: Commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400],
+      "id": "check-commands-001",
+      "notes": "Проверяет специальные команды (/help, /clear)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isCommand }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "If: Is Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 400],
+      "id": "if-command-001",
+      "notes": "Разделяет команды и обычные запросы"
+    },
+    {
+      "parameters": {
+        "jsCode": "function generateUUID() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}\n\nreturn [{ json: { uuid: generateUUID(), text: $input.item.json.text, chat_id: $input.item.json.chat_id } }];"
+      },
+      "name": "GigaChat: UUID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 520],
+      "id": "gigachat-uuid-001",
+      "notes": "Генерирует UUID для GigaChat OAuth"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "RqUID",
+              "value": "={{$json.uuid}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YOUR_GIGACHAT_AUTHORIZATION_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "GIGACHAT_API_PERS"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Get Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 520],
+      "id": "gigachat-token-001",
+      "notes": "Получает access token для GigaChat. ЗАМЕНИТЕ: YOUR_GIGACHAT_AUTHORIZATION_KEY"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Home Assistant Tools для GigaChat\nconst functions = [\n  {\n    name: \"turn_on_light\",\n    description: \"Включить свет в комнате или конкретный светильник\",\n    parameters: {\n      type: \"object\",\n      properties: {\n        entity_id: {\n          type: \"string\",\n          description: \"ID устройства света (например: light.kitchen)\"\n        },\n        brightness: {\n          type: \"number\",\n          description: \"Яркость света от 0 до 255 (опционально)\"\n        }\n      },\n      required: [\"entity_id\"]\n    }\n  },\n  {\n    name: \"turn_off_light\",\n    description: \"Выключить свет в комнате или конкретный светильник\",\n    parameters: {\n      type: \"object\",\n      properties: {\n        entity_id: {\n          type: \"string\",\n          description: \"ID устройства света (например: light.kitchen)\"\n        }\n      },\n      required: [\"entity_id\"]\n    }\n  },\n  {\n    name: \"set_temperature\",\n    description: \"Установить целевую температуру в комнате\",\n    parameters: {\n      type: \"object\",\n      properties: {\n        entity_id: {\n          type: \"string\",\n          description: \"ID климатического устройства (например: climate.bedroom)\"\n        },\n        temperature: {\n          type: \"number\",\n          description: \"Целевая температура в градусах Цельсия\"\n        }\n      },\n      required: [\"entity_id\", \"temperature\"]\n    }\n  },\n  {\n    name: \"activate_scene\",\n    description: \"Запустить сцену (scene) в Home Assistant\",\n    parameters: {\n      type: \"object\",\n      properties: {\n        entity_id: {\n          type: \"string\",\n          description: \"ID сцены (например: scene.evening)\"\n        }\n      },\n      required: [\"entity_id\"]\n    }\n  },\n  {\n    name: \"get_state\",\n    description: \"Получить текущее состояние устройства или датчика\",\n    parameters: {\n      type: \"object\",\n      properties: {\n        entity_id: {\n          type: \"string\",\n          description: \"ID устройства или датчика\"\n        }\n      },\n      required: [\"entity_id\"]\n    }\n  }\n];\n\nconst uuidData = $('GigaChat: UUID').first().json;\nconst token = $input.item.json.access_token;\n\nconst request = {\n  model: \"GigaChat\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"Ты голосовой ассистент умного дома Home Assistant. Ты помогаешь управлять светом, климатом, сценами и получать информацию с устройств. Отвечай на русском языке, кратко и по делу. Когда нужно выполнить действие - используй доступные функции. Если не уверен в названии устройства - попроси уточнить или предложи варианты. Сегодня \" + new Date().toLocaleString('ru-RU', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}) + \".\"\n    },\n    {\n      role: \"user\",\n      content: uuidData.text\n    }\n  ],\n  functions: functions,\n  temperature: 0.7,\n  max_tokens: 500\n};\n\nreturn [{ json: { token, request, chat_id: uuidData.chat_id, user_text: uuidData.text } }];"
+      },
+      "name": "GigaChat: Prepare Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 520],
+      "id": "gigachat-prepare-001",
+      "notes": "Подготавливает запрос к GigaChat с 5 HA tools"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.request}}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 520],
+      "id": "gigachat-chat-001",
+      "notes": "Отправляет запрос в GigaChat для AI анализа"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим ответ от GigaChat\nconst response = $input.item.json;\nconst prepData = $('GigaChat: Prepare Request').first().json;\nconst chatId = prepData.chat_id;\n\nlet text = '';\nlet functionCall = null;\nlet needsExecution = false;\n\nif (response.choices && response.choices.length > 0) {\n  const choice = response.choices[0];\n  \n  if (choice.message.function_call) {\n    functionCall = {\n      name: choice.message.function_call.name,\n      arguments: JSON.parse(choice.message.function_call.arguments || '{}')\n    };\n    needsExecution = true;\n    text = choice.message.content || 'Выполняю команду...';\n  } else {\n    text = choice.message.content || 'Извините, я не понял запрос. Попробуйте переформулировать или используйте /help для справки.';\n  }\n} else {\n  text = '❌ Ошибка обработки ответа от GigaChat. Попробуйте еще раз.';\n}\n\nreturn [{ json: { text, functionCall, chat_id: chatId, needsExecution } }];"
+      },
+      "name": "Parse: GigaChat Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 520],
+      "id": "parse-gigachat-001",
+      "notes": "Парсит ответ от GigaChat и извлекает function_call"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.needsExecution }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "If: Needs HA Execution?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2000, 520],
+      "id": "if-execution-001",
+      "notes": "Проверяет нужно ли выполнить команду в HA"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Выполняем команду HA через API\nconst functionCall = $input.item.json.functionCall;\nconst chatId = $input.item.json.chat_id;\n\nif (!functionCall) {\n  return [{ json: { error: true, text: 'Нет команды для выполнения', chat_id: chatId } }];\n}\n\nconst fname = functionCall.name;\nconst args = functionCall.arguments;\n\nlet service = '';\nlet domain = '';\nlet serviceData = {};\n\n// Маршрутизация функций к HA сервисам\nswitch(fname) {\n  case 'turn_on_light':\n    domain = 'light';\n    service = 'turn_on';\n    serviceData = { entity_id: args.entity_id };\n    if (args.brightness) serviceData.brightness = args.brightness;\n    break;\n    \n  case 'turn_off_light':\n    domain = 'light';\n    service = 'turn_off';\n    serviceData = { entity_id: args.entity_id };\n    break;\n    \n  case 'set_temperature':\n    domain = 'climate';\n    service = 'set_temperature';\n    serviceData = { entity_id: args.entity_id, temperature: args.temperature };\n    break;\n    \n  case 'activate_scene':\n    domain = 'scene';\n    service = 'turn_on';\n    serviceData = { entity_id: args.entity_id };\n    break;\n    \n  case 'get_state':\n    // Для get_state используем другой подход\n    return [{ json: { \n      action: 'get_state', \n      entity_id: args.entity_id,\n      chat_id: chatId\n    }}];\n    \n  default:\n    return [{ json: { error: true, text: `Неизвестная функция: ${fname}`, chat_id: chatId } }];\n}\n\nreturn [{ json: { \n  action: 'call_service',\n  domain, \n  service, \n  service_data: serviceData,\n  chat_id: chatId,\n  original_text: $('Parse: GigaChat Response').first().json.text\n}}];"
+      },
+      "name": "Execute: HA Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 400],
+      "id": "execute-ha-001",
+      "notes": "Выполняет команду в Home Assistant через service call"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.action }}",
+              "operation": "equals",
+              "value2": "call_service"
+            }
+          ]
+        }
+      },
+      "name": "Switch: Action Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2440, 400],
+      "id": "switch-action-001",
+      "notes": "Определяет тип действия: service call или get_state"
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "domain": "={{ $json.domain }}",
+        "service": "={{ $json.service }}",
+        "serviceAttributes": "={{ $json.service_data }}"
+      },
+      "name": "HA: Call Service",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2660, 300],
+      "id": "ha-service-001",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      },
+      "notes": "Вызывает сервис в Home Assistant. ЗАМЕНИТЕ: YOUR_HA_CREDENTIAL_ID"
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "get",
+        "entityId": "={{ $json.entity_id }}"
+      },
+      "name": "HA: Get State",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2660, 500],
+      "id": "ha-state-001",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      },
+      "notes": "Получает состояние устройства из Home Assistant"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Форматируем успешный ответ после выполнения\nconst execData = $('Execute: HA Command').first().json;\nconst originalText = execData.original_text || 'Команда выполнена';\n\nlet resultText = `✅ ${originalText}`;\n\n// Если есть результат от HA\nif ($input.item.json.state !== undefined) {\n  const state = $input.item.json;\n  resultText = `📊 *${state.attributes?.friendly_name || state.entity_id}*\\n\\nСостояние: ${state.state}`;\n  \n  if (state.attributes?.temperature) {\n    resultText += `\\nТемпература: ${state.attributes.temperature}°C`;\n  }\n  if (state.attributes?.brightness) {\n    const brightnessPercent = Math.round((state.attributes.brightness / 255) * 100);\n    resultText += `\\nЯркость: ${brightnessPercent}%`;\n  }\n}\n\nreturn [{ json: { text: resultText, chat_id: execData.chat_id } }];"
+      },
+      "name": "Format: Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 400],
+      "id": "format-success-001",
+      "notes": "Форматирует успешный ответ после выполнения команды"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "name": "Merge: All Responses",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [3100, 500],
+      "id": "merge-responses-001",
+      "notes": "Объединяет все возможные ответы"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true,
+          "append_attribution": false
+        }
+      },
+      "name": "Telegram: Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [3320, 500],
+      "id": "telegram-reply-001",
+      "webhookId": "reply-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "Отправляет ответ пользователю в Telegram"
+    }
+  ],
+  "connections": {
+    "Telegram: Trigger": {
+      "main": [[{"node": "Check: Commands", "type": "main", "index": 0}]]
+    },
+    "Check: Commands": {
+      "main": [[{"node": "If: Is Command?", "type": "main", "index": 0}]]
+    },
+    "If: Is Command?": {
+      "main": [
+        [{"node": "Merge: All Responses", "type": "main", "index": 0}],
+        [{"node": "GigaChat: UUID", "type": "main", "index": 0}]
+      ]
+    },
+    "GigaChat: UUID": {
+      "main": [[{"node": "GigaChat: Get Token", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Get Token": {
+      "main": [[{"node": "GigaChat: Prepare Request", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Prepare Request": {
+      "main": [[{"node": "GigaChat: Chat", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Chat": {
+      "main": [[{"node": "Parse: GigaChat Response", "type": "main", "index": 0}]]
+    },
+    "Parse: GigaChat Response": {
+      "main": [[{"node": "If: Needs HA Execution?", "type": "main", "index": 0}]]
+    },
+    "If: Needs HA Execution?": {
+      "main": [
+        [{"node": "Execute: HA Command", "type": "main", "index": 0}],
+        [{"node": "Merge: All Responses", "type": "main", "index": 1}]
+      ]
+    },
+    "Execute: HA Command": {
+      "main": [[{"node": "Switch: Action Type", "type": "main", "index": 0}]]
+    },
+    "Switch: Action Type": {
+      "main": [
+        [{"node": "HA: Call Service", "type": "main", "index": 0}],
+        [{"node": "HA: Get State", "type": "main", "index": 0}]
+      ]
+    },
+    "HA: Call Service": {
+      "main": [[{"node": "Format: Success Response", "type": "main", "index": 0}]]
+    },
+    "HA: Get State": {
+      "main": [[{"node": "Format: Success Response", "type": "main", "index": 0}]]
+    },
+    "Format: Success Response": {
+      "main": [[{"node": "Merge: All Responses", "type": "main", "index": 2}]]
+    },
+    "Merge: All Responses": {
+      "main": [[{"node": "Telegram: Reply", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "voice-assistant-free-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voice-assistant-free-template"
+  },
+  "tags": []
+}
