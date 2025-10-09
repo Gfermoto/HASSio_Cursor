@@ -31,6 +31,8 @@
 
 **Workflow:** `n8n-voice-assistant-free.json` (шаблон) или `n8n-voice-assistant-free.local.json` (рабочий)
 
+**Roadmap:** [VOICE-ASSISTANT-ROADMAP.md](./VOICE-ASSISTANT-ROADMAP.md) - план развития по поколениям
+
 **Стоимость:** ✅ **₽0/месяц** - всё бесплатно!
 
 ---
