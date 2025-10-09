@@ -79,3 +79,13 @@ temp/
 samba-credentials
 config
 *.local.json
+
+# n8n sensitive files
+*.local.json
+**/credentials.json
+**/*.credentials.json
+
+# API keys and tokens
+*key*.json
+*token*.json
+*secret*.json
