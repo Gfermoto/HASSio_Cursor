@@ -60,6 +60,26 @@ n8n:
       url: "http://192.168.1.XXX:11434"  # URL Ollama API
       model: "llama2"  # Модель для использования
 
+# Yandex Cloud (для голосового ассистента)
+yandex_cloud:
+  enabled: false  # true = используете Yandex Cloud API
+  folder_id: "YOUR_FOLDER_ID"  # Folder ID из Yandex Cloud Console
+  api_key: "YOUR_API_KEY"  # API ключ сервисного аккаунта
+
+  # SpeechKit (распознавание речи)
+  speechkit:
+    enabled: false  # true = включить транскрипцию голоса
+    language: "ru-RU"  # Язык распознавания
+    sample_rate: 48000  # Частота дискретизации (Hz)
+    format: "oggopus"  # Формат аудио: oggopus, lpcm, mp3
+
+  # YandexGPT (языковая модель)
+  yandexgpt:
+    enabled: false  # true = использовать YandexGPT
+    model: "yandexgpt-lite"  # yandexgpt-lite (быстрая) | yandexgpt (точная)
+    temperature: 0.6  # Креативность (0.0-1.0)
+    max_tokens: 500  # Максимум токенов в ответе
+
 # Backup Settings
 backup:
   retention_days: 7

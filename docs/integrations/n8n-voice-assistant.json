@@ -1,0 +1,640 @@
+{
+  "name": "🗣️ Voice Assistant: HA + YandexGPT + GigaChat",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {
+          "download": false,
+          "userIds": "YOUR_TELEGRAM_USER_ID"
+        }
+      },
+      "name": "Telegram: Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400],
+      "id": "telegram-trigger-001",
+      "webhookId": "voice-assistant-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "Прием сообщений от пользователя (текст + голос). ЗАМЕНИТЕ: YOUR_TELEGRAM_USER_ID"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Check: Voice or Text?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [460, 400],
+      "id": "check-message-type-001",
+      "notes": "Определяет тип сообщения: голос или текст"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "name": "Telegram: Get Voice File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [680, 280],
+      "id": "get-voice-file-001",
+      "webhookId": "get-voice-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "Загружает голосовой файл из Telegram"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Api-Key YOUR_YANDEX_CLOUD_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "audio",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "lang",
+              "value": "ru-RU"
+            },
+            {
+              "name": "folderId",
+              "value": "YOUR_YANDEX_FOLDER_ID"
+            },
+            {
+              "name": "format",
+              "value": "oggopus"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Yandex: SpeechKit STT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 280],
+      "id": "yandex-stt-001",
+      "notes": "Транскрибирует голос в текст. ЗАМЕНИТЕ: YOUR_YANDEX_CLOUD_API_KEY, YOUR_YANDEX_FOLDER_ID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "text-assignment-001",
+              "name": "text",
+              "value": "={{ $json.result }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-assignment-001",
+              "name": "chat_id",
+              "value": "={{ $('Telegram: Trigger').first().json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract: Transcribed Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1120, 280],
+      "id": "extract-transcribed-001",
+      "notes": "Извлекает транскрибированный текст из ответа SpeechKit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "text-direct-assignment-001",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-direct-assignment-001",
+              "name": "chat_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract: Text Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 520],
+      "id": "extract-text-001",
+      "notes": "Извлекает текст из текстового сообщения"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "name": "Merge: Voice + Text",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1340, 400],
+      "id": "merge-inputs-001",
+      "notes": "Объединяет голосовые и текстовые сообщения"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Проверяем специальные команды\nconst text = $input.item.json.text;\nconst chatId = $input.item.json.chat_id;\n\nif (text === '/clear') {\n  return [{ json: { isCommand: true, command: 'clear', chat_id: chatId, text: '🗑️ Контекст диалога очищен' } }];\n}\n\nif (text === '/help') {\n  const helpText = `🤖 *Голосовой ассистент Home Assistant*\\n\\n*Команды управления:*\\n• Включи/выключи свет [комната]\\n• Сделай теплее/холоднее [комната]\\n• Запусти сцену [название]\\n• Какая температура в [комната]?\\n\\n*Системные команды:*\\n/lights - список светильников\\n/status - статус дома\\n/scenes - доступные сцены\\n/clear - очистить контекст\\n/help - эта справка`;\n  return [{ json: { isCommand: true, command: 'help', chat_id: chatId, text: helpText } }];\n}\n\nreturn [{ json: { isCommand: false, text: text, chat_id: chatId } }];"
+      },
+      "name": "Check: Commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 400],
+      "id": "check-commands-001",
+      "notes": "Проверяет специальные команды (/clear, /help и т.д.)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isCommand }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "If: Is Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1780, 400],
+      "id": "if-command-001",
+      "notes": "Разделяет команды и обычные запросы"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Home Assistant Tools для YandexGPT\nconst tools = [\n  {\n    type: \"function\",\n    function: {\n      name: \"turn_on_light\",\n      description: \"Включить свет в комнате или конкретный светильник\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID устройства света (например: light.kitchen)\"\n          },\n          brightness: {\n            type: \"number\",\n            description: \"Яркость света от 0 до 255 (опционально)\"\n          }\n        },\n        required: [\"entity_id\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"turn_off_light\",\n      description: \"Выключить свет в комнате или конкретный светильник\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID устройства света (например: light.kitchen)\"\n          }\n        },\n        required: [\"entity_id\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"set_temperature\",\n      description: \"Установить целевую температуру в комнате\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID климатического устройства (например: climate.bedroom)\"\n          },\n          temperature: {\n            type: \"number\",\n            description: \"Целевая температура в градусах Цельсия\"\n          }\n        },\n        required: [\"entity_id\", \"temperature\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"set_climate_mode\",\n      description: \"Установить режим работы климатического устройства\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID климатического устройства\"\n          },\n          hvac_mode: {\n            type: \"string\",\n            enum: [\"heat\", \"cool\", \"heat_cool\", \"off\", \"auto\"],\n            description: \"Режим: heat (обогрев), cool (охлаждение), heat_cool (авто), off (выкл), auto\"\n          }\n        },\n        required: [\"entity_id\", \"hvac_mode\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"activate_scene\",\n      description: \"Запустить сцену (scene) в Home Assistant\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID сцены (например: scene.evening)\"\n          }\n        },\n        required: [\"entity_id\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"get_sensor_state\",\n      description: \"Получить текущее состояние датчика или устройства\",\n      parameters: {\n        type: \"object\",\n        properties: {\n          entity_id: {\n            type: \"string\",\n            description: \"ID датчика или устройства\"\n          }\n        },\n        required: [\"entity_id\"]\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"list_lights\",\n      description: \"Получить список всех светильников в доме\",\n      parameters: {\n        type: \"object\",\n        properties: {}\n      }\n    }\n  },\n  {\n    type: \"function\",\n    function: {\n      name: \"list_scenes\",\n      description: \"Получить список доступных сцен\",\n      parameters: {\n        type: \"object\",\n        properties: {}\n      }\n    }\n  }\n];\n\nconst text = $input.item.json.text;\nconst chatId = $input.item.json.chat_id;\n\nreturn [{ json: { text, chat_id: chatId, tools } }];"
+      },
+      "name": "Prepare: HA Tools",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 520],
+      "id": "prepare-tools-001",
+      "notes": "Подготавливает список инструментов Home Assistant для LLM"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://llm.api.cloud.yandex.net/foundationModels/v1/completion",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Api-Key YOUR_YANDEX_CLOUD_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\"modelUri\": \"gpt://YOUR_YANDEX_FOLDER_ID/yandexgpt-lite\", \"completionOptions\": {\"stream\": false, \"temperature\": 0.6, \"maxTokens\": 500}, \"messages\": [{\"role\": \"system\", \"text\": \"Ты голосовой ассистент умного дома Home Assistant. Ты помогаешь управлять светом, климатом, сценами и получать информацию с датчиков. Отвечай на русском языке, кратко и по делу. Когда нужно выполнить действие - используй доступные функции (tools). Если не уверен в названии устройства - попроси уточнить. Сегодня \" + $now.format('cccc, yyyy-MM-dd HH:mm') + \".\"}, {\"role\": \"user\", \"text\": $json.text}], \"tools\": $json.tools} }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "name": "YandexGPT: Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2440, 520],
+      "id": "yandexgpt-chat-001",
+      "notes": "Основной LLM - YandexGPT. ЗАМЕНИТЕ: YOUR_YANDEX_CLOUD_API_KEY, YOUR_YANDEX_FOLDER_ID",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "name": "Check: YandexGPT Error?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2660, 520],
+      "id": "check-yandex-error-001",
+      "notes": "Проверяет ошибки YandexGPT для fallback на GigaChat"
+    },
+    {
+      "parameters": {
+        "jsCode": "function generateUUID() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}\n\nconst data = $('Prepare: HA Tools').first().json;\n\nreturn [{ json: { uuid: generateUUID(), text: data.text, chat_id: data.chat_id, tools: data.tools } }];"
+      },
+      "name": "GigaChat: UUID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 660],
+      "id": "gigachat-uuid-001",
+      "notes": "Генерирует UUID для GigaChat OAuth"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "RqUID",
+              "value": "={{$json.uuid}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YOUR_GIGACHAT_AUTHORIZATION_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "GIGACHAT_API_PERS"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Get Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3100, 660],
+      "id": "gigachat-token-001",
+      "notes": "Получает access token для GigaChat. ЗАМЕНИТЕ: YOUR_GIGACHAT_AUTHORIZATION_KEY"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Конвертируем HA tools в формат GigaChat\nconst uuidData = $('GigaChat: UUID').first().json;\nconst token = $input.item.json.access_token;\n\n// GigaChat использует аналогичный OpenAI формат для function calling\nconst functions = uuidData.tools.map(tool => ({\n  name: tool.function.name,\n  description: tool.function.description,\n  parameters: tool.function.parameters\n}));\n\nconst request = {\n  model: \"GigaChat\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"Ты голосовой ассистент умного дома Home Assistant. Ты помогаешь управлять светом, климатом, сценами и получать информацию с датчиков. Отвечай на русском языке, кратко и по делу. Когда нужно выполнить действие - используй доступные функции. Если не уверен в названии устройства - попроси уточнить. Сегодня \" + new Date().toLocaleString('ru-RU') + \".\"\n    },\n    {\n      role: \"user\",\n      content: uuidData.text\n    }\n  ],\n  functions: functions,\n  temperature: 0.7,\n  max_tokens: 500\n};\n\nreturn [{ json: { token, request, chat_id: uuidData.chat_id } }];"
+      },
+      "name": "GigaChat: Prepare Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3320, 660],
+      "id": "gigachat-prepare-001",
+      "notes": "Подготавливает запрос к GigaChat с HA tools"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.request}}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3540, 660],
+      "id": "gigachat-chat-001",
+      "notes": "Fallback LLM - GigaChat при ошибках YandexGPT"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим ответ от YandexGPT\nconst response = $input.item.json;\nconst chatId = $('Prepare: HA Tools').first().json.chat_id;\n\nlet text = '';\nlet functionCall = null;\n\nif (response.result && response.result.alternatives && response.result.alternatives.length > 0) {\n  const alternative = response.result.alternatives[0];\n  \n  // Проверяем есть ли вызов функции\n  if (alternative.message.functionCall) {\n    functionCall = alternative.message.functionCall;\n    text = alternative.message.text || 'Выполняю команду...';\n  } else {\n    text = alternative.message.text || 'Извините, я не понял запрос.';\n  }\n} else {\n  text = 'Ошибка обработки ответа от YandexGPT';\n}\n\nreturn [{ json: { text, functionCall, chat_id: chatId, source: 'yandexgpt' } }];"
+      },
+      "name": "Parse: YandexGPT Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 380],
+      "id": "parse-yandex-001",
+      "notes": "Парсит ответ от YandexGPT и извлекает function_call"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим ответ от GigaChat\nconst response = $input.item.json;\nconst chatId = $('GigaChat: Prepare Request').first().json.chat_id;\n\nlet text = '';\nlet functionCall = null;\n\nif (response.choices && response.choices.length > 0) {\n  const choice = response.choices[0];\n  \n  if (choice.message.function_call) {\n    functionCall = {\n      name: choice.message.function_call.name,\n      arguments: JSON.parse(choice.message.function_call.arguments || '{}')\n    };\n    text = 'Выполняю команду...';\n  } else {\n    text = choice.message.content || 'Извините, я не понял запрос.';\n  }\n} else {\n  text = 'Ошибка обработки ответа от GigaChat';\n}\n\nreturn [{ json: { text, functionCall, chat_id: chatId, source: 'gigachat' } }];"
+      },
+      "name": "Parse: GigaChat Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3760, 660],
+      "id": "parse-gigachat-001",
+      "notes": "Парсит ответ от GigaChat и извлекает function_call"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "name": "Merge: LLM Responses",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [3100, 400],
+      "id": "merge-llm-001",
+      "notes": "Объединяет ответы от YandexGPT и GigaChat"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.functionCall }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Check: Has Function Call?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [3320, 400],
+      "id": "check-function-001",
+      "notes": "Проверяет нужно ли выполнить команду HA"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Роутинг вызова функции к соответствующему HA узлу\nconst functionCall = $input.item.json.functionCall;\nconst chatId = $input.item.json.chat_id;\n\nreturn [{ json: { \n  function_name: functionCall.name,\n  function_args: typeof functionCall.arguments === 'string' ? JSON.parse(functionCall.arguments) : functionCall.arguments,\n  chat_id: chatId\n}}];"
+      },
+      "name": "Route: Function Call",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3540, 280],
+      "id": "route-function-001",
+      "notes": "Определяет какую функцию HA нужно вызвать"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.function_name }}",
+              "operation": "equals",
+              "value2": "turn_on_light"
+            }
+          ]
+        }
+      },
+      "name": "Switch: Function Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [3760, 280],
+      "id": "switch-function-001",
+      "notes": "Маршрутизирует к нужному HA действию",
+      "parameters": {
+        "options": {
+          "fallbackOutput": 3
+        },
+        "rules": {
+          "rules": [
+            {
+              "operation": "equals",
+              "value2": "turn_on_light",
+              "output": 0
+            },
+            {
+              "operation": "equals",
+              "value2": "turn_off_light",
+              "output": 1
+            },
+            {
+              "operation": "equals",
+              "value2": "set_temperature",
+              "output": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "domain": "light",
+        "service": "turn_on",
+        "serviceAttributes": "={{ {\"entity_id\": $json.function_args.entity_id, \"brightness\": $json.function_args.brightness || 255} }}"
+      },
+      "name": "HA: Turn On Light",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [3980, 160],
+      "id": "ha-light-on-001",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      },
+      "notes": "Включает свет в HA"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true,
+          "append_attribution": false
+        }
+      },
+      "name": "Telegram: Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [4200, 400],
+      "id": "telegram-reply-001",
+      "webhookId": "reply-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "Отправляет ответ пользователю в Telegram"
+    }
+  ],
+  "connections": {
+    "Telegram: Trigger": {
+      "main": [[{"node": "Check: Voice or Text?", "type": "main", "index": 0}]]
+    },
+    "Check: Voice or Text?": {
+      "main": [
+        [{"node": "Telegram: Get Voice File", "type": "main", "index": 0}],
+        [{"node": "Extract: Text Message", "type": "main", "index": 0}]
+      ]
+    },
+    "Telegram: Get Voice File": {
+      "main": [[{"node": "Yandex: SpeechKit STT", "type": "main", "index": 0}]]
+    },
+    "Yandex: SpeechKit STT": {
+      "main": [[{"node": "Extract: Transcribed Text", "type": "main", "index": 0}]]
+    },
+    "Extract: Transcribed Text": {
+      "main": [[{"node": "Merge: Voice + Text", "type": "main", "index": 0}]]
+    },
+    "Extract: Text Message": {
+      "main": [[{"node": "Merge: Voice + Text", "type": "main", "index": 1}]]
+    },
+    "Merge: Voice + Text": {
+      "main": [[{"node": "Check: Commands", "type": "main", "index": 0}]]
+    },
+    "Check: Commands": {
+      "main": [[{"node": "If: Is Command?", "type": "main", "index": 0}]]
+    },
+    "If: Is Command?": {
+      "main": [
+        [{"node": "Telegram: Reply", "type": "main", "index": 0}],
+        [{"node": "Prepare: HA Tools", "type": "main", "index": 0}]
+      ]
+    },
+    "Prepare: HA Tools": {
+      "main": [[{"node": "YandexGPT: Chat", "type": "main", "index": 0}]]
+    },
+    "YandexGPT: Chat": {
+      "main": [[{"node": "Check: YandexGPT Error?", "type": "main", "index": 0}]]
+    },
+    "Check: YandexGPT Error?": {
+      "main": [
+        [{"node": "GigaChat: UUID", "type": "main", "index": 0}],
+        [{"node": "Parse: YandexGPT Response", "type": "main", "index": 0}]
+      ]
+    },
+    "GigaChat: UUID": {
+      "main": [[{"node": "GigaChat: Get Token", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Get Token": {
+      "main": [[{"node": "GigaChat: Prepare Request", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Prepare Request": {
+      "main": [[{"node": "GigaChat: Chat", "type": "main", "index": 0}]]
+    },
+    "GigaChat: Chat": {
+      "main": [[{"node": "Parse: GigaChat Response", "type": "main", "index": 0}]]
+    },
+    "Parse: YandexGPT Response": {
+      "main": [[{"node": "Merge: LLM Responses", "type": "main", "index": 0}]]
+    },
+    "Parse: GigaChat Response": {
+      "main": [[{"node": "Merge: LLM Responses", "type": "main", "index": 1}]]
+    },
+    "Merge: LLM Responses": {
+      "main": [[{"node": "Check: Has Function Call?", "type": "main", "index": 0}]]
+    },
+    "Check: Has Function Call?": {
+      "main": [
+        [{"node": "Route: Function Call", "type": "main", "index": 0}],
+        [{"node": "Telegram: Reply", "type": "main", "index": 0}]
+      ]
+    },
+    "Route: Function Call": {
+      "main": [[{"node": "Switch: Function Type", "type": "main", "index": 0}]]
+    },
+    "Switch: Function Type": {
+      "main": [
+        [{"node": "HA: Turn On Light", "type": "main", "index": 0}]
+      ]
+    },
+    "HA: Turn On Light": {
+      "main": [[{"node": "Telegram: Reply", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "voice-assistant-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "voice-assistant-template"
+  },
+  "tags": []
+}
