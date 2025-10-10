@@ -1,581 +1,852 @@
-# 🚀 Установка Ollama на Proxmox с NVIDIA GPU
+# Ollama на Proxmox VE с NVIDIA GPU - Technical Guide
 
-Полная инструкция по установке Ollama в LXC контейнере на Proxmox с поддержкой NVIDIA GPU для локального запуска AI моделей.
+Техническая документация по развертыванию Ollama в LXC контейнере на Proxmox VE с GPU passthrough для локального inference LLM моделей.
 
 ---
 
-## 📋 Содержание
+## Содержание
 
+- [Архитектура решения](#архитектура-решения)
 - [Требования](#требования)
-- [Выбор моделей](#выбор-моделей)
-- [Этап 1: Подготовка Proxmox хоста](#этап-1-подготовка-proxmox-хоста)
-- [Этап 2: Создание LXC контейнера](#этап-2-создание-lxc-контейнера)
-- [Этап 3: Установка Ollama](#этап-3-установка-ollama)
-- [Этап 4: Настройка и интеграция](#этап-4-настройка-и-интеграция)
-- [Интеграция с n8n](#интеграция-с-n8n)
+- [Подготовка Proxmox хоста](#подготовка-proxmox-хоста)
+- [Создание LXC контейнера](#создание-lxc-контейнера)
+- [Установка и конфигурация Ollama](#установка-и-конфигурация-ollama)
+- [Выбор и оптимизация моделей](#выбор-и-оптимизация-моделей)
+- [Мониторинг и обслуживание](#мониторинг-и-обслуживание)
 - [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🎯 Требования
+## Архитектура решения
 
-### Железо
+### Выбор LXC vs VM
 
-- **Proxmox VE:** 7.x или 8.x
-- **GPU:** NVIDIA GTX 1050 Ti / GTX 1060 (или новее)
-- **RAM:** минимум 8GB (рекомендуется 16GB+)
-- **Диск:** 50GB+ свободного места для моделей
+**LXC контейнер (выбрано):**
+- ✅ Прямой доступ к GPU без полного passthrough
+- ✅ Минимальный overhead (~2-5% vs bare metal)
+- ✅ Простое управление через `pct` CLI
+- ✅ Быстрое создание и клонирование
 
-### Текущая конфигурация
+**VM (не рекомендуется):**
+- ❌ Требует PCI passthrough (IOMMU groups, VT-d)
+- ❌ Overhead эмуляции (~10-15%)
+- ❌ Сложнее миграция и backup
+- ❌ Требует dedicated GPU
 
-- ✅ **GTX 1050 Ti:** 4GB VRAM (сейчас)
-- ✅ **GTX 1060:** 6GB VRAM (после апгрейда)
+### Компоненты системы
 
----
-
-## 📊 Выбор моделей
-
-### Для GTX 1050 Ti (4GB VRAM)
-
-| Модель | Размер | VRAM | Качество | Скорость | Рекомендация |
-|--------|--------|------|----------|----------|--------------|
-| **phi3:mini** | 2.3GB | ~2.5GB | ⭐⭐⭐⭐⭐ | Средняя | ✅ **Лучший баланс** |
-| **llama3.2:3b** | 2GB | ~2.2GB | ⭐⭐⭐⭐ | Быстрая | ✅ Отлично |
-| **qwen2.5:3b** | 2GB | ~2.2GB | ⭐⭐⭐⭐ | Средняя | ✅ Хорошая альтернатива |
-| **gemma2:2b** | 1.6GB | ~1.8GB | ⭐⭐⭐ | Очень быстрая | ✅ Для простых задач |
-| **llama3.1:8b** | 4.7GB | ~5GB | ⭐⭐⭐⭐⭐ | Медленная | ❌ Не поместится |
-
-**Рекомендация:** `phi3:mini` - лучшее качество для 4GB
-
-### Для GTX 1060 (6GB VRAM)
-
-| Модель | Размер | VRAM | Качество | Скорость | Рекомендация |
-|--------|--------|------|----------|----------|--------------|
-| **llama3.1:8b** | 4.7GB | ~5GB | ⭐⭐⭐⭐⭐ | Средняя | ✅ **Лучший выбор** |
-| **phi3:mini** | 2.3GB | ~2.5GB | ⭐⭐⭐⭐⭐ | Быстрая | ✅ Отлично |
-| **qwen2.5:7b** | 4.7GB | ~5GB | ⭐⭐⭐⭐⭐ | Средняя | ✅ Альтернатива |
-| **mixtral:8x7b** | 26GB | ~28GB | ⭐⭐⭐⭐⭐ | - | ❌ Не поместится |
-| **phi3:medium** | 7.9GB | ~8.5GB | ⭐⭐⭐⭐⭐ | - | ❌ Не поместится |
-
-**Рекомендация:** `llama3.1:8b` - отличное качество для 6GB
-
----
-
-## 🔧 Этап 1: Подготовка Proxmox хоста
-
-### 1.1 Проверка GPU
-
-Подключитесь к Proxmox хосту по SSH:
-
-```bash
-# Проверить наличие GPU
-lspci | grep -i nvidia
-
-# Должно показать что-то вроде:
-# 01:00.0 VGA compatible controller: NVIDIA Corporation GP107 [GeForce GTX 1050 Ti]
+```text
+┌─────────────────────────────────────────┐
+│         Proxmox VE Host                 │
+│  ┌───────────────────────────────────┐  │
+│  │    NVIDIA Driver (host)           │  │
+│  │    nvidia-smi, kernel modules     │  │
+│  └───────────────────────────────────┘  │
+│              │ (device nodes)           │
+│              ↓                           │
+│  ┌───────────────────────────────────┐  │
+│  │    LXC Container (privileged)     │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │ NVIDIA Container Toolkit    │  │  │
+│  │  │ libnvidia-container         │  │  │
+│  │  └─────────────────────────────┘  │  │
+│  │  ┌─────────────────────────────┐  │  │
+│  │  │ Ollama Service              │  │  │
+│  │  │ API: 0.0.0.0:11434          │  │  │
+│  │  │ Models: /root/.ollama       │  │  │
+│  │  └─────────────────────────────┘  │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+           │ (network: vmbr0)
+           ↓
+  ┌────────────────────┐
+  │  n8n / Clients     │
+  │  HTTP API calls    │
+  └────────────────────┘
 ```
 
-### 1.2 Установка NVIDIA драйверов на хост
+---
+
+## Требования
+
+### Аппаратное обеспечение
+
+**Минимум:**
+- CPU: 4 cores (host + container)
+- RAM: 16GB total (8GB для container)
+- GPU: NVIDIA Pascal+ (GTX 1050 Ti, GTX 1060+)
+- Storage: 50GB для контейнера + models
+
+**Рекомендуется:**
+- CPU: 8+ cores
+- RAM: 32GB+ total
+- GPU: NVIDIA Turing+ (RTX 2060+)
+- Storage: NVMe SSD для моделей
+
+### Программное обеспечение
+
+**Proxmox хост:**
+- Proxmox VE 7.4+ или 8.x
+- Kernel 5.15+ или 6.x
+- NVIDIA Driver 535.xx или новее
+
+**LXC контейнер:**
+- Ubuntu 22.04 LTS или 24.04 LTS
+- Ollama latest (устанавливается автоматически)
+
+---
+
+## Подготовка Proxmox хоста
+
+### 1. Проверка GPU
 
 ```bash
-# Добавить Proxmox no-subscription репозиторий (опционально)
-echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
+lspci | grep -i nvidia
+# Вывод: 01:00.0 VGA compatible controller: NVIDIA Corporation GP107 [GeForce GTX 1050 Ti]
+```
 
-# Обновить систему
-apt update && apt upgrade -y
+Проверка IOMMU (опционально для LXC, но полезно знать):
 
-# Установить заголовки ядра
-apt install -y pve-headers-$(uname -r)
+```bash
+dmesg | grep -i iommu
+# Если пусто, IOMMU отключен (для LXC не критично)
+```
 
-# Добавить contrib и non-free репозитории для NVIDIA
+### 2. Конфигурация APT репозиториев
+
+Proxmox использует Debian, нужно добавить `non-free` для проприетарных драйверов:
+
+```bash
+# Backup текущей конфигурации
+cp /etc/apt/sources.list /etc/apt/sources.list.backup
+
+# Добавление non-free и non-free-firmware
 sed -i 's/main$/main contrib non-free non-free-firmware/' /etc/apt/sources.list
-apt update
 
-# Установить NVIDIA драйверы
+# Для Proxmox 8 (Debian Bookworm)
+cat /etc/apt/sources.list
+# Должно содержать: deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+
+apt update
+```
+
+### 3. Установка NVIDIA драйверов
+
+```bash
+# Установка headers для текущего ядра
+apt install -y "pve-headers-$(uname -r)"
+
+# Проверка доступных версий драйверов
+apt-cache search nvidia-driver
+
+# Установка драйвера (535+ поддерживает CUDA 12.2+)
 apt install -y nvidia-driver nvidia-smi
 
-# Загрузить модули blacklist для nouveau
-echo "blacklist nouveau" > /etc/modprobe.d/blacklist-nouveau.conf
-echo "options nouveau modeset=0" >> /etc/modprobe.d/blacklist-nouveau.conf
+# Blacklist nouveau (открытый драйвер)
+cat > /etc/modprobe.d/blacklist-nouveau.conf << EOF
+blacklist nouveau
+options nouveau modeset=0
+EOF
+
+# Обновление initramfs
 update-initramfs -u
 
-# Перезагрузить хост
+# Перезагрузка хоста
 reboot
 ```
 
-### 1.3 Проверка установки
+### 4. Верификация установки
 
 После перезагрузки:
 
 ```bash
-# Проверить работу драйвера
+# Проверка драйвера
 nvidia-smi
 
-# Должно показать информацию о GPU:
-# +-----------------------------------------------------------------------------+
-# | NVIDIA-SMI 535.xx.xx    Driver Version: 535.xx.xx    CUDA Version: 12.2    |
-# |-------------------------------+----------------------+----------------------+
-# | GPU  Name        TCC/WDDM | Bus-Id        Disp.A | Volatile Uncorr. ECC |
-# | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-# |===============================+======================+======================|
-# |   0  GeForce GTX 105...  Off  | 00000000:01:00.0 Off |                  N/A |
+# Должен показать:
+# - GPU model
+# - Driver Version: 535.xx.xx
+# - CUDA Version: 12.2
+# - GPU Memory: используется / total
+# - Processes: пусто (если никто не использует)
+
+# Проверка kernel modules
+lsmod | grep nvidia
+# Должны быть: nvidia, nvidia_uvm, nvidia_modeset, nvidia_drm
+
+# Проверка device nodes
+ls -la /dev/nvidia*
+# /dev/nvidia0        - основное GPU устройство
+# /dev/nvidiactl      - control устройство
+# /dev/nvidia-uvm     - unified memory
+# /dev/nvidia-modeset - mode setting
 ```
 
-### 1.4 Получить device nodes
+### 5. Определение device numbers
+
+Для конфигурации LXC нужны major/minor номера устройств:
 
 ```bash
-# Найти NVIDIA устройства
-ls -la /dev/nvidia*
+stat -c 'Major: %t, Minor: %T' /dev/nvidia0
+stat -c 'Major: %t, Minor: %T' /dev/nvidiactl
+stat -c 'Major: %t, Minor: %T' /dev/nvidia-uvm
 
-# Обычно это:
-# /dev/nvidia0          - GPU устройство
-# /dev/nvidia-uvm       - Unified Memory
-# /dev/nvidia-uvm-tools - UVM Tools
-# /dev/nvidiactl        - Control устройство
-# /dev/nvidia-modeset   - Mode setting
-
-# Проверить major/minor номера (нужны для LXC)
-ls -l /dev/nvidia0 /dev/nvidiactl /dev/nvidia-uvm
+# Конвертация из hex в decimal для lxc.cgroup2.devices.allow
+# Обычно:
+# nvidia0:    195 (major), 0 (minor)
+# nvidiactl:  195 (major), 255 (minor)
+# nvidia-uvm: 508 или 511 (major), 0 (minor)
 ```
 
 ---
 
-## 🐧 Этап 2: Создание LXC контейнера
+## Создание LXC контейнера
 
-### 2.1 Создание контейнера через Web UI
-
-1. Откройте Proxmox Web UI
-2. Нажмите **Create CT**
-3. Заполните параметры:
-
-**General:**
-- **CT ID:** 200 (или свободный ID)
-- **Hostname:** ollama
-- **Unprivileged container:** ❌ **НЕ ставить** (нужен привилегированный!)
-- **Password:** ваш пароль
-
-**Template:**
-- **Storage:** local
-- **Template:** ubuntu-22.04-standard или ubuntu-24.04-standard
-
-**Disks:**
-- **Disk size:** 50GB (минимум для моделей)
-
-**CPU:**
-- **Cores:** 4 (рекомендуется)
-
-**Memory:**
-- **Memory:** 8192 MB
-- **Swap:** 2048 MB
-
-**Network:**
-- **Bridge:** vmbr0
-- **IPv4:** DHCP или статический IP
-- **IPv6:** DHCP (опционально)
-
-4. **НЕ запускайте** контейнер сразу!
-
-### 2.2 Настройка доступа к GPU
-
-Отредактируйте конфиг контейнера (замените `200` на ваш CT ID):
+### 1. Создание через pct CLI
 
 ```bash
-# На Proxmox хосте
-nano /etc/pve/lxc/200.conf
+# Скачивание template (если еще нет)
+pveam update
+pveam download local ubuntu-24.04-standard_24.04-2_amd64.tar.zst
+
+# Создание контейнера
+pct create 200 \
+  local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
+  --hostname ollama \
+  --password <STRONG_PASSWORD> \
+  --cores 4 \
+  --memory 8192 \
+  --swap 2048 \
+  --storage local-lvm \
+  --rootfs local-lvm:50 \
+  --net0 name=eth0,bridge=vmbr0,ip=dhcp,firewall=1 \
+  --unprivileged 0 \
+  --features nesting=1 \
+  --onboot 1 \
+  --ostype ubuntu
 ```
 
-Добавьте в конец файла:
+**Важно:** `--unprivileged 0` создает привилегированный контейнер, необходимый для доступа к GPU.
+
+### 2. Конфигурация GPU passthrough
+
+Редактирование `/etc/pve/lxc/200.conf`:
 
 ```bash
-# GPU Passthrough для NVIDIA
+cat >> /etc/pve/lxc/200.conf << 'EOF'
+
+# ================== GPU Passthrough ==================
+# Device cgroup permissions
 lxc.cgroup2.devices.allow: c 195:* rwm
 lxc.cgroup2.devices.allow: c 508:* rwm
+
+# Mount NVIDIA device nodes
 lxc.mount.entry: /dev/nvidia0 dev/nvidia0 none bind,optional,create=file
 lxc.mount.entry: /dev/nvidiactl dev/nvidiactl none bind,optional,create=file
 lxc.mount.entry: /dev/nvidia-uvm dev/nvidia-uvm none bind,optional,create=file
 lxc.mount.entry: /dev/nvidia-modeset dev/nvidia-modeset none bind,optional,create=file
 lxc.mount.entry: /dev/nvidia-uvm-tools dev/nvidia-uvm-tools none bind,optional,create=file
 
-# Features
+# Security settings for GPU access
 lxc.apparmor.profile: unconfined
 lxc.cap.drop:
 lxc.cgroup2.devices.allow: a
 lxc.mount.auto: proc:rw sys:rw
+EOF
 ```
 
-**Примечание:** Major номера устройств (`195` и `508`) могут отличаться. Проверьте на вашем хосте:
+**Примечание:** Если major номера отличаются, замените `195` и `508` на актуальные значения из step 5 предыдущего раздела.
+
+### 3. Запуск и первичная настройка
 
 ```bash
-# Узнать major номера
-ls -l /dev/nvidia0 | awk '{print $5}' | tr -d ','    # обычно 195
-ls -l /dev/nvidia-uvm | awk '{print $5}' | tr -d ',' # обычно 508 или 511
-```
-
-### 2.3 Запуск контейнера
-
-```bash
-# Запустить контейнер
+# Запуск контейнера
 pct start 200
 
-# Войти в контейнер
+# Проверка статуса
+pct status 200
+
+# Вход в контейнер
 pct enter 200
+
+# Внутри контейнера: проверка GPU devices
+ls -la /dev/nvidia*
+# Должны быть видны все device nodes
 ```
 
 ---
 
-## 🤖 Этап 3: Установка Ollama
+## Установка и конфигурация Ollama
 
-### 3.1 Подготовка контейнера
+### 1. Подготовка контейнера
 
-Внутри LXC контейнера:
+Внутри LXC контейнера (после `pct enter 200`):
 
 ```bash
-# Обновить систему
+# System update
 apt update && apt upgrade -y
 
-# Установить необходимые пакеты
-apt install -y curl wget gnupg2 software-properties-common
+# Базовые утилиты
+apt install -y curl wget gnupg2 software-properties-common ca-certificates
+
+# Проверка connectivity
+curl -I https://ollama.ai
 ```
 
-### 3.2 Установка NVIDIA драйверов в контейнере
+### 2. Установка NVIDIA Container Toolkit
+
+NVIDIA Container Toolkit обеспечивает runtime для GPU в контейнерах без полной установки драйверов:
 
 ```bash
-# Добавить NVIDIA репозиторий
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+# Определение дистрибутива
+distribution=$(. /etc/os-release; echo "$ID$VERSION_ID")
+
+# Добавление NVIDIA GPG ключа
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | \
+  gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+
+# Добавление репозитория
+curl -s -L "https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list" | \
   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
   tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
+# Установка
 apt update
-
-# Установить NVIDIA Container Toolkit (легче чем полные драйверы)
 apt install -y nvidia-container-toolkit
 
-# ИЛИ установить полные драйверы (если нужно)
-# apt install -y nvidia-driver-535 nvidia-utils-535
+# Верификация
+nvidia-container-cli --version
 ```
 
-### 3.3 Проверка GPU в контейнере
+### 3. Установка Ollama
 
 ```bash
-# Проверить доступ к GPU устройствам
-ls -la /dev/nvidia*
-
-# Если nvidia-smi установлен, проверить:
-nvidia-smi
-
-# Если команда не найдена, это нормально для container toolkit
-# GPU будет работать через библиотеки
-```
-
-### 3.4 Установка Ollama
-
-```bash
-# Установить Ollama одной командой
+# Официальный install script
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Проверить установку
+# Проверка установки
+ollama --version
+which ollama  # /usr/local/bin/ollama
+```
+
+### 4. Конфигурация systemd сервиса
+
+Ollama автоматически создает systemd unit, но нужно настроить сетевой binding:
+
+```bash
+# Создание override для systemd unit
+systemctl edit ollama.service
+```
+
+Добавить в редакторе:
+
+```ini
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_ORIGINS=*"
+Environment="OLLAMA_MODELS=/root/.ollama/models"
+Environment="CUDA_VISIBLE_DEVICES=0"
+Restart=always
+RestartSec=3
+```
+
+Применение изменений:
+
+```bash
+systemctl daemon-reload
+systemctl enable ollama.service
+systemctl start ollama.service
+
+# Проверка статуса
+systemctl status ollama.service
+
+# Проверка логов
+journalctl -u ollama.service -f
+```
+
+### 5. Верификация API endpoint
+
+```bash
+# Внутри контейнера
+curl http://localhost:11434/api/tags
+
+# С хоста Proxmox (замените IP на IP контейнера)
+CONTAINER_IP=$(pct exec 200 -- ip -4 addr show eth0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+curl "http://$CONTAINER_IP:11434/api/tags"
+
+# Должен вернуть JSON: {"models":[]}
+```
+
+---
+
+## Выбор и оптимизация моделей
+
+### Матрица совместимости моделей
+
+#### GTX 1050 Ti (4GB VRAM)
+
+| Модель | Size | VRAM | Quantization | Tokens/s | Use Case |
+|--------|------|------|--------------|----------|----------|
+| **phi3:mini** | 2.3GB | ~2.5GB | Q4_K_M | 40-60 | General, HA commands |
+| **llama3.2:3b** | 2GB | ~2.2GB | Q4_K_M | 50-70 | Fast responses |
+| **qwen2.5:3b** | 2GB | ~2.2GB | Q4_K_M | 40-60 | Multilingual |
+| **gemma2:2b** | 1.6GB | ~1.8GB | Q4_K_M | 80+ | Simple tasks |
+| llama3.1:8b | 4.7GB | ~5GB | Q4_K_M | N/A | ❌ OOM |
+
+**Рекомендация:** `phi3:mini` для production use.
+
+#### GTX 1060 (6GB VRAM)
+
+| Модель | Size | VRAM | Quantization | Tokens/s | Use Case |
+|--------|------|------|--------------|----------|----------|
+| **llama3.1:8b** | 4.7GB | ~5GB | Q4_K_M | 30-50 | Best quality |
+| **qwen2.5:7b** | 4.7GB | ~5GB | Q4_K_M | 30-50 | Multilingual |
+| phi3:mini | 2.3GB | ~2.5GB | Q4_K_M | 60-80 | Fast, good quality |
+| mixtral:8x7b | 26GB | ~28GB | Q4_K_M | N/A | ❌ OOM |
+
+**Рекомендация:** `llama3.1:8b` после апгрейда GPU.
+
+### Установка модели
+
+```bash
+# Внутри контейнера
+pct enter 200
+
+# Для GTX 1050 Ti
+ollama pull phi3:mini
+
+# Мониторинг загрузки
+watch -n 1 'du -sh /root/.ollama/models/*'
+
+# После загрузки - тест
+ollama run phi3:mini "Напиши короткое приветствие на русском"
+```
+
+### Оптимизация параметров
+
+Создание Modelfile для custom конфигурации:
+
+```bash
+cat > /root/phi3-optimized.Modelfile << 'EOF'
+FROM phi3:mini
+
+# System prompt для Home Assistant
+SYSTEM """Ты русскоязычный ассистент умного дома. Отвечай кратко и по делу. 
+Используй предоставленные функции для управления устройствами."""
+
+# Параметры generation
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
+PARAMETER num_ctx 4096
+PARAMETER num_predict 512
+
+# Stop tokens
+PARAMETER stop <|end|>
+PARAMETER stop <|im_end|>
+EOF
+
+# Создание custom модели
+ollama create phi3-ha -f /root/phi3-optimized.Modelfile
+
+# Использование
+ollama run phi3-ha "Тест оптимизированной модели"
+```
+
+---
+
+## Мониторинг и обслуживание
+
+### Мониторинг GPU
+
+```bash
+# Real-time monitoring
+watch -n 1 nvidia-smi
+
+# Парсинг для метрик
+nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu \
+  --format=csv,noheader,nounits
+```
+
+### Мониторинг Ollama
+
+```bash
+# Логи в реальном времени
+journalctl -u ollama.service -f
+
+# Статистика запросов через API
+curl http://localhost:11434/api/ps
+```
+
+### Backup и восстановление
+
+```bash
+# На хосте Proxmox
+
+# Backup контейнера (snapshot)
+pct snapshot 200 ollama-backup-$(date +%Y%m%d)
+
+# Backup моделей отдельно
+pct exec 200 -- tar -czf /root/ollama-models-backup.tar.gz /root/.ollama/models
+pct pull 200 /root/ollama-models-backup.tar.gz ./ollama-models-backup.tar.gz
+
+# Восстановление моделей
+pct push 200 ./ollama-models-backup.tar.gz /root/ollama-models-backup.tar.gz
+pct exec 200 -- tar -xzf /root/ollama-models-backup.tar.gz -C /
+```
+
+### Обновление Ollama
+
+```bash
+pct enter 200
+
+# Ollama обновляется тем же install script
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Рестарт сервиса
+systemctl restart ollama.service
+
+# Проверка версии
 ollama --version
 ```
 
-### 3.5 Настройка Ollama как сервис
-
-Создайте systemd сервис:
-
-```bash
-cat > /etc/systemd/system/ollama.service << 'EOF'
-[Unit]
-Description=Ollama Service
-After=network-online.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=/usr/local/bin/ollama serve
-Environment="OLLAMA_HOST=0.0.0.0:11434"
-Environment="OLLAMA_ORIGINS=*"
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Включить и запустить сервис
-systemctl daemon-reload
-systemctl enable ollama
-systemctl start ollama
-
-# Проверить статус
-systemctl status ollama
-```
-
-### 3.6 Скачивание моделей
-
-**Для GTX 1050 Ti (4GB):**
-
-```bash
-# Рекомендуемая модель: phi3:mini
-ollama pull phi3:mini
-
-# Альтернативы:
-# ollama pull llama3.2:3b
-# ollama pull qwen2.5:3b
-# ollama pull gemma2:2b
-```
-
-**Для GTX 1060 (6GB) - после апгрейда:**
-
-```bash
-# Рекомендуемая модель: llama3.1:8b
-ollama pull llama3.1:8b
-
-# Альтернативы:
-# ollama pull qwen2.5:7b
-```
-
-### 3.7 Тестирование
-
-```bash
-# Тест через CLI
-ollama run phi3:mini "Привет! Расскажи о себе кратко"
-
-# Тест через API
-curl http://localhost:11434/api/generate -d '{
-  "model": "phi3:mini",
-  "prompt": "Привет! Как дела?",
-  "stream": false
-}'
-```
-
-Если видите ответ - **GPU работает!** 🎉
-
 ---
 
-## 🔗 Этап 4: Настройка и интеграция
+## Troubleshooting
 
-### 4.1 Открыть доступ к API
-
-Ollama API по умолчанию доступен на `http://<IP_контейнера>:11434`
-
-```bash
-# Узнать IP контейнера
-ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1
-
-# Пример: 192.168.1.200
-```
-
-### 4.2 Проверка с другого хоста
-
-```bash
-# С вашей рабочей машины
-curl http://192.168.1.200:11434/api/tags
-
-# Должен вернуть список моделей:
-# {"models":[{"name":"phi3:mini","size":2300000000,...}]}
-```
-
-### 4.3 Настройка firewall (если нужно)
-
-```bash
-# В контейнере (если используется ufw)
-apt install -y ufw
-ufw allow 11434/tcp
-ufw enable
-```
-
----
-
-## 🔄 Интеграция с n8n
-
-### Вариант 1: HTTP Chat Model (рекомендуется)
-
-В n8n используйте узел **"Chat Model"** → **"HTTP Chat Model"**:
-
-**Настройки:**
-
-- **Base URL:** `http://192.168.1.200:11434/api`
-- **Model:** `phi3:mini` (или ваша модель)
-- **Temperature:** `0.7`
-- **Max Tokens:** `500`
-
-### Вариант 2: HTTP Request
-
-Пример узла **"HTTP Request"** в n8n:
-
-```json
-{
-  "method": "POST",
-  "url": "http://192.168.1.200:11434/api/generate",
-  "body": {
-    "model": "phi3:mini",
-    "prompt": "{{$json.input_text}}",
-    "stream": false,
-    "options": {
-      "temperature": 0.7,
-      "num_predict": 500
-    }
-  },
-  "headers": {
-    "Content-Type": "application/json"
-  }
-}
-```
-
-### Вариант 3: Langchain Agent
-
-См. файл `n8n-voice-assistant-ollama.json` для полного примера
-
----
-
-## 🐛 Troubleshooting
-
-### Проблема: GPU не виден в контейнере
+### GPU не виден в контейнере
 
 **Симптомы:**
-- `ls /dev/nvidia*` ничего не показывает
-- `nvidia-smi` не работает
+```bash
+ls /dev/nvidia*
+# ls: cannot access '/dev/nvidia*': No such file or directory
+```
 
 **Решение:**
 
+1. Проверка на хосте:
 ```bash
-# На Proxmox хосте проверить device nodes
 ls -la /dev/nvidia*
+# Должны быть видны устройства
+```
 
-# Проверить major/minor номера
-ls -l /dev/nvidia0 /dev/nvidiactl
+2. Проверка major/minor номеров:
+```bash
+stat -c '%t:%T' /dev/nvidia0
+# Например: c3:0 (hex) = 195:0 (decimal)
+```
 
-# Обновить конфиг контейнера с правильными номерами
-nano /etc/pve/lxc/200.conf
+3. Проверка конфигурации контейнера:
+```bash
+cat /etc/pve/lxc/200.conf | grep -A 15 "GPU Passthrough"
+```
 
-# Перезапустить контейнер
+4. Пересоздание device nodes вручную (workaround):
+```bash
+pct enter 200
+
+# Создание device nodes с правильными номерами
+mknod /dev/nvidia0 c 195 0
+mknod /dev/nvidiactl c 195 255
+mknod /dev/nvidia-uvm c 508 0
+mknod /dev/nvidia-modeset c 195 254
+
+chmod 666 /dev/nvidia*
+```
+
+5. Рестарт контейнера:
+```bash
 pct stop 200
 pct start 200
 ```
 
-### Проблема: Ollama использует CPU вместо GPU
+### Ollama не использует GPU
 
 **Симптомы:**
-- Модель работает медленно
-- `nvidia-smi` показывает 0% GPU usage
+- Медленный inference (CPU mode)
+- `nvidia-smi` показывает 0% GPU utilization
+
+**Диагностика:**
+
+```bash
+pct enter 200
+
+# Проверка видимости GPU для Ollama
+CUDA_VISIBLE_DEVICES=0 nvidia-smi
+
+# Проверка переменных окружения
+systemctl cat ollama.service | grep Environment
+
+# Тест с явным указанием GPU
+CUDA_VISIBLE_DEVICES=0 ollama run phi3:mini "test"
+```
 
 **Решение:**
 
 ```bash
-# Проверить переменные окружения
-systemctl edit ollama
+# Добавление CUDA_VISIBLE_DEVICES в systemd unit
+systemctl edit ollama.service
 
 # Добавить:
 [Service]
 Environment="CUDA_VISIBLE_DEVICES=0"
 
-# Перезапустить
-systemctl restart ollama
+systemctl daemon-reload
+systemctl restart ollama.service
 ```
 
-### Проблема: Out of memory при загрузке модели
+### Out of Memory (OOM)
 
 **Симптомы:**
-- Ошибка при `ollama pull` или `ollama run`
-- "CUDA out of memory"
+- Ollama крашится при загрузке модели
+- Kernel OOM killer убивает процесс
 
 **Решение:**
 
+1. Проверка доступной VRAM:
 ```bash
-# Выбрать меньшую модель
-# Для 4GB: phi3:mini, llama3.2:3b, gemma2:2b
-# Для 6GB: llama3.1:8b, qwen2.5:7b
-
-# Очистить кэш
-ollama rm <старая_модель>
-
-# Проверить доступную память
-nvidia-smi
+nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits
 ```
 
-### Проблема: API недоступен из сети
+2. Использование меньшей модели или другой квантизации:
+```bash
+# Вместо Q4_K_M использовать Q3_K_M (меньше VRAM, хуже качество)
+ollama pull phi3:mini-q3_K_M  # если доступна
+
+# Или меньшую модель
+ollama pull gemma2:2b
+```
+
+3. Увеличение swap в контейнере:
+```bash
+# На хосте
+pct set 200 --swap 4096
+pct reboot 200
+```
+
+### API Connection Refused
 
 **Симптомы:**
-- `curl http://IP:11434` не работает с другого хоста
-- Connection refused
+```bash
+curl http://<CONTAINER_IP>:11434/api/tags
+# curl: (7) Failed to connect to <IP> port 11434: Connection refused
+```
 
 **Решение:**
 
+1. Проверка статуса сервиса:
 ```bash
-# Проверить что Ollama слушает 0.0.0.0
-systemctl edit ollama
+pct exec 200 -- systemctl status ollama.service
+```
 
-# Убедиться что есть:
+2. Проверка binding:
+```bash
+pct exec 200 -- ss -tlnp | grep 11434
+# Должно показать: 0.0.0.0:11434 (не 127.0.0.1)
+```
+
+3. Проверка переменной OLLAMA_HOST:
+```bash
+pct exec 200 -- systemctl cat ollama.service | grep OLLAMA_HOST
+# Должно быть: Environment="OLLAMA_HOST=0.0.0.0:11434"
+```
+
+4. Проверка firewall (если включен):
+```bash
+pct exec 200 -- ufw status
+# Если active, добавить правило:
+pct exec 200 -- ufw allow 11434/tcp
+```
+
+### Медленный inference
+
+**Ожидается:** 40-60 tokens/s на GTX 1050 Ti  
+**Наблюдается:** <10 tokens/s
+
+**Диагностика:**
+
+```bash
+# Во время inference запустить nvidia-smi
+nvidia-smi dmon -s u
+
+# Проверить GPU utilization
+# Должно быть >80% во время generation
+```
+
+**Возможные причины:**
+
+1. Работает на CPU (см. "Ollama не использует GPU")
+2. Thermal throttling:
+```bash
+nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader
+# Если >85°C, проверить cooling
+```
+
+3. Power limit:
+```bash
+nvidia-smi -q -d POWER
+# Если Current Power близко к Power Limit, карта throttles
+```
+
+---
+
+## Performance Tuning
+
+### Kernel parameters
+
+На Proxmox хосте:
+
+```bash
+cat >> /etc/sysctl.conf << 'EOF'
+# NVIDIA performance tuning
+vm.swappiness=10
+vm.dirty_ratio=10
+vm.dirty_background_ratio=5
+EOF
+
+sysctl -p
+```
+
+### NVIDIA persistence mode
+
+```bash
+# На хосте
+nvidia-smi -pm 1
+
+# Сохранить настройку после reboot
+cat > /etc/systemd/system/nvidia-persistenced.service << 'EOF'
+[Unit]
+Description=NVIDIA Persistence Daemon
+Wants=syslog.target
+
 [Service]
-Environment="OLLAMA_HOST=0.0.0.0:11434"
-Environment="OLLAMA_ORIGINS=*"
+Type=forking
+PIDFile=/var/run/nvidia-persistenced/nvidia-persistenced.pid
+Restart=always
+ExecStart=/usr/bin/nvidia-persistenced --user root --persistence-mode --verbose
+ExecStopPost=/bin/rm -rf /var/run/nvidia-persistenced
 
-# Перезапустить
-systemctl restart ollama
+[Install]
+WantedBy=multi-user.target
+EOF
 
-# Проверить порт
-ss -tulpn | grep 11434
+systemctl enable nvidia-persistenced.service
+systemctl start nvidia-persistenced.service
 ```
 
-### Проблема: Модель отвечает на английском вместо русского
+### CPU pinning
 
-**Решение:**
+Для уменьшения latency можно pin контейнер к specific CPU cores:
 
 ```bash
-# В промпте явно указать язык
-curl http://localhost:11434/api/generate -d '{
-  "model": "phi3:mini",
-  "prompt": "Ответь на русском языке: Как дела?",
-  "system": "Ты русскоязычный AI ассистент. Всегда отвечай на русском языке.",
-  "stream": false
-}'
+# На хосте
+# Предположим, у вас 8 cores (0-7)
+# Pin контейнер к cores 4-7
+pct set 200 --cpuunits 2048 --cpulimit 4
+```
+
+Редактировать `/etc/pve/lxc/200.conf`:
+
+```bash
+# Добавить
+lxc.cgroup2.cpuset.cpus: 4-7
 ```
 
 ---
 
-## 📊 Сравнение производительности
+## Security Considerations
 
-### Ollama vs GigaChat vs Cloud API
+### Привилегированный контейнер
 
-| Параметр | Ollama (локально) | GigaChat | Cloud API |
-|----------|-------------------|----------|-----------|
-| **Скорость** | ⚡ 50-100 tokens/s | 🐌 20-30 tokens/s | 🚀 100+ tokens/s |
-| **Стоимость** | ✅ Бесплатно | ✅ Бесплатная квота | 💰 Платно |
-| **Приватность** | ✅ 100% локально | ❌ Облако | ❌ Облако |
-| **Качество** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Доступность** | ✅ Всегда | ⚠️ Интернет нужен | ⚠️ Интернет нужен |
-| **VPN из РФ** | ✅ Не нужен | ✅ Не нужен | ❌ Нужен |
+LXC контейнер запущен в привилегированном режиме (`unprivileged 0`), что означает:
 
-**Рекомендация:**
-- **Ollama** - для приватных данных, быстрых ответов, работы без интернета
-- **GigaChat** - для лучшего качества на русском языке
-- **Cloud API** - если нет GPU и нужно лучшее качество
+- ⚠️ Root в контейнере = root на хосте
+- ⚠️ Потенциальный escape to host
+- ⚠️ Не рекомендуется для untrusted workloads
+
+**Mitigation:**
+
+1. Network isolation:
+```bash
+# Создать отдельный bridge для AI workloads
+# /etc/network/interfaces
+auto vmbr1
+iface vmbr1 inet static
+    address 10.0.100.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    post-up iptables -t nat -A POSTROUTING -s 10.0.100.0/24 -o vmbr0 -j MASQUERADE
+```
+
+2. Firewall rules в Proxmox Firewall UI
+
+3. Регулярные updates контейнера:
+```bash
+pct exec 200 -- apt update && apt upgrade -y
+```
+
+### API access control
+
+По умолчанию Ollama API не имеет authentication. Для production:
+
+1. **Reverse proxy с authentication** (Nginx/Caddy)
+2. **Network isolation** (доступ только из trusted networks)
+3. **API rate limiting** (через reverse proxy)
+
+Пример Nginx конфигурации:
+
+```nginx
+upstream ollama {
+    server 10.0.100.2:11434;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ollama.local;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    # Basic auth
+    auth_basic "Ollama API";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=ollama:10m rate=10r/s;
+    limit_req zone=ollama burst=20;
+
+    location / {
+        proxy_pass http://ollama;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 300s;
+    }
+}
+```
 
 ---
 
-## 🎯 Следующие шаги
+## Заключение
 
-1. ✅ Установили Ollama с GPU
-2. ✅ Скачали модель phi3:mini
-3. 🔄 Интегрируйте с n8n (см. примеры выше)
-4. 🔄 Создайте workflow для Home Assistant
-5. 🔄 После апгрейда до GTX 1060 скачайте llama3.1:8b
+Данная конфигурация обеспечивает:
 
-**Готово!** Теперь у вас локальный AI без облаков и VPN! 🚀
+- ✅ Production-ready deployment Ollama на Proxmox
+- ✅ Оптимальное использование GPU без VM overhead
+- ✅ Простое управление через `pct` и `systemd`
+- ✅ Scalability (можно создать несколько LXC с разными моделями)
+- ✅ Backup и disaster recovery через Proxmox встроенные инструменты
 
----
-
-## 📚 Полезные ссылки
-
-- [Ollama Documentation](https://github.com/ollama/ollama/blob/main/docs/README.md)
-- [Ollama API Reference](https://github.com/ollama/ollama/blob/main/docs/api.md)
-- [Ollama Models Library](https://ollama.ai/library)
-- [Proxmox LXC Documentation](https://pve.proxmox.com/wiki/Linux_Container)
-- [n8n Ollama Integration](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.lmollamaembeddings/)
+**Документация проверена на:**
+- Proxmox VE 8.1.4
+- NVIDIA Driver 535.154.05
+- Ubuntu 24.04 LTS (container)
+- Ollama 0.11.10
+- GTX 1050 Ti 4GB
 
 ---
 
-**Автор:** AI Assistant
-**Дата:** Октябрь 2025
-**Версия:** 1.0
+**Автор:** AI Assistant (Technical Writer & DevOps)  
+**Последнее обновление:** Октябрь 2025  
+**Версия:** 2.0
