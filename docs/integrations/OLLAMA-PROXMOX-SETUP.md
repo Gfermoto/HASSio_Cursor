@@ -197,11 +197,19 @@ apt update
 # Установка headers для текущего ядра
 apt install -y "pve-headers-$(uname -r)"
 
-# Проверка доступных версий драйверов
-apt-cache search nvidia-driver
+# Поиск доступных версий драйверов
+apt-cache search --names-only '^nvidia-driver-[0-9]+$'
 
-# Установка драйвера (535+ поддерживает CUDA 12.2+)
-apt install -y nvidia-driver nvidia-smi
+# Обычно доступны версии: 525, 535, 545, 550
+# Рекомендуется 535+ (поддержка CUDA 12.2+)
+
+# Установка конкретной версии (замените 535 на доступную в вашей системе)
+apt install -y nvidia-driver-535 nvidia-smi
+
+# Для автоматического выбора последней версии:
+NVIDIA_DRIVER=$(apt-cache search --names-only '^nvidia-driver-[0-9]+$' | \
+  awk '{print $1}' | sort -V | tail -1)
+apt install -y "$NVIDIA_DRIVER" nvidia-smi
 
 # Blacklist nouveau (открытый драйвер)
 cat > /etc/modprobe.d/blacklist-nouveau.conf << EOF
@@ -575,6 +583,52 @@ ollama --version
 ---
 
 ## Troubleshooting
+
+### NVIDIA драйвер не найден при установке
+
+**Симптомы:**
+```text
+E: Package 'nvidia-driver' has no installation candidate
+E: Package 'nvidia-smi' has no installation candidate
+```
+
+**Причина:**  
+В Debian/Proxmox пакет называется не `nvidia-driver`, а с указанием версии: `nvidia-driver-XXX`
+
+**Решение:**
+
+1. Поиск доступных версий:
+```bash
+apt-cache search --names-only '^nvidia-driver-[0-9]+$'
+# Вывод: nvidia-driver-525, nvidia-driver-535, nvidia-driver-545, etc.
+```
+
+2. Установка конкретной версии:
+```bash
+# Рекомендуется 535+ для CUDA 12.2+ support
+apt install -y nvidia-driver-535 nvidia-smi
+```
+
+3. Автоматический выбор последней версии:
+```bash
+NVIDIA_DRIVER=$(apt-cache search --names-only '^nvidia-driver-[0-9]+$' | \
+  awk '{print $1}' | sort -V | tail -1)
+echo "Устанавливаю: $NVIDIA_DRIVER"
+apt install -y "$NVIDIA_DRIVER" nvidia-smi
+```
+
+4. Если драйверы вообще не найдены, проверьте репозитории:
+```bash
+# Проверка non-free в sources.list
+grep 'non-free' /etc/apt/sources.list
+
+# Должно содержать: main contrib non-free non-free-firmware
+# Если нет, добавьте:
+sed -i 's/main$/main contrib non-free non-free-firmware/' /etc/apt/sources.list
+apt update
+```
+
+**Примечание:** Скрипт `ollama-proxmox-install.sh` автоматически определяет и устанавливает правильную версию.
 
 ### GPU не виден в контейнере
 

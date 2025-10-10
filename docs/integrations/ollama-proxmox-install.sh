@@ -80,8 +80,26 @@ install_nvidia_host() {
     apt install -y "pve-headers-$(uname -r)"
 
     # Установить NVIDIA драйверы
-    info "Установка nvidia-driver..."
-    apt install -y nvidia-driver nvidia-smi
+    info "Поиск доступных версий NVIDIA драйверов..."
+    NVIDIA_VERSIONS=$(apt-cache search --names-only '^nvidia-driver-[0-9]+$' | awk '{print $1}' | sort -V | tail -3)
+    
+    if [ -z "$NVIDIA_VERSIONS" ]; then
+        error "NVIDIA драйверы не найдены в репозиториях. Проверьте что добавлены non-free репозитории."
+    fi
+    
+    info "Доступные версии:"
+    echo "$NVIDIA_VERSIONS"
+    
+    # Выбор последней стабильной версии (535 или выше)
+    NVIDIA_DRIVER=$(echo "$NVIDIA_VERSIONS" | grep -E 'nvidia-driver-(535|545|550)' | tail -1)
+    
+    if [ -z "$NVIDIA_DRIVER" ]; then
+        # Fallback на самую новую версию
+        NVIDIA_DRIVER=$(echo "$NVIDIA_VERSIONS" | tail -1)
+    fi
+    
+    info "Установка $NVIDIA_DRIVER..."
+    apt install -y "$NVIDIA_DRIVER" nvidia-smi
 
     # Blacklist nouveau
     info "Отключение nouveau..."
