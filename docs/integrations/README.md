@@ -39,23 +39,23 @@
 
 ### Вариант 2: Ollama (локальный, приватный) 🔒
 
-**Файлы**:
-- [OLLAMA-QUICKSTART.md](./OLLAMA-QUICKSTART.md) - за 15 минут
-- [OLLAMA-PROXMOX-SETUP.md](./OLLAMA-PROXMOX-SETUP.md) - полная документация
+**Файлы**: 
+- [OLLAMA-VM-SETUP.md](./OLLAMA-VM-SETUP.md) - установка в Ubuntu VM (безопасно)
 - [README-ollama-assistant.md](./README-ollama-assistant.md) - интеграция с n8n
+- [OLLAMA-PROXMOX-NVIDIA-ISSUE.md](./OLLAMA-PROXMOX-NVIDIA-ISSUE.md) - известная проблема с Proxmox
 
 Локальный AI на вашем GPU (GTX 1050 Ti / GTX 1060):
 - ✅ 100% локально - работает БЕЗ интернета
 - ✅ 100% приватно - данные не покидают вашу сеть
 - ✅ Модели: phi3:mini (4GB), llama3.1:8b (6GB)
-- ✅ Скорость: 40-60 tokens/sec
-- ✅ LXC контейнер на Proxmox
+- ✅ Скорость: 35-55 tokens/sec (в VM)
+- ✅ Ubuntu VM с PCI passthrough (безопасно для Proxmox)
 
 **Workflow:** `n8n-voice-assistant-ollama.json`
 
-**Скрипт установки:** `ollama-proxmox-install.sh` - автоматическая установка
-
 **Стоимость:** ✅ **₽0/месяц** - единоразовые затраты только на GPU!
+
+**⚠️ Важно:** LXC подход не работает на Proxmox из-за конфликта nvidia-driver с proxmox-ve. Используйте VM подход.
 
 ---
 
@@ -105,13 +105,13 @@
 
 **Хотите управлять HA через Telegram текстом?** ⭐ (100% бесплатно)
 - С интернетом: [README-voice-assistant.md](./README-voice-assistant.md) (GigaChat)
-- Локально БЕЗ интернета: [OLLAMA-QUICKSTART.md](./OLLAMA-QUICKSTART.md) 🔒
+- Локально БЕЗ интернета: [OLLAMA-VM-SETUP.md](./OLLAMA-VM-SETUP.md) 🔒
 
 **Хотите прогноз погоды с AI?**
 → [README-meteostation.md](./README-meteostation.md)
 
 **Есть NVIDIA GPU и хотите локальный AI?** 🚀
-→ [OLLAMA-QUICKSTART.md](./OLLAMA-QUICKSTART.md) - за 15 минут
+→ [OLLAMA-VM-SETUP.md](./OLLAMA-VM-SETUP.md) - Ubuntu VM на Proxmox
 
 **Хотите AI дворецкого с полным контролем дома?**
 → [n8n-butler-setup.md](./n8n-butler-setup.md)
