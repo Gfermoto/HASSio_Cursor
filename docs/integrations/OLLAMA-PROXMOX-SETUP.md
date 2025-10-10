@@ -98,44 +98,59 @@
 
 ## Получение скрипта автоматизации
 
-Данная документация описывает ручную установку для понимания процесса. Для автоматизации используйте скрипт `ollama-proxmox-install.sh`.
+Данная документация описывает ручную установку для понимания процесса. Для автоматизации используйте скрипт `ollama-proxmox-install.sh` из GitHub репозитория.
 
-### Копирование из локального репозитория
+### Скачивание с GitHub
 
-Скрипт находится в репозитории HASSio:
-
-```bash
-# На вашей рабочей машине (WSL/Linux)
-cd /home/gfer/HASSio
-
-# Проверка наличия скрипта
-ls -lh docs/integrations/ollama-proxmox-install.sh
-
-# Копирование на Proxmox хост через SCP
-scp docs/integrations/ollama-proxmox-install.sh root@<PROXMOX_IP>:/root/
-
-# Пример с конкретным IP
-# scp docs/integrations/ollama-proxmox-install.sh root@192.168.1.100:/root/
-```
-
-### Подготовка скрипта на Proxmox
+Скрипт доступен в публичном репозитории: [HASSio_Cursor/docs/integrations](https://github.com/Gfermoto/HASSio_Cursor/tree/main/docs/integrations)
 
 ```bash
-# Подключение к Proxmox хосту
+# SSH на Proxmox хост
 ssh root@<PROXMOX_IP>
 
-# Проверка и установка прав
-ls -lh /root/ollama-proxmox-install.sh
+# Скачивание скрипта напрямую с GitHub
+wget https://raw.githubusercontent.com/Gfermoto/HASSio_Cursor/main/docs/integrations/ollama-proxmox-install.sh \
+  -O /root/ollama-proxmox-install.sh
+
+# Установка прав на выполнение
 chmod +x /root/ollama-proxmox-install.sh
 
-# Запуск интерактивного меню
-./ollama-proxmox-install.sh
+# Проверка скрипта
+ls -lh /root/ollama-proxmox-install.sh
+head -20 /root/ollama-proxmox-install.sh  # Просмотр начала скрипта
+```
 
-# Или напрямую конкретные этапы:
-# ./ollama-proxmox-install.sh --install-host     # Установка NVIDIA на хост
-# ./ollama-proxmox-install.sh --create-lxc       # Создание LXC контейнера
-# ./ollama-proxmox-install.sh --install-model    # Установка модели
-# ./ollama-proxmox-install.sh --check            # Проверка системы
+### Использование скрипта
+
+**Интерактивный режим (рекомендуется для первого раза):**
+
+```bash
+./ollama-proxmox-install.sh
+```
+
+Откроется меню:
+```text
+1) Установить NVIDIA драйверы на хост
+2) Создать LXC контейнер с Ollama
+3) Установить модель в контейнер
+4) Проверить установку
+5) Выход
+```
+
+**CLI режим (для автоматизации):**
+
+```bash
+# Установка NVIDIA драйверов на хост (первый запуск)
+./ollama-proxmox-install.sh --install-host
+
+# После перезагрузки хоста: создание LXC контейнера
+./ollama-proxmox-install.sh --create-lxc
+
+# Установка модели
+./ollama-proxmox-install.sh --install-model
+
+# Проверка системы
+./ollama-proxmox-install.sh --check
 ```
 
 **Примечание:** Далее описана ручная установка для понимания всех шагов. Для production используйте скрипт автоматизации.

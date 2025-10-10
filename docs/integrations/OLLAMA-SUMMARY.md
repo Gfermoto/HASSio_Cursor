@@ -76,17 +76,17 @@
 
 ## 🚀 Следующие шаги
 
-### Шаг 1: Установка на Proxmox
+### Шаг 1: Скачивание и запуск скрипта
 
 ```bash
-# 1. Скопируйте скрипт на Proxmox хост
-scp docs/integrations/ollama-proxmox-install.sh root@PROXMOX_IP:/root/
-
-# 2. SSH на Proxmox
+# 1. SSH на Proxmox хост
 ssh root@PROXMOX_IP
 
-# 3. Запустите скрипт
-chmod +x ollama-proxmox-install.sh
+# 2. Скачивание скрипта с GitHub
+wget https://raw.githubusercontent.com/Gfermoto/HASSio_Cursor/main/docs/integrations/ollama-proxmox-install.sh -O /root/ollama-proxmox-install.sh
+
+# 3. Установка прав и запуск
+chmod +x /root/ollama-proxmox-install.sh
 ./ollama-proxmox-install.sh
 
 # Выберите:
