@@ -96,6 +96,52 @@
 
 ---
 
+## Получение скрипта автоматизации
+
+Данная документация описывает ручную установку для понимания процесса. Для автоматизации используйте скрипт `ollama-proxmox-install.sh`.
+
+### Копирование из локального репозитория
+
+Скрипт находится в репозитории HASSio:
+
+```bash
+# На вашей рабочей машине (WSL/Linux)
+cd /home/gfer/HASSio
+
+# Проверка наличия скрипта
+ls -lh docs/integrations/ollama-proxmox-install.sh
+
+# Копирование на Proxmox хост через SCP
+scp docs/integrations/ollama-proxmox-install.sh root@<PROXMOX_IP>:/root/
+
+# Пример с конкретным IP
+# scp docs/integrations/ollama-proxmox-install.sh root@192.168.1.100:/root/
+```
+
+### Подготовка скрипта на Proxmox
+
+```bash
+# Подключение к Proxmox хосту
+ssh root@<PROXMOX_IP>
+
+# Проверка и установка прав
+ls -lh /root/ollama-proxmox-install.sh
+chmod +x /root/ollama-proxmox-install.sh
+
+# Запуск интерактивного меню
+./ollama-proxmox-install.sh
+
+# Или напрямую конкретные этапы:
+# ./ollama-proxmox-install.sh --install-host     # Установка NVIDIA на хост
+# ./ollama-proxmox-install.sh --create-lxc       # Создание LXC контейнера
+# ./ollama-proxmox-install.sh --install-model    # Установка модели
+# ./ollama-proxmox-install.sh --check            # Проверка системы
+```
+
+**Примечание:** Далее описана ручная установка для понимания всех шагов. Для production используйте скрипт автоматизации.
+
+---
+
 ## Подготовка Proxmox хоста
 
 ### 1. Проверка GPU

@@ -30,21 +30,33 @@
 
 ## Установка
 
-### 1. Подготовка скрипта установки
+### 1. Копирование скрипта на Proxmox хост
 
-На рабочей машине (WSL/Linux):
+Скрипт находится в вашем локальном репозитории: `/home/gfer/HASSio/docs/integrations/ollama-proxmox-install.sh`
+
+**Копирование через SCP:**
 
 ```bash
+# На вашей рабочей машине (WSL)
 cd /home/gfer/HASSio
+
+# Копирование скрипта на Proxmox хост (замените <PROXMOX_IP> на IP вашего Proxmox)
 scp docs/integrations/ollama-proxmox-install.sh root@<PROXMOX_IP>:/root/
+
+# Пример: scp docs/integrations/ollama-proxmox-install.sh root@192.168.1.100:/root/
 ```
 
-Подключение к Proxmox хосту:
+**Подключение к Proxmox и подготовка скрипта:**
 
 ```bash
+# SSH на Proxmox хост
 ssh root@<PROXMOX_IP>
-cd /root
-chmod +x ollama-proxmox-install.sh
+
+# Проверка что скрипт скопирован
+ls -lh /root/ollama-proxmox-install.sh
+
+# Установка прав на выполнение
+chmod +x /root/ollama-proxmox-install.sh
 ```
 
 ### 2. Установка NVIDIA драйверов на хост
