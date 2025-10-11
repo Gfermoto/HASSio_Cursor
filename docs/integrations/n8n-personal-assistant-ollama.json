@@ -1,0 +1,194 @@
+{
+  "name": "🏠 Персональный ассистент с памятью (Ollama + HA)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"],
+        "additionalFields": {
+          "download": false,
+          "userIds": "YOUR_TELEGRAM_USER_ID"
+        }
+      },
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 400],
+      "id": "telegram-trigger-01",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.item.json.message.text;\nconst chatId = $input.item.json.message.chat.id;\n\nif (!text) return [{ json: { skip: true } }];\n\nif (text === '/help' || text === '/start') {\n  const help = `🏠 *Персональный ассистент дома*\\n\\n*Я помогу узнать:*\\n• Температуру в комнатах\\n• Состояние датчиков\\n• Какие устройства включены\\n• Историю событий\\n\\n*Я помню контекст!*\\n\\\"Какая температура?\\\" → \\\"А в спальне?\\\"\\n\\n/clear - очистить память`;\n  return [{ json: { isCommand: true, text: help, chat_id: chatId } }];\n}\n\nif (text === '/clear') {\n  return [{ json: { isCommand: true, text: '🗑️ Память очищена', chat_id: chatId } }];\n}\n\nreturn [{ json: { isCommand: false, text, chat_id: chatId } }];"
+      },
+      "name": "Check Commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 400],
+      "id": "check-cmd-01"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [{"value1": "={{ $json.isCommand }}", "value2": true}]
+        }
+      },
+      "name": "If Command",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [600, 400],
+      "id": "if-cmd-01"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "name": "Send Command Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [800, 300],
+      "id": "tg-resp-01",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://YOUR_HA_IP:8123/api/states",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "name": "HA Get States",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 500],
+      "id": "ha-states-01",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "1", "name": "user_text", "value": "={{ $('Check Commands').item.json.text }}", "type": "string"},
+            {"id": "2", "name": "chat_id", "value": "={{ $('Check Commands').item.json.chat_id }}", "type": "string"}
+          ]
+        }
+      },
+      "name": "Prepare Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1000, 500],
+      "id": "prep-ctx-01"
+    },
+    {
+      "parameters": {
+        "model": "phi3:mini",
+        "options": {
+          "baseURL": "http://YOUR_OLLAMA_VM_IP:11434",
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "name": "Ollama Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [1200, 640],
+      "id": "ollama-01"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Prepare Context').item.json.chat_id }}",
+        "contextWindowLength": 10
+      },
+      "name": "Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [1200, 760],
+      "id": "memory-01"
+    },
+    {
+      "parameters": {
+        "name": "get_sensor_value",
+        "description": "Получить текущее значение датчика (температура, влажность, энергия). Параметр: entity_id (например sensor.bedroom_temperature)",
+        "workflowId": "YOUR_WORKFLOW_ID_SENSOR"
+      },
+      "name": "Tool Get Sensor",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [1200, 880],
+      "id": "tool-sensor-01"
+    },
+    {
+      "parameters": {
+        "name": "list_devices",
+        "description": "Получить список устройств по типу (light, sensor, climate, binary_sensor, switch). Параметр: domain",
+        "workflowId": "YOUR_WORKFLOW_ID_LIST"
+      },
+      "name": "Tool List Devices",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [1200, 1000],
+      "id": "tool-list-01"
+    },
+    {
+      "parameters": {
+        "text": "={{ $('Prepare Context').item.json.user_text }}",
+        "options": {
+          "systemMessage": "Ты персональный ассистент умного дома. Сегодня {{ $now.format('cccc, d MMMM yyyy, HH:mm', 'ru') }}.\n\nДоступные устройства:\n{{ JSON.stringify($('HA Get States').item.json, null, 2) }}\n\nОтвечай КРАТКО на русском. Используй инструменты для получения данных. Помни контекст - если спросили 'а в спальне?' после вопроса о температуре, понимай что речь о температуре."
+        }
+      },
+      "name": "Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [1420, 500],
+      "id": "agent-01"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Prepare Context').item.json.chat_id }}",
+        "text": "={{ $json.output }}"
+      },
+      "name": "Send Answer",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1620, 500],
+      "id": "tg-answer-01",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {"main": [[{"node": "Check Commands", "type": "main", "index": 0}]]},
+    "Check Commands": {"main": [[{"node": "If Command", "type": "main", "index": 0}]]},
+    "If Command": {"main": [[{"node": "Send Command Response", "type": "main", "index": 0}],[{"node": "HA Get States", "type": "main", "index": 0}]]},
+    "HA Get States": {"main": [[{"node": "Prepare Context", "type": "main", "index": 0}]]},
+    "Prepare Context": {"main": [[{"node": "Agent", "type": "main", "index": 0}]]},
+    "Ollama Model": {"ai_languageModel": [[{"node": "Agent", "type": "ai_languageModel", "index": 0}]]},
+    "Memory": {"ai_memory": [[{"node": "Agent", "type": "ai_memory", "index": 0}]]},
+    "Tool Get Sensor": {"ai_tool": [[{"node": "Agent", "type": "ai_tool", "index": 0}]]},
+    "Tool List Devices": {"ai_tool": [[{"node": "Agent", "type": "ai_tool", "index": 0}]]},
+    "Agent": {"main": [[{"node": "Send Answer", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": [{"name": "ollama"}, {"name": "home-assistant"}]
+}
+
