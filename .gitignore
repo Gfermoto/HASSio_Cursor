@@ -89,3 +89,9 @@ config
 *key*.json
 *token*.json
 *secret*.json
+
+# ESPHome secrets (чувствительные данные!)
+**/esphome/secrets.yaml
+**/esphome/.esphome/
+**/esphome/**/secrets.yaml
+docs/examples/esphome/LD2450/secrets.yaml

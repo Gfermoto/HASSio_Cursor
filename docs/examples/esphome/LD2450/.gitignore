@@ -1,0 +1,6 @@
+# ESPHome секреты - НЕ коммитить!
+secrets.yaml
+
+# ESPHome временные файлы
+.esphome/
+*.log
