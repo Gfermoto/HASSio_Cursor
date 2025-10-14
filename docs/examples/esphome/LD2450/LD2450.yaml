@@ -17,6 +17,9 @@ substitutions:
   # specify below pin numbers of your LD2450
   tx_pin_ld2450: GPIO17
   rx_pin_ld2450: GPIO16
+  # Blue LED indicator (GPIO2 - built-in blue LED on most ESP32)
+  # Lights up when radar receives valid data from targets
+  blue_led_pin: GPIO2
 
 #ESP32/LD2450 : Human Presence Sensor by Zone
 esphome:
@@ -1255,6 +1258,12 @@ light:
     entity_category: diagnostic
     restore_mode: ALWAYS_OFF
     disabled_by_default: True
+  - platform: binary
+    name: ${entity_name} Blue Radar Status
+    id: blue_radar_led
+    output: blue_led_output
+    entity_category: diagnostic
+    restore_mode: ALWAYS_OFF
 time:
   - platform: sntp
     id: time_now
@@ -1263,6 +1272,9 @@ output:
   - platform: gpio
     id: board_info_ed
     pin: GPIO12
+  - platform: gpio
+    id: blue_led_output
+    pin: ${blue_led_pin}
 
 switch:
 #  - platform: factory_reset
@@ -1565,6 +1577,20 @@ uart:
             if (zone_ex_target_exist[i]->state != zone_ex[i].has_target){
               zone_ex_target_exist[i]->publish_state(zone_ex[i].has_target);
             }
+          }
+
+          // ИНДИКАЦИЯ: Синий светодиод горит когда данные с радара валидны
+          bool has_valid_data = false;
+          for (int i = 0; i < NUM_TARGETS; i++) {
+            if (p[i].valid) {
+              has_valid_data = true;
+              break;
+            }
+          }
+          if (has_valid_data) {
+            id(blue_radar_led).turn_on();
+          } else {
+            id(blue_radar_led).turn_off();
           }
 
           if (!id(init_zone_publish)){
