@@ -1582,12 +1582,39 @@ uart:
             }
           }
 
-          // ИНДИКАЦИЯ: Синий светодиод горит когда обнаружено присутствие
-          // (не просто валидные данные, а реальные цели в зонах)
-          if (has_target_in_zone_all) {
-            id(blue_radar_led).turn_on();
-          } else {
+          // ИНДИКАЦИЯ: Синий светодиод - индикатор состояния целей
+          // - Нет целей → не горит
+          // - Цель движется → мигает (500ms)
+          // - Цель статична → горит постоянно
+          // (проверяется хотя бы одна валидная цель не в зонах исключения)
+          
+          bool has_any_target = false;
+          bool has_moving_target = false;
+          
+          for (int i = 0; i < NUM_TARGETS; i++) {
+            if (p[i].valid && !p[i].zone_ex_enter) {
+              has_any_target = true;
+              if (p[i].speed != 0) {
+                has_moving_target = true;
+                break;  // Достаточно одной движущейся
+              }
+            }
+          }
+          
+          if (!has_any_target) {
+            // Нет целей - не горит
             id(blue_radar_led).turn_off();
+          } else if (has_moving_target) {
+            // Есть движущиеся - мигает (500ms период)
+            static unsigned long last_blink = 0;
+            if (millis() - last_blink > 500) {
+              auto call = id(blue_radar_led).toggle();
+              call.perform();
+              last_blink = millis();
+            }
+          } else {
+            // Только статичные - горит постоянно
+            id(blue_radar_led).turn_on();
           }
 
           if (!id(init_zone_publish)){
