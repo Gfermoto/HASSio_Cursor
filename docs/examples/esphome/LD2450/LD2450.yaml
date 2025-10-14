@@ -17,9 +17,10 @@ substitutions:
   # specify below pin numbers of your LD2450
   tx_pin_ld2450: GPIO17
   rx_pin_ld2450: GPIO16
-  # Blue LED indicator (GPIO2 - built-in blue LED on most ESP32)
+  # Blue LED indicator (GPIO2 is strapping pin - use external LED!)
   # Lights up when radar receives valid data from targets
-  blue_led_pin: GPIO2
+  # Change to your external LED pin or use GPIO5/GPIO18/GPIO19/GPIO21/GPIO22/GPIO23
+  blue_led_pin: GPIO5
 
 #ESP32/LD2450 : Human Presence Sensor by Zone
 esphome:
