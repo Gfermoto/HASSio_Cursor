@@ -1582,15 +1582,9 @@ uart:
             }
           }
 
-          // ИНДИКАЦИЯ: Синий светодиод горит когда данные с радара валидны
-          bool has_valid_data = false;
-          for (int i = 0; i < NUM_TARGETS; i++) {
-            if (p[i].valid) {
-              has_valid_data = true;
-              break;
-            }
-          }
-          if (has_valid_data) {
+          // ИНДИКАЦИЯ: Синий светодиод горит когда обнаружено присутствие
+          // (не просто валидные данные, а реальные цели в зонах)
+          if (has_target_in_zone_all) {
             id(blue_radar_led).turn_on();
           } else {
             id(blue_radar_led).turn_off();
