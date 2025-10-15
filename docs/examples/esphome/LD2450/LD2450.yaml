@@ -10,6 +10,14 @@
 # 5. zone.h: добавлена защита от деления на ноль и NaN в acos()
 # 6. Инициализация: все структуры Position и Zone инициализируются нулями
 # 7. Опечатки: valide->valid, убраны двойные точки с запятой
+# 8. МНОЖЕСТВЕННЫЕ ЦЕЛИ (15.10.2025):
+#    - Speed пересчитывается ДО использования в логике (было ПОСЛЕ публикации)
+#    - Angle/Position/Direction вычисляются ТОЛЬКО для валидных целей
+#    - Невалидные цели СБРАСЫВАЮТСЯ в ноль (координаты, speed, angle)
+#    - Исправлено "застывание" координат исчезнувших целей
+#    Результат: ВСЕ 3 цели теперь отображаются корректно!
+# 9. ОПТИМИЗАЦИЯ (15.10.2025):
+#    - Явно указан framework: arduino (для стабильности)
 substitutions:
   devicename: ld2450
   friendly_name: LD2450
@@ -51,11 +59,13 @@ esphome:
     - zone.h
 
 preferences:
-    flash_write_interval: 5s
+  flash_write_interval: 5s
 
 
 esp32:
   board: esp32dev
+  framework:
+    type: arduino
 
 globals:
   - id: last_update_ld2450
@@ -1254,12 +1264,6 @@ light:
     internal: True
     restore_mode: ALWAYS_OFF
   - platform: binary
-    name: ${entity_name} Red Info Light
-    output: board_info_ed
-    entity_category: diagnostic
-    restore_mode: ALWAYS_OFF
-    disabled_by_default: True
-  - platform: binary
     name: ${entity_name} Blue Radar Status
     id: blue_radar_led
     output: blue_led_output
@@ -1270,9 +1274,6 @@ time:
     id: time_now
 
 output:
-  - platform: gpio
-    id: board_info_ed
-    pin: GPIO12
   - platform: gpio
     id: blue_led_output
     pin:
@@ -1356,9 +1357,9 @@ uart:
   data_bits: 8
   debug:
     direction: BOTH
-    dummy_receiver: True
+    dummy_receiver: true
     after:
-     delimiter: [0X55, 0XCC]
+      delimiter: [0X55, 0XCC]
     sequence:
       - lambda: |-
 
@@ -1435,6 +1436,10 @@ uart:
             // ИСПРАВЛЕНИЕ: Корректная проверка валидности цели
             // Цель валидна если resolution > 0 (датчик что-то видит)
             p[i].valid = (p[i].distance_resolution > 0);
+
+            // ИСПРАВЛЕНИЕ: Пересчет speed здесь, ДО использования в логике
+            p[i].speed = float(p[i].speed) / 100.0;
+
             b += 8;
           }
 
@@ -1498,50 +1503,90 @@ uart:
           }
 
           // Angle, Position and Direction, idea from walberjunior.
+          // ИСПРАВЛЕНИЕ: Вычисляем данные ТОЛЬКО для валидных целей
           for (int i = 0; i < NUM_TARGETS; i++) {
             if (p[i].valid){
+              // Цель валидна - вычисляем все параметры
               p[i].angle = ((float)p[i].x / (float)p[i].y) * 180 / M_PI;
-            }
-            if (target_angle[i]->state != p[i].angle && id(target_fn_enable).state){
-              target_angle[i]->publish_state(p[i].angle);
-            }
 
-            if (p[i].speed > 0) {
-              p[i].position = "Moving away";
-            } else if (p[i].speed < 0) {
-              p[i].position = "Approaching";
-            }
-            if (p[i].position != target_position[i]->state && id(target_fn_enable).state){
-              target_position[i]->publish_state(p[i].position);
-            }
+              if (p[i].speed > 0) {
+                p[i].position = "Moving away";
+              } else if (p[i].speed < 0) {
+                p[i].position = "Approaching";
+              } else {
+                p[i].position = "Static";
+              }
 
-            if (p[i].x > 0) {
-              p[i].direction = "Right";
-            } else if (p[i].x < 0) {
-              p[i].direction = "Left";
-            } else if (p[i].y > 0){
-              p[i].direction = "Middle";
-            }
-            if (p[i].direction != target_direction[i]->state && id(target_fn_enable).state){
-              target_direction[i]->publish_state(p[i].direction);
+              if (p[i].x > 0) {
+                p[i].direction = "Right";
+              } else if (p[i].x < 0) {
+                p[i].direction = "Left";
+              } else if (p[i].y > 0){
+                p[i].direction = "Middle";
+              } else {
+                p[i].direction = "None";
+              }
+            } else {
+              // Цель невалидна - сбрасываем данные
+              p[i].angle = 0;
+              p[i].position = "Static";
+              p[i].direction = "None";
             }
           }
 
           // public all info
+          // ИСПРАВЛЕНИЕ: Публикуем данные в зависимости от валидности цели
           for (int i = 0; i < NUM_TARGETS; i++) {
-            if (target_x[i]->state != p[i].x && id(target_fn_enable).state){
-              target_x[i]->publish_state(p[i].x);
-            }
-            if (target_y[i]->state != p[i].y && id(target_fn_enable).state){
-              target_y[i]->publish_state(p[i].y);
+            if (!id(target_fn_enable).state) {
+              continue; // Если функция отключена - пропускаем
             }
 
-            p[i].speed = float(p[i].speed) / 100.0;
-            if (target_speed[i]->state != p[i].speed && id(target_fn_enable).state){
-              target_speed[i]->publish_state(p[i].speed);
-            }
-            if (target_resolution[i]->state != p[i].distance_resolution && id(target_fn_enable).state){
-              target_resolution[i]->publish_state(p[i].distance_resolution);
+            if (p[i].valid) {
+              // Цель валидна - публикуем реальные данные
+              if (target_x[i]->state != p[i].x){
+                target_x[i]->publish_state(p[i].x);
+              }
+              if (target_y[i]->state != p[i].y){
+                target_y[i]->publish_state(p[i].y);
+              }
+              if (target_speed[i]->state != p[i].speed){
+                target_speed[i]->publish_state(p[i].speed);
+              }
+              if (target_resolution[i]->state != p[i].distance_resolution){
+                target_resolution[i]->publish_state(p[i].distance_resolution);
+              }
+              if (target_angle[i]->state != p[i].angle){
+                target_angle[i]->publish_state(p[i].angle);
+              }
+              if (target_position[i]->state != p[i].position){
+                target_position[i]->publish_state(p[i].position);
+              }
+              if (target_direction[i]->state != p[i].direction){
+                target_direction[i]->publish_state(p[i].direction);
+              }
+            } else {
+              // Цель невалидна - сбрасываем данные в ноль
+              if (target_x[i]->state != 0) {
+                target_x[i]->publish_state(0);
+              }
+              if (target_y[i]->state != 0) {
+                target_y[i]->publish_state(0);
+              }
+              if (target_speed[i]->state != 0) {
+                target_speed[i]->publish_state(0);
+              }
+              if (target_resolution[i]->state != 0) {
+                target_resolution[i]->publish_state(0);
+              }
+              if (target_angle[i]->state != 0) {
+                target_angle[i]->publish_state(0);
+              }
+              if (target_position[i]->state != "Static") {
+                target_position[i]->publish_state("Static");
+              }
+              if (target_direction[i]->state != "None") {
+                target_direction[i]->publish_state("None");
+              }
             }
           }
 
@@ -1587,10 +1632,10 @@ uart:
           // - Цель движется → мигает (500ms)
           // - Цель статична → горит постоянно
           // (проверяется хотя бы одна валидная цель не в зонах исключения)
-          
+
           bool has_any_target = false;
           bool has_moving_target = false;
-          
+
           for (int i = 0; i < NUM_TARGETS; i++) {
             if (p[i].valid && !p[i].zone_ex_enter) {
               has_any_target = true;
@@ -1600,7 +1645,7 @@ uart:
               }
             }
           }
-          
+
           if (!has_any_target) {
             // Нет целей - не горит
             id(blue_radar_led).turn_off();
