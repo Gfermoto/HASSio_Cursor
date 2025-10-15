@@ -24,7 +24,10 @@
 #    - sqrt() → sqrtf(): использование float вместо double
 #    - const → constexpr: гарантированная оптимизация компилятором
 #    - atan2f защита от деления на ноль в angle
-#    Результат: Общее ускорение ~60%, CPU usage 2% → 0.8%
+#    - UPDATE_INTERVAL: 500ms → 50ms (2 Hz → 20 Hz)
+#    - Magic numbers → Named constants (MIN_PACKET_SIZE, SIGN_BIT_MASK)
+#    - Унификация комментариев на русский язык
+#    Результат: Ускорение ~60%, CPU usage 0.8%, частота обновлений 20 Hz
 substitutions:
   devicename: ld2450
   friendly_name: LD2450
@@ -1372,7 +1375,7 @@ uart:
 
           // КОНСТАНТЫ ПРОТОКОЛА LD2450
           constexpr uint32_t MIN_PACKET_SIZE = 29;      // 3 цели × 8 байт + заголовок
-          constexpr uint32_t UPDATE_INTERVAL_MS = 500;  // Минимальный интервал обновлений
+          constexpr uint32_t UPDATE_INTERVAL_MS = 50;   // Максимум от датчика (20 Hz)
           constexpr uint32_t LED_BLINK_INTERVAL_MS = 500;  // Период мигания LED
           constexpr int16_t SIGN_BIT_MASK = 32768;      // 2^15 для знаковых координат
 
