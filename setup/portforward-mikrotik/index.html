@@ -1,0 +1,2599 @@
+
+<!doctype html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Профессиональные инструменты для управления и аудита Home Assistant">
+      
+      
+        <meta name="author" content="Gfermoto">
+      
+      
+        <link rel="canonical" href="https://gfermoto.github.io/HASSio_Cursor/setup/portforward-mikrotik/">
+      
+      
+        <link rel="prev" href="../post-setup/">
+      
+      
+        <link rel="next" href="../zerotier-mixed-mode/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>Проброс портов MikroTik - HASSio Cursor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mikrotik-reverse-proxy" class="md-skip">
+          Перейти к содержанию
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
+    <a href="../.." title="HASSio Cursor" class="md-header__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            HASSio Cursor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Проброс портов MikroTik
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Тёмная тема"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Тёмная тема" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Светлая тема"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Светлая тема" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Поиск">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Инициализация поиска
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Вкладки" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  🏠 Главная
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../quickstart/" class="md-tabs__link">
+          
+  
+  
+  📖 Установка
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/first-audit/" class="md-tabs__link">
+          
+  
+  
+  📚 Руководства
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/heating/" class="md-tabs__link">
+          
+  
+  
+  💡 Примеры
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/COMMANDS/" class="md-tabs__link">
+          
+  
+  
+  📋 Справочник
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyzers/" class="md-tabs__link">
+          
+  
+  
+  📊 Анализаторы
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../integrations/n8n-ai-agents/" class="md-tabs__link">
+          
+  
+  
+  🔗 Интеграции
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Навигация" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="HASSio Cursor" class="md-nav__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    HASSio Cursor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🏠 Главная
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    📖 Установка
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            📖 Установка
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Быстрый старт
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Детальная установка
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../post-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    После установки
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Проброс портов MikroTik
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Проброс портов MikroTik
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      📑 Содержание
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Ваша конфигурация
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      📋 Рекомендуемая схема подключения
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Вариант 1: С Reverse Proxy (Рекомендуется)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Вариант 1: С Reverse Proxy (Рекомендуется)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Преимущества
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты для проброса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik" class="md-nav__link">
+    <span class="md-ellipsis">
+      Команды MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-proxy-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Настройка Reverse Proxy (Nginx)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Настройка Reverse Proxy (Nginx)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#etcnginxsites-availablehomeassistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      /etc/nginx/sites-available/homeassistant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Получение SSL сертификата
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Вариант 2: Прямой доступ (без Reverse Proxy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Вариант 2: Прямой доступ (без Reverse Proxy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты для проброса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Команды MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mikrotik_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔒 Дополнительная безопасность MikroTik
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Дополнительная безопасность MikroTik">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Защита SSH от брутфорса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-rate-limiting-" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Rate limiting для веб-доступа
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Разрешить только из определённых стран (опционально)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      📝 Настройка DNS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Настройка DNS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Если у вас есть доменное имя
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Если у вас есть доменное имя">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-" class="md-nav__link">
+    <span class="md-ellipsis">
+      A-запись для домена
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка DNS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Обновление config.yml
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Тестирование
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Проверка портов
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Проверка доступа
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Проверка SSL сертификата
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      🆘 Решение проблем
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Решение проблем">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты не открываются
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL не работает
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#home-assistant-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Home Assistant недоступен через Reverse Proxy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Мониторинг
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Мониторинг">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Логи MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Логи Nginx
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔗 Полезные ссылки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      📋 Чек-лист настройки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Важные рекомендации
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zerotier-mixed-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ZeroTier смешанный режим
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssh-tunnel-samba/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSH туннель для SAMBA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📚 Руководства
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            📚 Руководства
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/first-audit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Первый аудит
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/heating-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Оптимизация отопления
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность умного дома
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    💡 Примеры
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            💡 Примеры
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/heating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Отопление
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/energy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Энергосбережение
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📋 Справочник
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            📋 Справочник
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/COMMANDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Команды
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Рабочий процесс
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📊 Анализаторы
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            📊 Анализаторы
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyzers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Обзор
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    🔗 Интеграции
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            🔗 Интеграции
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-ai-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤖 AI Агенты n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    📚 Подключение n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-butler-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤵 Пошаговое развертывание
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      📑 Содержание
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Ваша конфигурация
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      📋 Рекомендуемая схема подключения
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Вариант 1: С Reverse Proxy (Рекомендуется)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Вариант 1: С Reverse Proxy (Рекомендуется)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Преимущества
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты для проброса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik" class="md-nav__link">
+    <span class="md-ellipsis">
+      Команды MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-proxy-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Настройка Reverse Proxy (Nginx)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Настройка Reverse Proxy (Nginx)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#etcnginxsites-availablehomeassistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      /etc/nginx/sites-available/homeassistant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Получение SSL сертификата
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Вариант 2: Прямой доступ (без Reverse Proxy)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Вариант 2: Прямой доступ (без Reverse Proxy)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты для проброса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Команды MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mikrotik_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔒 Дополнительная безопасность MikroTik
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Дополнительная безопасность MikroTik">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Защита SSH от брутфорса
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-rate-limiting-" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Rate limiting для веб-доступа
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Разрешить только из определённых стран (опционально)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      📝 Настройка DNS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Настройка DNS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Если у вас есть доменное имя
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Если у вас есть доменное имя">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-" class="md-nav__link">
+    <span class="md-ellipsis">
+      A-запись для домена
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка DNS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔧 Обновление config.yml
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Тестирование
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Тестирование">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Проверка портов
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Проверка доступа
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ssl" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Проверка SSL сертификата
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      🆘 Решение проблем
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Решение проблем">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Порты не открываются
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssl_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSL не работает
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#home-assistant-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Home Assistant недоступен через Reverse Proxy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      📊 Мониторинг
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Мониторинг">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Логи MikroTik
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      Логи Nginx
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔗 Полезные ссылки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      📋 Чек-лист настройки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Важные рекомендации
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="mikrotik-reverse-proxy">🌐 Проброс портов на MikroTik с Reverse Proxy<a class="headerlink" href="#mikrotik-reverse-proxy" title="Permanent link">&para;</a></h1>
+<p>Настройка для белого IP, доменного имени и Reverse Proxy</p>
+<hr />
+<h2 id="_1">📑 Содержание<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#ваша-конфигурация">🎯 Ваша конфигурация</a></li>
+<li><a href="#рекомендуемая-схема-подключения">📋 Рекомендуемая схема подключения</a></li>
+<li><a href="#вариант-1-с-reverse-proxy-рекомендуется">🔧 Вариант 1: С Reverse Proxy (Рекомендуется)</a></li>
+<li><a href="#преимущества">Преимущества</a></li>
+<li><a href="#порты-для-проброса">Порты для проброса</a></li>
+<li><a href="#команды-mikrotik">Команды MikroTik</a></li>
+<li><a href="#настройка-reverse-proxy-nginx">Настройка Reverse Proxy (Nginx)</a></li>
+<li><a href="#вариант-2-прямой-доступ-без-reverse-proxy">🔧 Вариант 2: Прямой доступ (без Reverse Proxy)</a></li>
+<li><a href="#порты-для-проброса">Порты для проброса</a></li>
+<li><a href="#команды-mikrotik">Команды MikroTik</a></li>
+<li><a href="#дополнительная-безопасность-mikrotik">🔒 Дополнительная безопасность MikroTik</a></li>
+<li><a href="#1-защита-ssh-от-брутфорса">1. Защита SSH от брутфорса</a></li>
+<li><a href="#2-rate-limiting-для-веб-доступа">2. Rate limiting для веб-доступа</a></li>
+<li><a href="#3-разрешить-только-из-определённых-стран-опционально">3. Разрешить только из определённых стран (опционально)</a></li>
+<li><a href="#настройка-dns">📝 Настройка DNS</a></li>
+<li><a href="#если-у-вас-есть-доменное-имя">Если у вас есть доменное имя</a></li>
+<li><a href="#обновление-configyml">🔧 Обновление config.yml</a></li>
+<li><a href="#тестирование">🧪 Тестирование</a></li>
+<li><a href="#1-проверка-портов">1. Проверка портов</a></li>
+<li><a href="#2-проверка-доступа">2. Проверка доступа</a></li>
+<li><a href="#3-проверка-ssl-сертификата">3. Проверка SSL сертификата</a></li>
+<li><a href="#решение-проблем">🆘 Решение проблем</a></li>
+<li><a href="#порты-не-открываются">Порты не открываются</a></li>
+<li><a href="#ssl-не-работает">SSL не работает</a></li>
+<li><a href="#home-assistant-недоступен-через-reverse-proxy">Home Assistant недоступен через Reverse Proxy</a></li>
+<li><a href="#мониторинг">📊 Мониторинг</a></li>
+<li><a href="#логи-mikrotik">Логи MikroTik</a></li>
+<li><a href="#логи-nginx">Логи Nginx</a></li>
+<li><a href="#полезные-ссылки">🔗 Полезные ссылки</a></li>
+<li><a href="#чек-лист-настройки">📋 Чек-лист настройки</a></li>
+<li><a href="#важные-рекомендации">⚠️ Важные рекомендации</a></li>
+</ul>
+<hr />
+<h2 id="_2">🎯 Ваша конфигурация<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>✅ <strong>Белый статический IP</strong> - прямой доступ из интернета
+✅ <strong>Доменное имя</strong> - удобный адрес вместо IP
+✅ <strong>Reverse Proxy</strong> - централизованный вход через HTTPS</p>
+<hr />
+<h2 id="_3">📋 Рекомендуемая схема подключения<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Интернет
+    ↓
+[Белый IP / Домен]
+    ↓
+MikroTik Router (Проброс портов)
+    ↓
+┌─────────────────────────────────┐
+│  Reverse Proxy (Nginx/Traefik)  │  ← Единая точка входа
+│  - SSL сертификаты               │
+│  - Маршрутизация по доменам      │
+└─────────────────────────────────┘
+    ↓
+┌─────────────────────────────────┐
+│  Home Assistant                  │
+│  192.168.1.XXX:8123              │
+└─────────────────────────────────┘</p>
+<hr />
+<h2 id="1-reverse-proxy">🔧 Вариант 1: С Reverse Proxy (Рекомендуется)<a class="headerlink" href="#1-reverse-proxy" title="Permanent link">&para;</a></h2>
+<h3 id="_4">Преимущества<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>✅ Один SSL сертификат для всех сервисов
+✅ Автоматическое обновление Let's Encrypt
+✅ Защита от DDoS
+✅ Централизованные логи
+✅ Проще управлять безопасностью</p>
+<h3 id="_5">Порты для проброса<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Сервис</th>
+<th>Внешний порт</th>
+<th>→</th>
+<th>Внутренний порт</th>
+<th>IP</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HTTPS</strong></td>
+<td>443</td>
+<td>→</td>
+<td>443</td>
+<td>Reverse Proxy</td>
+<td>Весь HTTPS трафик</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong></td>
+<td>80</td>
+<td>→</td>
+<td>80</td>
+<td>Reverse Proxy</td>
+<td>Redirect на HTTPS</td>
+</tr>
+<tr>
+<td><strong>SSH</strong></td>
+<td>22</td>
+<td>→</td>
+<td>22</td>
+<td>Home Assistant</td>
+<td>Прямой SSH доступ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mikrotik">Команды MikroTik<a class="headerlink" href="#mikrotik" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Замените:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># - ether1 на ваш WAN интерфейс</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># - 192.168.1.5 на IP вашего Reverse Proxy</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># - 192.168.1.20 на IP вашего Home Assistant</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># 1. HTTPS на Reverse Proxy</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>dstnat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>dst-nat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="k">in</span>-interface<span class="o">=</span>ether1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span>to-addresses<span class="o">=</span><span class="m">192</span>.168.1.5<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span>to-ports<span class="o">=</span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;HTTPS to Reverse Proxy&quot;</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># 2. HTTP на Reverse Proxy (для редиректа)</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>dstnat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>dst-nat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">80</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="k">in</span>-interface<span class="o">=</span>ether1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span>to-addresses<span class="o">=</span><span class="m">192</span>.168.1.5<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span>to-ports<span class="o">=</span><span class="m">80</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;HTTP to Reverse Proxy&quot;</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="c1"># 3. SSH напрямую к Home Assistant</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>dstnat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>dst-nat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span><span class="k">in</span>-interface<span class="o">=</span>ether1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span>to-addresses<span class="o">=</span><span class="m">192</span>.168.1.20<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span>to-ports<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;SSH to Home Assistant&quot;</span>
+</span></code></pre></div>
+<h3 id="reverse-proxy-nginx">Настройка Reverse Proxy (Nginx)<a class="headerlink" href="#reverse-proxy-nginx" title="Permanent link">&para;</a></h3>
+<h4 id="etcnginxsites-availablehomeassistant">/etc/nginx/sites-available/homeassistant<a class="headerlink" href="#etcnginxsites-availablehomeassistant" title="Permanent link">&para;</a></h4>
+<div class="language-nginx highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Redirect HTTP to HTTPS</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">hassio.yourdomain.com</span><span class="p">;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="kn">return</span><span class="w"> </span><span class="mi">301</span><span class="w"> </span><span class="s">https://</span><span class="nv">$server_name$request_uri</span><span class="p">;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Home Assistant</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="w"> </span><span class="s">http2</span><span class="p">;</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">hassio.yourdomain.com</span><span class="p">;</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="c1"># SSL сертификаты (Let&#39;s Encrypt)</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="kn">ssl_certificate</span><span class="w"> </span><span class="s">/etc/letsencrypt/live/hassio.yourdomain.com/fullchain.pem</span><span class="p">;</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/etc/letsencrypt/live/hassio.yourdomain.com/privkey.pem</span><span class="p">;</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="c1"># Современные SSL настройки</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="kn">ssl_protocols</span><span class="w"> </span><span class="s">TLSv1.2</span><span class="w"> </span><span class="s">TLSv1.3</span><span class="p">;</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="kn">ssl_ciphers</span><span class="w"> </span><span class="s">HIGH:!aNULL:!MD5</span><span class="p">;</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="kn">ssl_prefer_server_ciphers</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="c1"># Безопасность</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Strict-Transport-Security</span><span class="w"> </span><span class="s">&quot;max-age=31536000</span><span class="p">;</span><span class="w"> </span><span class="kn">includeSubDomains&quot;</span><span class="w"> </span><span class="s">always</span><span class="p">;</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Frame-Options</span><span class="w"> </span><span class="s">&quot;SAMEORIGIN&quot;</span><span class="w"> </span><span class="s">always</span><span class="p">;</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">    </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Content-Type-Options</span><span class="w"> </span><span class="s">&quot;nosniff&quot;</span><span class="w"> </span><span class="s">always</span><span class="p">;</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">    </span><span class="c1"># Proxy к Home Assistant</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://192.168.1.20:8123</span><span class="p">;</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">        </span><span class="c1"># WebSocket поддержка</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">        </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;upgrade&quot;</span><span class="p">;</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="p">}</span>
+</span></code></pre></div>
+<h4 id="ssl">Получение SSL сертификата<a class="headerlink" href="#ssl" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Установить certbot</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>certbot<span class="w"> </span>python3-certbot-nginx
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Получить сертификат</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>sudo<span class="w"> </span>certbot<span class="w"> </span>--nginx<span class="w"> </span>-d<span class="w"> </span>hassio.yourdomain.com
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Автообновление (уже настроено)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>sudo<span class="w"> </span>certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run
+</span></code></pre></div>
+<hr />
+<h2 id="2-reverse-proxy">🔧 Вариант 2: Прямой доступ (без Reverse Proxy)<a class="headerlink" href="#2-reverse-proxy" title="Permanent link">&para;</a></h2>
+<p>Если Reverse Proxy не используется, пробросьте порты напрямую:</p>
+<h3 id="_6">Порты для проброса<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Сервис</th>
+<th>Внешний порт</th>
+<th>→</th>
+<th>Внутренний порт</th>
+<th>IP</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Home Assistant</strong></td>
+<td>8123</td>
+<td>→</td>
+<td>8123</td>
+<td>Home Assistant</td>
+<td>Веб-интерфейс</td>
+</tr>
+<tr>
+<td><strong>SSH</strong></td>
+<td>22</td>
+<td>→</td>
+<td>22</td>
+<td>Home Assistant</td>
+<td>SSH доступ</td>
+</tr>
+<tr>
+<td><strong>SAMBA</strong></td>
+<td>445</td>
+<td>→</td>
+<td>445</td>
+<td>Home Assistant</td>
+<td>Файлы (опасно!)</td>
+</tr>
+</tbody>
+</table>
+<p>⚠️ <strong>Не рекомендуется!</strong> SAMBA через интернет небезопасен!</p>
+<h3 id="mikrotik_1">Команды MikroTik<a class="headerlink" href="#mikrotik_1" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 1. Home Assistant</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>dstnat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>dst-nat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">8123</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="k">in</span>-interface<span class="o">=</span>ether1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span>to-addresses<span class="o">=</span><span class="m">192</span>.168.1.20<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span>to-ports<span class="o">=</span><span class="m">8123</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;HA Web Direct&quot;</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># 2. SSH</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>dstnat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>dst-nat<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">  </span><span class="k">in</span>-interface<span class="o">=</span>ether1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span>to-addresses<span class="o">=</span><span class="m">192</span>.168.1.20<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">  </span>to-ports<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;SSH Direct&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="mikrotik_2">🔒 Дополнительная безопасность MikroTik<a class="headerlink" href="#mikrotik_2" title="Permanent link">&para;</a></h2>
+<h3 id="1-ssh">1. Защита SSH от брутфорса<a class="headerlink" href="#1-ssh" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Создать address list для блокировки</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>src-address-list<span class="o">=</span>ssh_blacklist<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>drop<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;Block SSH attackers&quot;</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># Добавлять в blacklist при 3+ попытках</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span>connection-state<span class="o">=</span>new<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">  </span>src-address-list<span class="o">=</span>ssh_stage3<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>add-src-to-address-list<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">  </span>address-list<span class="o">=</span>ssh_blacklist<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span>address-list-timeout<span class="o">=</span>1d
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">  </span>connection-state<span class="o">=</span>new<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">  </span>src-address-list<span class="o">=</span>ssh_stage2<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>add-src-to-address-list<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">  </span>address-list<span class="o">=</span>ssh_stage3<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">  </span>address-list-timeout<span class="o">=</span>1m
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">  </span>connection-state<span class="o">=</span>new<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">  </span>src-address-list<span class="o">=</span>ssh_stage1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>add-src-to-address-list<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">  </span>address-list<span class="o">=</span>ssh_stage2<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">  </span>address-list-timeout<span class="o">=</span>1m
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>input<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">22</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">  </span>connection-state<span class="o">=</span>new<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>add-src-to-address-list<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">  </span>address-list<span class="o">=</span>ssh_stage1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">  </span>address-list-timeout<span class="o">=</span>1m
+</span></code></pre></div>
+<h3 id="2-rate-limiting-">2. Rate limiting для веб-доступа<a class="headerlink" href="#2-rate-limiting-" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Ограничить количество подключений с одного IP</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>forward<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>connection-limit<span class="o">=</span><span class="m">50</span>,32<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>drop<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;Limit HTTPS connections per IP&quot;</span>
+</span></code></pre></div>
+<h3 id="3">3. Разрешить только из определённых стран (опционально)<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Скачать GeoIP базу</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>/tool<span class="w"> </span>fetch<span class="w"> </span><span class="nv">url</span><span class="o">=</span><span class="s2">&quot;https://download.mikrotik.com/routeros/geoip.dat&quot;</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Разрешить только из России</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>address-list<span class="w"> </span>add<span class="w"> </span><span class="nv">list</span><span class="o">=</span>allowed_countries<span class="w"> </span><span class="nv">address</span><span class="o">=</span><span class="m">0</span>.0.0.0/0<span class="w"> </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;Russia&quot;</span><span class="w"> </span>address-list<span class="o">=</span>geoip-c-ru
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Блокировать всё остальное</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nv">chain</span><span class="o">=</span>forward<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="nv">protocol</span><span class="o">=</span>tcp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span>dst-port<span class="o">=</span><span class="m">443</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">  </span>src-address-list<span class="o">=</span>!allowed_countries<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">  </span><span class="nv">action</span><span class="o">=</span>drop<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">  </span><span class="nv">comment</span><span class="o">=</span><span class="s2">&quot;Block non-RU&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="dns">📝 Настройка DNS<a class="headerlink" href="#dns" title="Permanent link">&para;</a></h2>
+<h3 id="_7">Если у вас есть доменное имя<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<h4 id="a-">A-запись для домена<a class="headerlink" href="#a-" title="Permanent link">&para;</a></h4>
+<p>В панели управления доменом (например, CloudFlare, Reg.ru):</p>
+<p>Тип: A
+Имя: hassio
+Значение: ВАШ_БЕЛЫЙ_IP
+TTL: 300</p>
+<p>Результат: <code>hassio.yourdomain.com</code> → <code>ВАШ_БЕЛЫЙ_IP</code></p>
+<h4 id="dns_1">Проверка DNS<a class="headerlink" href="#dns_1" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Linux/Mac</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>dig<span class="w"> </span>hassio.yourdomain.com
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Windows</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>nslookup<span class="w"> </span>hassio.yourdomain.com
+</span></code></pre></div>
+<hr />
+<h2 id="configyml">🔧 Обновление config.yml<a class="headerlink" href="#configyml" title="Permanent link">&para;</a></h2>
+<p>После настройки обновите <code>config.yml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">home_assistant</span><span class="p">:</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="c1"># Локальный доступ</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.20&quot;</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">local_port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8123</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="c1"># Глобальный доступ</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hassio.yourdomain.com&quot;</span><span class="w">  </span><span class="c1"># Ваш домен</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">global_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ВАШ_БЕЛЫЙ_IP&quot;</span><span class="w">          </span><span class="c1"># Ваш белый IP</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nt">global_port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span><span class="w">                    </span><span class="c1"># Через Reverse Proxy (HTTPS)</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nt">use_ssl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">                       </span><span class="c1"># Если через Reverse Proxy</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="nt">ssh</span><span class="p">:</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;root&quot;</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">  </span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.20&quot;</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">  </span><span class="nt">global_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ВАШ_БЕЛЫЙ_IP&quot;</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="nt">samba</span><span class="p">:</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">  </span><span class="c1"># SAMBA только локально! Не через интернет!</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">  </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;homeassistant&quot;</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">  </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your_password&quot;</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">  </span><span class="nt">local_ip</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;192.168.1.20&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="_8">🧪 Тестирование<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="1">1. Проверка портов<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Проверить что порты открыты</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>nmap<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>,80,22<span class="w"> </span>ВАШ_БЕЛЫЙ_IP
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Или онлайн</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># https://www.yougetsignal.com/tools/open-ports/</span>
+</span></code></pre></div>
+<h3 id="2">2. Проверка доступа<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># HTTPS</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>curl<span class="w"> </span>-I<span class="w"> </span>https://hassio.yourdomain.com
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># SSH</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>ssh<span class="w"> </span>root@ВАШ_БЕЛЫЙ_IP
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Или через домен</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>ssh<span class="w"> </span>root@hassio.yourdomain.com
+</span></code></pre></div>
+<h3 id="3-ssl">3. Проверка SSL сертификата<a class="headerlink" href="#3-ssl" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Проверить сертификат</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>hassio.yourdomain.com:443<span class="w"> </span>-servername<span class="w"> </span>hassio.yourdomain.com
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Или через браузер</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1"># https://www.ssllabs.com/ssltest/</span>
+</span></code></pre></div>
+<hr />
+<h2 id="_9">🆘 Решение проблем<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">Порты не открываются<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Проверить NAT правила</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>nat<span class="w"> </span>print
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Проверить firewall filter</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>filter<span class="w"> </span>print
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># Проверить WAN интерфейс</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>/interface<span class="w"> </span>print
+</span></code></pre></div>
+<h3 id="ssl_1">SSL не работает<a class="headerlink" href="#ssl_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Проверьте что DNS настроен правильно</li>
+<li>Проверьте Nginx конфигурацию: <code>sudo nginx -t</code></li>
+<li>Проверьте сертификат: <code>sudo certbot certificates</code></li>
+<li>Проверьте логи: <code>sudo tail -f /var/log/nginx/error.log</code></li>
+</ol>
+<h3 id="home-assistant-reverse-proxy">Home Assistant недоступен через Reverse Proxy<a class="headerlink" href="#home-assistant-reverse-proxy" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Добавьте в <code>configuration.yaml</code>:</li>
+</ol>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">http</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">use_x_forwarded_for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">trusted_proxies</span><span class="p">:</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.5</span><span class="w">  </span><span class="c1"># IP вашего Reverse Proxy</span>
+</span></code></pre></div>
+<ol>
+<li>Перезапустите Home Assistant</li>
+</ol>
+<hr />
+<h2 id="_11">📊 Мониторинг<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<h3 id="mikrotik_3">Логи MikroTik<a class="headerlink" href="#mikrotik_3" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Смотреть логи</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>/log<span class="w"> </span>print
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Смотреть активные подключения</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>/ip<span class="w"> </span>firewall<span class="w"> </span>connection<span class="w"> </span>print<span class="w"> </span>where<span class="w"> </span>dst-port<span class="o">=</span><span class="m">443</span>
+</span></code></pre></div>
+<h3 id="nginx">Логи Nginx<a class="headerlink" href="#nginx" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Access log</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/nginx/access.log
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Error log</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/nginx/error.log
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># Только ошибки HA</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>sudo<span class="w"> </span>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/nginx/error.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>hassio
+</span></code></pre></div>
+<hr />
+<h2 id="_12">🔗 Полезные ссылки<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://wiki.mikrotik.com/wiki/Manual:IP/Firewall/NAT">MikroTik NAT Documentation</a></li>
+<li><a href="https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/">Nginx Reverse Proxy</a></li>
+<li><a href="https://letsencrypt.org/">Let's Encrypt</a></li>
+<li><a href="https://www.home-assistant.io/docs/configuration/remote/">Home Assistant Reverse Proxy</a></li>
+</ul>
+<hr />
+<h2 id="-">📋 Чек-лист настройки<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] DNS A-запись настроена → <code>hassio.yourdomain.com</code></li>
+<li>[ ] MikroTik: Порты 80, 443, 22 проброшены</li>
+<li>[ ] Reverse Proxy: Nginx установлен и настроен</li>
+<li>[ ] SSL: Сертификат Let's Encrypt получен</li>
+<li>[ ] Home Assistant: <code>trusted_proxies</code> настроен</li>
+<li>[ ] Безопасность: SSH брутфорс защита включена</li>
+<li>[ ] Тесты: Доступ работает через домен</li>
+<li>[ ] config.yml обновлён с доменом</li>
+</ul>
+<hr />
+<h2 id="_13">⚠️ Важные рекомендации<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Используйте Reverse Proxy!</strong></li>
+<li>Один SSL сертификат</li>
+<li>Лучшая безопасность</li>
+<li>
+<p>Проще управление</p>
+</li>
+<li>
+<p><strong>НЕ открывайте SAMBA в интернет!</strong></p>
+</li>
+<li>Используйте только локально</li>
+<li>
+<p>Или через VPN</p>
+</li>
+<li>
+<p><strong>Регулярно обновляйте:</strong></p>
+</li>
+<li>Home Assistant</li>
+<li>Nginx</li>
+<li>MikroTik RouterOS</li>
+<li>
+<p>SSL сертификаты (автоматически)</p>
+</li>
+<li>
+<p><strong>Мониторьте логи:</strong></p>
+</li>
+<li>Nginx access/error logs</li>
+<li>Home Assistant logs</li>
+<li>MikroTik logs</li>
+</ol>
+<hr />
+<p><strong>Готово!</strong> Теперь у вас безопасный доступ к Home Assistant через доменное имя с SSL! 🔒</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  К началу
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Gfermoto
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Gfermoto/HASSio_Cursor" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

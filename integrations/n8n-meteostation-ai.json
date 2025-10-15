@@ -1,0 +1,474 @@
+{
+  "name": "🌤️ Погода: Метеостанция + AI (GigaChat + Яндекс.Погода)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Расписание 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        500
+      ],
+      "notes": "Запуск каждый день в 07:00. Измените на нужное время."
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "getAll",
+        "returnAll": true
+      },
+      "name": "HA: Все датчики",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [
+        450,
+        500
+      ],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      },
+      "notes": "Получает все состояния из Home Assistant. Настройте credential с вашим HA."
+    },
+    {
+      "parameters": {
+        "jsCode": "// НАСТРОЙТЕ: замените названия датчиков на ваши!\nconst sensorMap = {\n  'sensor.ws2350_v2_37_outdoor_temperature': 'temp',\n  'sensor.ws2350_v2_37_feels_like_temperature': 'feels_like',\n  'sensor.ws2350_v2_37_humidity': 'humidity',\n  'sensor.ws2350_v2_37_dewpoint': 'dewpoint',\n  'sensor.ws2350_v2_37_wind_speed': 'wind_speed',\n  'sensor.ws2350_v2_37_wind_direction': 'wind_direction',\n  'sensor.ws2350_v2_37_wind_gust': 'wind_gust',\n  'sensor.ws2350_v2_37_absolute_pressure': 'pressure',\n  'sensor.ws2350_v2_37_rain_rate': 'rain_rate',\n  'sensor.ws2350_v2_37_daily_rain_rate': 'daily_rain',\n  'sensor.ws2350_v2_37_uv_index': 'uv_index',\n  'sensor.gw2000a_soil_moisture_1': 'soil_moisture',\n  'sensor.gw2000a_soil_temperature_1': 'soil_temp',\n  'sensor.gw2000a_pm2_5_1': 'air_quality',\n  'sensor.radsens_dynamic_intensity': 'radiation'\n};\n\nconst weather = {};\nlet found = 0;\n\nconst items = $input.all();\nitems.forEach(item => {\n  const entityId = item.json.entity_id || item.json.id;\n  const state = item.json.state;\n  const key = sensorMap[entityId];\n  \n  if (key && state !== undefined && state !== 'unavailable' && state !== 'unknown') {\n    const value = parseFloat(state);\n    weather[key] = isNaN(value) ? state : value;\n    found++;\n  }\n});\n\nconsole.log('✅ Найдено датчиков:', found);\nconsole.log('Данные:', JSON.stringify(weather).substring(0, 200));\n\nreturn [{ json: { local_weather: weather } }];"
+      },
+      "name": "Фильтр метеостанции",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        500
+      ],
+      "notes": "Фильтрует только нужные датчики. ЗАМЕНИТЕ названия сенсоров на ваши!"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.weather.yandex.ru/v2/forecast?lat=YOUR_LATITUDE&lon=YOUR_LONGITUDE",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Yandex-Weather-Key",
+              "value": "YOUR_YANDEX_WEATHER_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Яндекс: Прогноз",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        250,
+        700
+      ],
+      "notes": "Использует REST API v2. ЗАМЕНИТЕ: YOUR_YANDEX_WEATHER_API_KEY, YOUR_LATITUDE, YOUR_LONGITUDE"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://YOUR_ALLSKY_IP/indi-allsky/images/latest.jpg",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          },
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "HTTP: Allsky снимок",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        250,
+        900
+      ],
+      "notes": "Получает последний снимок allsky через HTTP GET запрос. ЗАМЕНИТЕ: YOUR_ALLSKY_IP"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByIndex",
+        "numberOfInputs": 3,
+        "options": {}
+      },
+      "name": "Объединить источники",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        850,
+        600
+      ],
+      "notes": "Объединяет данные от метеостанции (index 0), Яндекс.Погода (index 1) и HTTP allsky снимок (index 2)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// С combineByPosition данные приходят в фиксированных позициях:\n// items[0] - данные от HA (index 0 в connections)\n// items[1] - данные от Яндекс (index 1 в connections)\n// items[2] - данные от HTTP Allsky (index 2 в connections)\n\nconst haData = items[0]?.json;\nconst yandexData = items[1]?.json;\nconst httpData = items[2]?.json;\n\nlet local = null;\nlet yandex = null;\nlet allskyImage = null;\n\n// Обрабатываем данные от HA\nif (haData?.local_weather) {\n  local = haData.local_weather;\n}\n\n// Обрабатываем данные от Яндекс (REST API v2)\nif (yandexData) {\n  yandex = yandexData;\n  console.log('✅ Яндекс.Погода данные получены:', yandexData.fact?.temp + '°C');\n  console.log('📊 Прогноз завтра:', JSON.stringify(yandex.forecasts?.[1]?.parts).substring(0, 200));\n}\n\n// Обрабатываем данные от HTTP Allsky\nif (httpData) {\n  if (httpData.data) {\n    // HTTP Request с responseFormat: file возвращает Buffer в data\n    try {\n      allskyImage = httpData.data;\n      console.log('✅ Allsky изображение получено, размер:', allskyImage.length, 'байт');\n    } catch(e) {\n      console.log('❌ HTTP image decode error:', e);\n    }\n  } else if (httpData.binary) {\n    // Альтернативно может быть в binary\n    try {\n      allskyImage = httpData.binary.data;\n      console.log('✅ Allsky изображение получено из binary, размер:', allskyImage.length, 'байт');\n    } catch(e) {\n      console.log('❌ Binary decode error:', e);\n    }\n  }\n}\n\n// Проверяем что у нас есть основные данные\nif (!local) {\n  throw new Error('Не удалось получить данные от метеостанции');\n}\n\n// Если Яндекс недоступен, используем fallback\nif (!yandex) {\n  console.log('⚠️ Яндекс.Погода недоступен, используем только метеостанцию');\n  return [{\n    json: {\n      local: local,\n      yandex_now: `${local.temp}°C, местные данные`,\n      forecast_today: 'Прогноз недоступен (Яндекс.Погода не работает)',\n      forecast_tomorrow_day: 'недоступно',\n      forecast_tomorrow_night: 'недоступно',\n      allsky_image: allskyImage,\n      has_allsky: !!allskyImage\n    }\n  }];\n}\n\n// Обрабатываем данные от Яндекс (REST API v2)\n// Полный словарь условий погоды Яндекс\nconst conditions = {\n  'clear': 'ясно',\n  'partly-cloudy': 'переменная облачность',\n  'cloudy': 'облачно',\n  'overcast': 'пасмурно',\n  'drizzle': 'морось',\n  'light-rain': 'небольшой дождь',\n  'rain': 'дождь',\n  'moderate-rain': 'умеренный дождь',\n  'heavy-rain': 'сильный дождь',\n  'continuous-heavy-rain': 'длительный сильный дождь',\n  'showers': 'ливень',\n  'wet-snow': 'дождь со снегом',\n  'light-snow': 'небольшой снег',\n  'snow': 'снег',\n  'snow-showers': 'снегопад',\n  'hail': 'град',\n  'thunderstorm': 'гроза',\n  'thunderstorm-with-rain': 'дождь с грозой',\n  'thunderstorm-with-hail': 'гроза с градом'\n};\n\n// REST API v2 структура: { fact: { temp, condition }, forecasts: [{ parts: { day: {...}, night: {...} } }] }\nconst nowTemp = yandex.fact?.temp || 'N/A';\nconst nowCondition = conditions[yandex.fact?.condition] || yandex.fact?.condition || 'неизвестно';\n\n// Получаем прогноз на завтра (второй день в массиве forecasts)\nconst tomorrow = yandex.forecasts?.[1]?.parts || {};\nconst tomorrowDay = tomorrow.day || {};\nconst tomorrowNight = tomorrow.night || {};\n\nconsole.log('🔍 День завтра:', JSON.stringify(tomorrowDay));\nconsole.log('🔍 Ночь завтра:', JSON.stringify(tomorrowNight));\n\nconst tomorrowDayTemp = tomorrowDay.temp_min !== undefined && tomorrowDay.temp_max !== undefined ? \n  `${tomorrowDay.temp_min}..${tomorrowDay.temp_max}°C` : \n  (tomorrowDay.temp_avg !== undefined ? `${tomorrowDay.temp_avg}°C` : 'недоступно');\n\nconst tomorrowDayCondition = conditions[tomorrowDay.condition] || tomorrowDay.condition || 'неизвестно';\n\nconst tomorrowNightTemp = tomorrowNight.temp_min !== undefined && tomorrowNight.temp_max !== undefined ? \n  `${tomorrowNight.temp_min}..${tomorrowNight.temp_max}°C` : \n  (tomorrowNight.temp_avg !== undefined ? `${tomorrowNight.temp_avg}°C` : 'недоступно');\n\nconst tomorrowNightCondition = conditions[tomorrowNight.condition] || tomorrowNight.condition || 'неизвестно';\n\nreturn [{\n  json: {\n    local: local,\n    yandex_now: `${nowTemp}°C, ${nowCondition}`,\n    forecast_today: `Сейчас: ${nowTemp}°C, ${nowCondition}`,\n    forecast_tomorrow_day: `${tomorrowDayTemp}, ${tomorrowDayCondition}`,\n    forecast_tomorrow_night: `${tomorrowNightTemp}, ${tomorrowNightCondition}`,\n    allsky_image: allskyImage,\n    has_allsky: !!allskyImage\n  }\n}];"
+      },
+      "name": "Подготовить данные",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        600
+      ],
+      "notes": "Объединяет и форматирует данные для AI"
+    },
+    {
+      "parameters": {
+        "jsCode": "function generateUUID() {\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {\n    const r = Math.random() * 16 | 0;\n    const v = c === 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  });\n}\n\nreturn [{ json: { uuid: generateUUID(), data: $input.item.json } }];"
+      },
+      "name": "UUID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        600
+      ],
+      "notes": "Генерирует UUID для GigaChat OAuth"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "RqUID",
+              "value": "={{$json.uuid}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic YOUR_GIGACHAT_AUTHORIZATION_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "GIGACHAT_API_PERS"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Токен",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1450,
+        600
+      ],
+      "notes": "ЗАМЕНИТЕ: YOUR_GIGACHAT_AUTHORIZATION_KEY (из config.yml)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $node[\"UUID\"].json.data;\nconst token = $input.item.json.access_token;\nconst local = d.local;\n\nconst windDirs = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ'];\nconst windDir = windDirs[Math.round((local.wind_direction % 360) / 45) % 8];\nconst pressure = (local.pressure * 0.750062).toFixed(0);\n\nconst prompt = `Прогноз КП. Только ПОЛЕЗНОЕ.\n\nСЕЙЧАС: ${local.temp}°C (ощущ. ${local.feels_like}°C), влажн. ${local.humidity}%, ветер ${local.wind_speed} м/с ${windDir}, давл. ${pressure} мм, осадки ${local.daily_rain} мм, почва ${local.soil_moisture}%\n\nЯНДЕКС: ${d.yandex_now}\nЗАВТРА: День ${d.forecast_tomorrow_day}, Ночь ${d.forecast_tomorrow_night}\n\nФОРМАТ:\n📊 ПРОГНОЗ: [1 предложение про сегодня+завтра]\n\n💡 РЕКОМЕНДАЦИИ:\n• Одежда: [что надеть]\n• Зонт: [брать/не брать]\n• Авто: [если актуально - прогрев/стёкла/дорога]\n• Дом: [проветривание/отопление]\n• Огород: [полив - только если актуально]\n\n⚠️ ВНИМАНИЕ: [только ВАЖНОЕ или пропусти]\n\nТРЕБОВАНИЯ:\n- 100 слов MAX\n- Только то что РЕАЛЬНО полезно\n- Если нечего сказать по пункту - пропусти его\n- Без воды и очевидностей`;\n\nreturn [{\n  json: {\n    token: token,\n    request: {\n      model: \"GigaChat\",\n      messages: [\n        {role: \"system\", content: \"Ты синоптик-консультант. Давай только ПОЛЕЗНЫЕ рекомендации: одежда, зонт, авто, дом, огород. КРАТКО. Макс 120 слов. Без очевидностей.\"},\n        {role: \"user\", content: prompt}\n      ],\n      temperature: 0.7,\n      max_tokens: 500\n    },\n    local: local\n  }\n}];"
+      },
+      "name": "AI: Промпт",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        600
+      ],
+      "notes": "Формирует промпт для GigaChat AI"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prompt = $node[\"AI: Промпт\"].json;\nconst data = $node[\"UUID\"].json.data;\n\n// Если есть изображение allsky, добавляем его к запросу\nif (data.allsky_image) {\n  let imageContent;\n  \n  if (data.allsky_image.startsWith('http')) {\n    // URL изображения\n    imageContent = { type: \"image_url\", image_url: { url: data.allsky_image } };\n  } else if (typeof data.allsky_image === 'string') {\n    // Base64 строка\n    imageContent = { type: \"image_url\", image_url: { url: `data:image/jpeg;base64,${data.allsky_image}` } };\n  } else if (data.allsky_image.buffer) {\n    // Binary данные из Home Assistant\n    imageContent = { type: \"image_url\", image_url: { url: `data:image/jpeg;base64,${data.allsky_image.toString('base64')}` } };\n  }\n  \n  if (imageContent) {\n    // Добавляем изображение к сообщению пользователя\n    prompt.request.messages[1].content = [\n      { type: \"text\", text: prompt.request.messages[1].content },\n      imageContent\n    ];\n  }\n}\n\nreturn [{\n  json: {\n    token: prompt.token,\n    request: prompt.request,\n    local: prompt.local\n  }\n}];"
+      },
+      "name": "AI: Добавить изображение",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1750,
+        600
+      ],
+      "notes": "Добавляет allsky изображение к GigaChat запросу для визуального анализа"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.token}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.request}}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "GigaChat: Анализ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1850,
+        600
+      ],
+      "notes": "Отправляет запрос в GigaChat для AI анализа"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ai = $input.item.json.choices[0].message.content;\nconst prompt = $node[\"AI: Промпт\"].json;\nconst local = prompt.local;\n\nconst windDirs = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ'];\nconst windDir = windDirs[Math.round((local.wind_direction % 360) / 45) % 8];\nconst pressure = (local.pressure * 0.750062).toFixed(0);\n\nlet tempIcon = '🌡️';\nif (local.temp < 5) tempIcon = '❄️';\nif (local.temp > 25) tempIcon = '🔥';\n\nlet rainIcon = '☀️';\nif (local.daily_rain > 0) rainIcon = '🌧️';\nif (local.daily_rain > 5) rainIcon = '☔️';\n\nlet airIcon = '😊';\nif (local.air_quality > 100) airIcon = '😐';\nif (local.air_quality > 150) airIcon = '😷';\n\n// НАСТРОЙТЕ: измените название КП и URL на ваши\nconst msg = `🌤️ *ПРОГНОЗ ПОГОДЫ [ВАШЕ КП]*\n\n*СЕЙЧАС:*\n${tempIcon} Температура: *${local.temp}°C* (ощущается *${local.feels_like}°C*)\n💧 Влажность: *${local.humidity}%* • 🌡️💦 Точка росы: *${local.dewpoint}°C*\n🌬️ Ветер: *${local.wind_speed} м/с ${windDir}* • 💨 Порывы: *${local.wind_gust} м/с*\n🎈 Давление: *${pressure} мм рт.ст.*\n${rainIcon} Осадки: *${local.rain_rate} мм/ч* (за день *${local.daily_rain} мм*)\n☀️ УФ-индекс: *${local.uv_index}*\n${airIcon} Воздух PM2.5: *${local.air_quality}*\n🌱 Почва: *${local.soil_moisture}%* (${local.soil_temp}°C)\n\n━━━━━━━━━━━━━━━━━━━━\n${ai}\n━━━━━━━━━━━━━━━━━━━━\n\n_[Метеостанция](YOUR_METEOSTATION_URL) • ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}_\n_LLM: GigaChat | Прогноз: Яндекс. | AI агент: n8n_`;\n\nreturn [{ json: { message: msg, local: local, ai_report: ai } }];"
+      },
+      "name": "Форматировать",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2050,
+        600
+      ],
+      "notes": "Форматирует красивое сообщение с данными + AI анализ"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{$json.message}}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true,
+          "append_attribution": false
+        }
+      },
+      "name": "TG: Отправить",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2250,
+        600
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      },
+      "notes": "ЗАМЕНИТЕ: YOUR_TELEGRAM_CHAT_ID и настройте Telegram credential"
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "upsert",
+        "entityId": "sensor.ai_weather_report",
+        "state": "updated",
+        "stateAttributes": "={{ { ai_report: $json.ai_report, temp: $json.local.temp, humidity: $json.local.humidity, pressure: $json.local.pressure, wind_speed: $json.local.wind_speed, air_quality: $json.local.air_quality, soil_moisture: $json.local.soil_moisture, updated_at: new Date().toISOString() } }}"
+      },
+      "name": "HA: Сохранить",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [
+        2250,
+        800
+      ],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      },
+      "notes": "Сохраняет AI отчет в Home Assistant sensor"
+    }
+  ],
+  "connections": {
+    "Расписание 07:00": {
+      "main": [
+        [
+          {
+            "node": "HA: Все датчики",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Яндекс: Прогноз",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Allsky снимок",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HA: Все датчики": {
+      "main": [
+        [
+          {
+            "node": "Фильтр метеостанции",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Фильтр метеостанции": {
+      "main": [
+        [
+          {
+            "node": "Объединить источники",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Яндекс: Прогноз": {
+      "main": [
+        [
+          {
+            "node": "Объединить источники",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP: Allsky снимок": {
+      "main": [
+        [
+          {
+            "node": "Объединить источники",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Объединить источники": {
+      "main": [
+        [
+          {
+            "node": "Подготовить данные",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовить данные": {
+      "main": [
+        [
+          {
+            "node": "UUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UUID": {
+      "main": [
+        [
+          {
+            "node": "GigaChat: Токен",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GigaChat: Токен": {
+      "main": [
+        [
+          {
+            "node": "AI: Промпт",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Промпт": {
+      "main": [
+        [
+          {
+            "node": "AI: Добавить изображение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Добавить изображение": {
+      "main": [
+        [
+          {
+            "node": "GigaChat: Анализ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GigaChat: Анализ": {
+      "main": [
+        [
+          {
+            "node": "Форматировать",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Форматировать": {
+      "main": [
+        [
+          {
+            "node": "TG: Отправить",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HA: Сохранить",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}

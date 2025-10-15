@@ -1,0 +1,3376 @@
+
+<!doctype html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Профессиональные инструменты для управления и аудита Home Assistant">
+      
+      
+        <meta name="author" content="Gfermoto">
+      
+      
+        <link rel="canonical" href="https://gfermoto.github.io/HASSio_Cursor/integrations/OLLAMA-PROXMOX-COMPLETE-GUIDE/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+    
+    
+      
+        <title>Ollama на Proxmox с NVIDIA GPU - Полное руководство - HASSio Cursor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ollama-proxmox-nvidia-gpu-" class="md-skip">
+          Перейти к содержанию
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
+    <a href="../.." title="HASSio Cursor" class="md-header__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            HASSio Cursor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Ollama на Proxmox с NVIDIA GPU - Полное руководство
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Тёмная тема"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Тёмная тема" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Светлая тема"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Светлая тема" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Поиск">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Инициализация поиска
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Вкладки" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  🏠 Главная
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../setup/quickstart/" class="md-tabs__link">
+          
+  
+  
+  📖 Установка
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/first-audit/" class="md-tabs__link">
+          
+  
+  
+  📚 Руководства
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/heating/" class="md-tabs__link">
+          
+  
+  
+  💡 Примеры
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/COMMANDS/" class="md-tabs__link">
+          
+  
+  
+  📋 Справочник
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyzers/" class="md-tabs__link">
+          
+  
+  
+  📊 Анализаторы
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../n8n-ai-agents/" class="md-tabs__link">
+          
+  
+  
+  🔗 Интеграции
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Навигация" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="HASSio Cursor" class="md-nav__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    HASSio Cursor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🏠 Главная
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📖 Установка
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            📖 Установка
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Быстрый старт
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Детальная установка
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/post-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    После установки
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/portforward-mikrotik/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Проброс портов MikroTik
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/zerotier-mixed-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ZeroTier смешанный режим
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/ssh-tunnel-samba/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSH туннель для SAMBA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📚 Руководства
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            📚 Руководства
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/first-audit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Первый аудит
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/heating-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Оптимизация отопления
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность умного дома
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    💡 Примеры
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            💡 Примеры
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/heating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Отопление
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/energy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Энергосбережение
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📋 Справочник
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            📋 Справочник
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/COMMANDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Команды
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Рабочий процесс
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📊 Анализаторы
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            📊 Анализаторы
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyzers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Обзор
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    🔗 Интеграции
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            🔗 Интеграции
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../n8n-ai-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤖 AI Агенты n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../n8n-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    📚 Подключение n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../n8n-butler-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤵 Пошаговое развертывание
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vm-lxc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Почему VM, а не LXC?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-biosuefi" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 1: Подготовка BIOS/UEFI (на физическом сервере)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 1: Подготовка BIOS/UEFI (на физическом сервере)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 Включение виртуализации
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-bios" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 Проверка что BIOS настроен правильно
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-proxmox-iommu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 2: Конфигурация Proxmox хоста для IOMMU
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 2: Конфигурация Proxmox хоста для IOMMU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-grub" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 Редактирование GRUB
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-vfio" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 Загрузка VFIO модулей
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 Применение изменений
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.4 Перезагрузка хоста
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-iommu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.5 Проверка IOMMU после перезагрузки
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-gpu-passthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 3: Подготовка GPU для passthrough
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 3: Подготовка GPU для passthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 Определение GPU в системе
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-iommu" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2 Проверка IOMMU группы
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-blacklist-nvidia" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3 Blacklist NVIDIA драйверов на хосте
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-gpu-vfio" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4 Привязка GPU к VFIO
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.5 Применение изменений
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-gpu-binding" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.6 Финальная проверка GPU binding
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ubuntu-server-iso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 4: Скачивание Ubuntu Server ISO
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-vm-proxmox-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 5: Создание VM через Proxmox Web UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 5: Создание VM через Proxmox Web UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1 Запуск мастера создания VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-general-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2 General (вкладка 1)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-os-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.3 OS (вкладка 2)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-system-3-" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.4 System (вкладка 3) - КРИТИЧНО!
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-disks-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.5 Disks (вкладка 4)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-cpu-5-" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.6 CPU (вкладка 5) - КРИТИЧНО!
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-memory-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.7 Memory (вкладка 6)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#58-network-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.8 Network (вкладка 7)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#59-confirm-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.9 Confirm (вкладка 8)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-gpu-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 6: Добавление GPU в VM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 6: Добавление GPU в VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-pci-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1 Добавление PCI устройств через Web UI
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.1 Добавление PCI устройств через Web UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#611-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1.1 Добавление GPU
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2 Дополнительная конфигурация VM (опционально, но рекомендуется)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ubuntu-server-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 7: Установка Ubuntu Server в VM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 7: Установка Ubuntu Server в VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.1 Запуск VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-ubuntu-installation-wizard" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.2 Ubuntu Installation Wizard
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.3 Завершение установки
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-ubuntu-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 8: Первичная настройка Ubuntu VM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 8: Первичная настройка Ubuntu VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.1 Подключение по SSH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.2 Обновление системы
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.3 Установка базовых утилит
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.4 Проверка видимости GPU
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-nvidia-ubuntu-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 9: Установка NVIDIA драйверов в Ubuntu VM
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 9: Установка NVIDIA драйверов в Ubuntu VM">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.1 Определение рекомендуемого драйвера
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-nvidia" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.2 Установка NVIDIA драйвера
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.3 Перезагрузка VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-nvidia" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.4 Проверка NVIDIA драйвера
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 10: Установка и настройка Ollama
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 10: Установка и настройка Ollama">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      10.1 Установка Ollama
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      10.2 Настройка сетевого доступа к API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-api-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      10.3 Проверка API endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 11: Загрузка и тестирование модели
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 11: Загрузка и тестирование модели">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-vram" class="md-nav__link">
+    <span class="md-ellipsis">
+      11.1 Выбор модели по VRAM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112" class="md-nav__link">
+    <span class="md-ellipsis">
+      11.2 Загрузка модели
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113" class="md-nav__link">
+    <span class="md-ellipsis">
+      11.3 Проверка загруженной модели
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      11.4 Тестирование модели с GPU
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      11.5 Тестирование API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-n8n" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 12: Интеграция с n8n
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 12: Интеграция с n8n">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.1 Скачивание workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-n8n" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.2 Импорт в n8n
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-ollama-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.3 Конфигурация Ollama node
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.4 Конфигурация Home Assistant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#125-telegram" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.5 Конфигурация Telegram
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#126-tool-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.6 Создание Tool workflows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#127-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      12.7 Активация workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    <span class="md-ellipsis">
+      Этап 13: Тестирование системы
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Этап 13: Тестирование системы">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131" class="md-nav__link">
+    <span class="md-ellipsis">
+      13.1 Простая команда
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132" class="md-nav__link">
+    <span class="md-ellipsis">
+      13.2 Команда управления
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      13.3 Мониторинг GPU
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#134" class="md-nav__link">
+    <span class="md-ellipsis">
+      13.4 Проверка производительности
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Обслуживание и мониторинг
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Обслуживание и мониторинг">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Snapshot VM перед изменениями
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      Обновление Ollama
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Добавление модели после апгрейда GPU
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vm-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проблема: VM не загружается после добавления GPU
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gpu-nvidia-smi" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проблема: GPU виден, но nvidia-smi не работает
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ollama-cpu-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проблема: Ollama медленно отвечает (CPU mode)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#out-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проблема: Out of Memory при загрузке модели
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-43-device-manager-windows-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проблема: Code 43 в Device Manager (если Windows VM)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Производительность и метрики
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Производительность и метрики">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gtx-1050-ti-4gb-phi3mini-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      GTX 1050 Ti (4GB) + phi3:mini в VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gtx-1060-6gb-llama318b" class="md-nav__link">
+    <span class="md-ellipsis">
+      GTX 1060 (6GB) + llama3.1:8b после апгрейда
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Оптимизация производительности
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Оптимизация производительности">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cpu-pinning-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      CPU pinning для VM
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#huge-pages-8b" class="md-nav__link">
+    <span class="md-ellipsis">
+      Huge pages (для моделей 8B+)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Финальная архитектура
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Чеклист успешной установки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Полезные команды для диагностики
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Полезные команды для диагностики">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmox" class="md-nav__link">
+    <span class="md-ellipsis">
+      На Proxmox хосте
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ubuntu-vm" class="md-nav__link">
+    <span class="md-ellipsis">
+      В Ubuntu VM
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Источники и благодарности
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Следующие шаги
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ollama-proxmox-nvidia-gpu-">Ollama на Proxmox с NVIDIA GPU - Полное руководство<a class="headerlink" href="#ollama-proxmox-nvidia-gpu-" title="Permanent link">&para;</a></h1>
+<p>Профессиональная инструкция по развертыванию Ollama в Ubuntu VM на Proxmox с GPU passthrough.<br />
+Консолидирует community best practices и глубокие знания Proxmox.</p>
+<p><strong>Целевая конфигурация:</strong>
+- Proxmox VE 8.x (Debian 12 Bookworm)
+- NVIDIA GTX 1050 Ti (4GB VRAM) → GTX 1060 (6GB VRAM)
+- Ubuntu 22.04 LTS VM
+- Ollama с моделями phi3:mini / llama3.1:8b</p>
+<p><strong>Время установки:</strong> 40-60 минут<br />
+<strong>Сложность:</strong> Intermediate<br />
+<strong>Безопасность:</strong> ✅ Proxmox хост остается чистым</p>
+<hr />
+<h2 id="vm-lxc">Почему VM, а не LXC?<a class="headerlink" href="#vm-lxc" title="Permanent link">&para;</a></h2>
+<p><strong>Проблема с LXC:</strong>
+Установка <code>nvidia-driver</code> на Proxmox хост вызывает конфликт с <code>proxmox-ve</code> metapackage:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>W: You are attempting to remove the meta-package &#39;proxmox-ve&#39;!
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>E: Sub-process /usr/share/proxmox-ve/pve-apt-hook returned an error code (1)
+</span></code></pre></div></p>
+<p><strong>Решение - VM с PCI passthrough:</strong>
+- ✅ NVIDIA драйверы устанавливаются <strong>только в VM</strong>, не на хосте
+- ✅ Нет конфликтов с proxmox-ve
+- ✅ Полная изоляция от Proxmox
+- ✅ Стандартная установка в Ubuntu (без проблем)
+- ⚠️ Требует IOMMU/VT-d в BIOS
+- ⚠️ GPU доступен только одной VM
+- ⚠️ Overhead ~5-10% (приемлемо)</p>
+<p><strong>Источники:</strong>
+- <a href="https://habr.com/ru/articles/794568/">Habr: Проброс видеокарты в Proxmox</a>
+- <a href="https://pve.proxmox.com/wiki/PCI_Passthrough">Proxmox Wiki: PCI Passthrough</a>
+- <a href="https://forum.proxmox.com/threads/ubuntu-22-04-ollama-nvidia-3060-gpu-passthrough-and-drivers-all-looking-good-but.144104/">Proxmox Forum: Ollama + GPU</a></p>
+<hr />
+<h2 id="1-biosuefi">Этап 1: Подготовка BIOS/UEFI (на физическом сервере)<a class="headerlink" href="#1-biosuefi" title="Permanent link">&para;</a></h2>
+<h3 id="11">1.1 Включение виртуализации<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>Перезагрузите сервер и войдите в BIOS/UEFI (обычно Del, F2, F10 при загрузке).</p>
+<p>Найдите и включите:</p>
+<p><strong>Для Intel материнских плат:</strong>
+- <strong>Intel VT-x</strong> (Virtualization Technology) → Enabled
+- <strong>Intel VT-d</strong> (Virtualization Technology for Directed I/O) → Enabled
+- <strong>IOMMU</strong> → Enabled (если есть отдельная опция)</p>
+<p><strong>Для AMD материнских плат:</strong>
+- <strong>SVM Mode</strong> (AMD-V) → Enabled
+- <strong>AMD-Vi</strong> (AMD IOMMU) → Enabled
+- <strong>IOMMU</strong> → Enabled</p>
+<p><strong>Где искать:</strong> Обычно в разделах:
+- Advanced → CPU Configuration
+- Chipset Configuration
+- Virtualization Support</p>
+<p>Сохраните (F10) и перезагрузите.</p>
+<h3 id="12-bios">1.2 Проверка что BIOS настроен правильно<a class="headerlink" href="#12-bios" title="Permanent link">&para;</a></h3>
+<p>После загрузки Proxmox:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ssh<span class="w"> </span>root@&lt;PROXMOX_IP&gt;
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Проверка поддержки виртуализации</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>egrep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;(vmx|svm)&#39;</span><span class="w"> </span>/proc/cpuinfo<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Должно вывести: vmx (Intel) или svm (AMD)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Если пусто - VT-x/AMD-V не включен в BIOS</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Проверка поддержки IOMMU в системе</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-e<span class="w"> </span>DMAR<span class="w"> </span>-e<span class="w"> </span>IOMMU
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Должно содержать (Intel):</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># DMAR: IOMMU enabled</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># DMAR-IR: Enabled IRQ remapping</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Или (AMD):</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># AMD-Vi: Found IOMMU</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># AMD-Vi: Interrupt remapping enabled</span>
+</span></code></pre></div>
+<p><strong>Критерий успеха:</strong> Видите сообщения об IOMMU/DMAR.<br />
+<strong>Если нет:</strong> Вернитесь в BIOS, проверьте что VT-d/AMD-Vi включен.</p>
+<hr />
+<h2 id="2-proxmox-iommu">Этап 2: Конфигурация Proxmox хоста для IOMMU<a class="headerlink" href="#2-proxmox-iommu" title="Permanent link">&para;</a></h2>
+<h3 id="21-grub">2.1 Редактирование GRUB<a class="headerlink" href="#21-grub" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Backup текущей конфигурации</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cp<span class="w"> </span>/etc/default/grub<span class="w"> </span>/etc/default/grub.backup
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Редактирование</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>nano<span class="w"> </span>/etc/default/grub
+</span></code></pre></div>
+<p>Найдите строку начинающуюся с <code>GRUB_CMDLINE_LINUX_DEFAULT=</code></p>
+<p><strong>Для Intel процессоров:</strong></p>
+<p>Было:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet&quot;
+</span></code></pre></div></p>
+<p>Станет:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet intel_iommu=on iommu=pt&quot;
+</span></code></pre></div></p>
+<p><strong>Для AMD процессоров:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>GRUB_CMDLINE_LINUX_DEFAULT=&quot;quiet amd_iommu=on iommu=pt&quot;
+</span></code></pre></div>
+<p><strong>Параметры:</strong>
+- <code>intel_iommu=on</code> / <code>amd_iommu=on</code> - включение IOMMU
+- <code>iommu=pt</code> - passthrough mode (лучшая производительность)</p>
+<p>Сохраните: Ctrl+O, Enter, Ctrl+X</p>
+<p>Обновление GRUB:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>update-grub
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># Должно вывести:</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Generating grub configuration file ...</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Found linux image: /boot/vmlinuz-6.8.12-4-pve</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># done</span>
+</span></code></pre></div>
+<h3 id="22-vfio">2.2 Загрузка VFIO модулей<a class="headerlink" href="#22-vfio" title="Permanent link">&para;</a></h3>
+<p>VFIO (Virtual Function I/O) - framework для проброса PCI устройств в VM.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>nano<span class="w"> </span>/etc/modules
+</span></code></pre></div>
+<p>Добавьте в конец файла:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>vfio
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>vfio_iommu_type1
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>vfio_pci
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>vfio_virqfd
+</span></code></pre></div>
+<p>Сохраните: Ctrl+O, Enter, Ctrl+X</p>
+<p><strong>Объяснение модулей:</strong>
+- <code>vfio</code> - основной framework
+- <code>vfio_iommu_type1</code> - IOMMU backend
+- <code>vfio_pci</code> - PCI device support
+- <code>vfio_virqfd</code> - interrupt remapping</p>
+<h3 id="23">2.3 Применение изменений<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Обновление initramfs</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>update-initramfs<span class="w"> </span>-u<span class="w"> </span>-k<span class="w"> </span>all
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Должно вывести:</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1"># update-initramfs: Generating /boot/initrd.img-6.8.12-4-pve</span>
+</span></code></pre></div>
+<h3 id="24">2.4 Перезагрузка хоста<a class="headerlink" href="#24" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>reboot
+</span></code></pre></div>
+<p>Подождите 2-3 минуты пока Proxmox загрузится.</p>
+<h3 id="25-iommu">2.5 Проверка IOMMU после перезагрузки<a class="headerlink" href="#25-iommu" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ssh<span class="w"> </span>root@&lt;PROXMOX_IP&gt;
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1"># 1. Проверка что IOMMU активирован</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;IOMMU enabled&quot;</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># Должно вывести:</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># DMAR: IOMMU enabled (Intel)</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="c1"># или</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="c1"># AMD-Vi: AMD IOMMUv2 loaded and initialized</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># 2. Проверка VFIO модулей</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vfio
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Должно показать:</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># vfio_pci</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># vfio_iommu_type1</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># vfio</span>
+</span></code></pre></div>
+<p><strong>Критерий успеха:</strong> IOMMU enabled и VFIO модули загружены.<br />
+<strong>Если нет:</strong> Проверьте GRUB конфигурацию и /etc/modules, повторите 2.1-2.4</p>
+<hr />
+<h2 id="3-gpu-passthrough">Этап 3: Подготовка GPU для passthrough<a class="headerlink" href="#3-gpu-passthrough" title="Permanent link">&para;</a></h2>
+<h3 id="31-gpu">3.1 Определение GPU в системе<a class="headerlink" href="#31-gpu" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>lspci<span class="w"> </span>-nn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>nvidia
+</span></code></pre></div>
+<p><strong>Пример вывода для GTX 1050 Ti:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP107 [GeForce GTX 1050 Ti] [10de:1c82] (rev a1)
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>01:00.1 Audio device [0403]: NVIDIA Corporation GP107GL High Definition Audio Controller [10de:0fb9] (rev a1)
+</span></code></pre></div></p>
+<p><strong>Запишите:</strong>
+- PCI Bus адрес: <code>01:00.0</code> (GPU), <code>01:00.1</code> (Audio)
+- Vendor:Device ID: <code>10de:1c82</code> (GPU), <code>10de:0fb9</code> (Audio)</p>
+<p><strong>Важно:</strong> Ваши ID могут отличаться в зависимости от производителя карты (Asus, MSI, Gigabyte).</p>
+<h3 id="32-iommu">3.2 Проверка IOMMU группы<a class="headerlink" href="#32-iommu" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="ch">#!/bin/bash</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">for</span><span class="w"> </span>d<span class="w"> </span><span class="k">in</span><span class="w"> </span>/sys/kernel/iommu_groups/*/devices/*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nv">n</span><span class="o">=</span><span class="si">${</span><span class="nv">d</span><span class="p">#*/iommu_groups/*</span><span class="si">}</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="nv">n</span><span class="o">=</span><span class="si">${</span><span class="nv">n</span><span class="p">%%/*</span><span class="si">}</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;IOMMU Group %s: &#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$n</span><span class="s2">&quot;</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span>lspci<span class="w"> </span>-nns<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">d</span><span class="p">##*/</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>nvidia
+</span></code></pre></div>
+<p><strong>Пример вывода:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>IOMMU Group 1: 01:00.0 VGA compatible controller [0300]: NVIDIA Corporation [10de:1c82]
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>IOMMU Group 1: 01:00.1 Audio device [0403]: NVIDIA Corporation [10de:0fb9]
+</span></code></pre></div></p>
+<p><strong>Критерий успеха:</strong> GPU (01:00.0) и Audio (01:00.1) в <strong>одной</strong> IOMMU группе.</p>
+<p><strong>Если в разных группах:</strong> Могут быть проблемы, но попробуйте. Если не работает - потребуется ACS override patch (сложно).</p>
+<h3 id="33-blacklist-nvidia">3.3 Blacklist NVIDIA драйверов на хосте<a class="headerlink" href="#33-blacklist-nvidia" title="Permanent link">&para;</a></h3>
+<p>Это критично - хост не должен захватывать GPU, только VFIO.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/modprobe.d/blacklist-nvidia.conf<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="s">blacklist nouveau</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="s">blacklist nvidia</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="s">blacklist nvidiafb</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="s">EOF</span>
+</span></code></pre></div>
+<p><strong>Объяснение:</strong>
+- <code>nouveau</code> - открытый драйвер NVIDIA (блокируем)
+- <code>nvidia</code> - проприетарный драйвер (блокируем, чтобы не конфликтовал)
+- <code>nvidiafb</code> - framebuffer driver</p>
+<h3 id="34-gpu-vfio">3.4 Привязка GPU к VFIO<a class="headerlink" href="#34-gpu-vfio" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;options vfio-pci ids=10de:1c82,10de:0fb9&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/modprobe.d/vfio.conf
+</span></code></pre></div>
+<p><strong>Замените</strong> <code>10de:1c82,10de:0fb9</code> на ваши ID из шага 3.1.</p>
+<p><strong>Что делает:</strong> При загрузке системы VFIO захватит эти устройства <strong>до</strong> загрузки других драйверов.</p>
+<h3 id="35">3.5 Применение изменений<a class="headerlink" href="#35" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>update-initramfs<span class="w"> </span>-u<span class="w"> </span>-k<span class="w"> </span>all
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>reboot
+</span></code></pre></div>
+<h3 id="36-gpu-binding">3.6 Финальная проверка GPU binding<a class="headerlink" href="#36-gpu-binding" title="Permanent link">&para;</a></h3>
+<p>После перезагрузки:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>ssh<span class="w"> </span>root@&lt;PROXMOX_IP&gt;
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>lspci<span class="w"> </span>-nnk<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">3</span><span class="w"> </span>-i<span class="w"> </span>nvidia
+</span></code></pre></div>
+<p><strong>Ожидаемый вывод:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP107 [GeForce GTX 1050 Ti] [10de:1c82]
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>        Subsystem: Micro-Star International Co., Ltd. [MSI] [1462:8c96]
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>        Kernel driver in use: vfio-pci
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>        Kernel modules: nouveau
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>01:00.1 Audio device [0403]: NVIDIA Corporation GP107GL [10de:0fb9]
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>        Subsystem: Micro-Star International Co., Ltd. [MSI] [1462:8c96]
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>        Kernel driver in use: vfio-pci
+</span></code></pre></div></p>
+<p><strong>Критерий успеха:</strong> <code>Kernel driver in use: vfio-pci</code> для обоих устройств.</p>
+<p><strong>Если показывает <code>nouveau</code> или нет driver:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># Проверьте vfio.conf</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>cat<span class="w"> </span>/etc/modprobe.d/vfio.conf
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># Проверьте что модули загружены</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vfio_pci
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="c1"># Пересоздайте initramfs</span>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>update-initramfs<span class="w"> </span>-u<span class="w"> </span>-k<span class="w"> </span>all
+</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>reboot
+</span></code></pre></div></p>
+<hr />
+<h2 id="4-ubuntu-server-iso">Этап 4: Скачивание Ubuntu Server ISO<a class="headerlink" href="#4-ubuntu-server-iso" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="nb">cd</span><span class="w"> </span>/var/lib/vz/template/iso
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="c1"># Ubuntu 22.04.5 LTS (проверенная версия)</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>wget<span class="w"> </span>https://releases.ubuntu.com/22.04.5/ubuntu-22.04.5-live-server-amd64.iso
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="c1"># Проверка целостности (опционально)</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>wget<span class="w"> </span>https://releases.ubuntu.com/22.04.5/SHA256SUMS
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>sha256sum<span class="w"> </span>-c<span class="w"> </span>SHA256SUMS<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ubuntu-22.04.5-live-server-amd64.iso
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>
+</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="c1"># Проверка размера</span>
+</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>ls<span class="w"> </span>-lh<span class="w"> </span>ubuntu-22.04.5-live-server-amd64.iso
+</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="c1"># Должно быть: ~2.5-2.7GB</span>
+</span></code></pre></div>
+<p><strong>Критерий успеха:</strong> ISO файл загружен в <code>/var/lib/vz/template/iso/</code></p>
+<hr />
+<h2 id="5-vm-proxmox-web-ui">Этап 5: Создание VM через Proxmox Web UI<a class="headerlink" href="#5-vm-proxmox-web-ui" title="Permanent link">&para;</a></h2>
+<h3 id="51-vm">5.1 Запуск мастера создания VM<a class="headerlink" href="#51-vm" title="Permanent link">&para;</a></h3>
+<p>Proxmox Web UI → правый верхний угол → <strong>Create VM</strong></p>
+<h3 id="52-general-1">5.2 General (вкладка 1)<a class="headerlink" href="#52-general-1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Node:</strong> ваш Proxmox node</li>
+<li><strong>VM ID:</strong> <code>300</code> (или любой свободный, запомните его)</li>
+<li><strong>Name:</strong> <code>ollama-vm</code></li>
+<li><strong>Resource Pool:</strong> (оставьте пустым)</li>
+<li><strong>Start at boot:</strong> ✅ (опционально)</li>
+</ul>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="53-os-2">5.3 OS (вкладка 2)<a class="headerlink" href="#53-os-2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Use CD/DVD disc image file (ISO)</strong></li>
+<li><strong>Storage:</strong> <code>local</code></li>
+<li><strong>ISO image:</strong> <code>ubuntu-22.04.5-live-server-amd64.iso</code></li>
+<li><strong>Type:</strong> <code>Linux</code></li>
+<li><strong>Version:</strong> <code>6.x - 2.6 Kernel</code></li>
+</ul>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="54-system-3-">5.4 System (вкладка 3) - КРИТИЧНО!<a class="headerlink" href="#54-system-3-" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Graphic card:</strong> <code>Default</code></li>
+<li><strong>Machine:</strong> <code>q35</code> ← <strong>Обязательно для PCIe passthrough</strong></li>
+<li><strong>BIOS:</strong> <code>OVMF (UEFI)</code> ← <strong>Обязательно для GPU</strong></li>
+<li><strong>Add EFI Disk:</strong> ✅ Yes</li>
+<li><strong>EFI Storage:</strong> <code>local-lvm</code></li>
+<li><strong>Pre-Enroll keys:</strong> ❌ No (отключите Secure Boot)</li>
+<li><strong>SCSI Controller:</strong> <code>VirtIO SCSI single</code></li>
+<li><strong>Qemu Agent:</strong> ✅ Yes (опционально, но полезно)</li>
+</ul>
+<p><strong>Почему q35 и OVMF:</strong>
+- q35 - современная machine type с PCIe support
+- OVMF (UEFI) - требуется для корректного GPU passthrough
+- Secure Boot отключен - NVIDIA драйверы unsigned</p>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="55-disks-4">5.5 Disks (вкладка 4)<a class="headerlink" href="#55-disks-4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Bus/Device:</strong> <code>VirtIO Block 0</code></li>
+<li><strong>Storage:</strong> <code>local-lvm</code> (или ваше хранилище)</li>
+<li><strong>Disk size (GiB):</strong> <code>50</code></li>
+<li><strong>Cache:</strong> <code>Default (No cache)</code></li>
+<li><strong>Discard:</strong> ✅ (если SSD)</li>
+<li><strong>SSD emulation:</strong> ✅ (если хранилище на SSD)</li>
+</ul>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="56-cpu-5-">5.6 CPU (вкладка 5) - КРИТИЧНО!<a class="headerlink" href="#56-cpu-5-" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sockets:</strong> <code>1</code></li>
+<li><strong>Cores:</strong> <code>4</code> (минимум 2, рекомендуется 4)</li>
+<li><strong>Type:</strong> <code>host</code> ← <strong>Обязательно для GPU и производительности</strong></li>
+<li><strong>Extra CPU Flags:</strong> (оставьте пустым)</li>
+</ul>
+<p><strong>Почему host:</strong>
+- Пробрасывает все инструкции процессора хоста в VM
+- Необходимо для CUDA и GPU compute
+- Максимальная производительность</p>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="57-memory-6">5.7 Memory (вкладка 6)<a class="headerlink" href="#57-memory-6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Memory (MiB):</strong> <code>8192</code> (8GB, минимум для Ollama)</li>
+<li><strong>Minimum memory (MiB):</strong> <code>8192</code></li>
+<li><strong>Ballooning Device:</strong> ❌ Uncheck (отключите для стабильности)</li>
+</ul>
+<p><strong>Для 4GB моделей хватит 6GB RAM, но 8GB - safer.</strong></p>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="58-network-7">5.8 Network (вкладка 7)<a class="headerlink" href="#58-network-7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Bridge:</strong> <code>vmbr0</code> (ваш основной bridge)</li>
+<li><strong>VLAN Tag:</strong> (оставьте пустым)</li>
+<li><strong>Model:</strong> <code>VirtIO (paravirtualized)</code></li>
+<li><strong>MAC address:</strong> (автоматически)</li>
+<li><strong>Firewall:</strong> ✅ (опционально)</li>
+</ul>
+<p>Нажмите <strong>Next</strong></p>
+<h3 id="59-confirm-8">5.9 Confirm (вкладка 8)<a class="headerlink" href="#59-confirm-8" title="Permanent link">&para;</a></h3>
+<p>Проверьте параметры:
+- Machine: q35
+- BIOS: OVMF
+- CPU Type: host
+- Memory: 8192 MB</p>
+<p>✅ <strong>Start after created</strong> - снимите галочку! (настроим GPU сначала)</p>
+<p>Нажмите <strong>Finish</strong></p>
+<p>VM создана, но <strong>НЕ запускайте её!</strong></p>
+<hr />
+<h2 id="6-gpu-vm">Этап 6: Добавление GPU в VM<a class="headerlink" href="#6-gpu-vm" title="Permanent link">&para;</a></h2>
+<h3 id="61-pci-web-ui">6.1 Добавление PCI устройств через Web UI<a class="headerlink" href="#61-pci-web-ui" title="Permanent link">&para;</a></h3>
+<p>Выберите VM 300 → <strong>Hardware</strong></p>
+<h4 id="611-gpu">6.1.1 Добавление GPU<a class="headerlink" href="#611-gpu" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Нажмите <strong>Add</strong> → <strong>PCI Device</strong></li>
+<li><strong>Raw Device:</strong> выберите вашу NVIDIA GPU (01:00.0)</li>
+<li>Установите галочки:</li>
+<li>✅ <strong>All Functions</strong> (важно - захватит GPU и Audio вместе)</li>
+<li>✅ <strong>Primary GPU</strong> (если это единственная GPU в системе)</li>
+<li>✅ <strong>PCI-Express</strong> (для лучшей производительности)</li>
+<li>✅ <strong>ROM-Bar</strong> (обычно нужен)</li>
+<li>Нажмите <strong>Add</strong></li>
+</ol>
+<p>Проверьте в списке Hardware:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>PCI Device (hostpci0): 0000:01:00, All Functions
+</span></code></pre></div></p>
+<h3 id="62-vm">6.2 Дополнительная конфигурация VM (опционально, но рекомендуется)<a class="headerlink" href="#62-vm" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>nano<span class="w"> </span>/etc/pve/qemu-server/300.conf
+</span></code></pre></div>
+<p>Найдите строку с <code>hostpci0</code> и добавьте после неё:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>cpu: host,hidden=1,flags=+pcid
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>args: -cpu host,kvm=off
+</span></code></pre></div>
+<p><strong>Объяснение:</strong>
+- <code>hidden=1</code> - скрывает от VM что она виртуальная (некоторые NVIDIA драйверы это проверяют)
+- <code>kvm=off</code> - скрывает KVM signature (для NVIDIA driver detection)
+- <code>+pcid</code> - Process-Context Identifiers (производительность)</p>
+<p>Сохраните: Ctrl+O, Enter, Ctrl+X</p>
+<p><strong>Файл должен выглядеть примерно так:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>bootdisk: scsi0
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>cores: 4
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>cpu: host,hidden=1,flags=+pcid
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>args: -cpu host,kvm=off
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>efidisk0: local-lvm:vm-300-disk-0,efitype=4m,size=4M
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>hostpci0: 0000:01:00,pcie=1,x-vga=1
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>memory: 8192
+</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>meta: creation-qemu=8.1.5,ctime=1728600000
+</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>name: ollama-vm
+</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>net0: virtio=XX:XX:XX:XX:XX:XX,bridge=vmbr0
+</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>numa: 0
+</span><span id="__span-28-12"><a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a>ostype: l26
+</span><span id="__span-28-13"><a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a>scsi0: local-lvm:vm-300-disk-1,iothread=1,size=50G
+</span><span id="__span-28-14"><a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a>scsihw: virtio-scsi-single
+</span><span id="__span-28-15"><a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a>smbios1: uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+</span><span id="__span-28-16"><a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a>sockets: 1
+</span><span id="__span-28-17"><a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a>vmgenid: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+</span></code></pre></div>
+<hr />
+<h2 id="7-ubuntu-server-vm">Этап 7: Установка Ubuntu Server в VM<a class="headerlink" href="#7-ubuntu-server-vm" title="Permanent link">&para;</a></h2>
+<h3 id="71-vm">7.1 Запуск VM<a class="headerlink" href="#71-vm" title="Permanent link">&para;</a></h3>
+<p>Proxmox Web UI → VM 300 → <strong>Start</strong></p>
+<p>Затем → <strong>Console</strong> (откроется noVNC)</p>
+<p>Подождите загрузки Ubuntu installer (~30 секунд).</p>
+<h3 id="72-ubuntu-installation-wizard">7.2 Ubuntu Installation Wizard<a class="headerlink" href="#72-ubuntu-installation-wizard" title="Permanent link">&para;</a></h3>
+<p><strong>Language:</strong>
+- English (рекомендуется для troubleshooting)</p>
+<p><strong>Keyboard configuration:</strong>
+- Layout: English (US) или Russian
+- Variant: English (US)</p>
+<p><strong>Network connections:</strong>
+- Оставьте DHCP (автоматически получит IP)
+- Запомните показанный IP адрес (например: 192.168.1.150)</p>
+<p><strong>Configure proxy:</strong>
+- Оставьте пустым</p>
+<p><strong>Configure Ubuntu archive mirror:</strong>
+- Оставьте по умолчанию</p>
+<p><strong>Guided storage configuration:</strong>
+- ✅ Use an entire disk
+- Disk: <code>/dev/sda</code> (50GB VirtIO disk)
+- ❌ Set up this disk as an LVM group (можно оставить, не критично)</p>
+<p><strong>Storage configuration:</strong>
+- Просмотрите разметку
+- Continue (подтвердите)</p>
+<p><strong>Profile setup:</strong>
+- Your name: <code>Administrator</code>
+- Your server's name: <code>ollama-vm</code>
+- Pick a username: <code>admin</code> (или другое)
+- Choose a password: <code>&lt;надежный_пароль&gt;</code>
+- Confirm your password: <code>&lt;надежный_пароль&gt;</code></p>
+<p><strong>Upgrade to Ubuntu Pro:</strong>
+- Skip for now</p>
+<p><strong>SSH Setup:</strong>
+- ✅ Install OpenSSH server (обязательно!)
+- ❌ Import SSH identity (не нужно)</p>
+<p><strong>Featured Server Snaps:</strong>
+- Ничего не выбирайте (установим позже что нужно)</p>
+<p>Начнется установка (~5-10 минут).</p>
+<h3 id="73">7.3 Завершение установки<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<p>Когда увидите <strong>"Reboot Now"</strong>:</p>
+<ol>
+<li>Нажмите <strong>Reboot Now</strong></li>
+<li>VM перезагрузится</li>
+<li>Дождитесь login prompt</li>
+</ol>
+<p><strong>Критерий успеха:</strong> Видите <code>ollama-vm login:</code></p>
+<hr />
+<h2 id="8-ubuntu-vm">Этап 8: Первичная настройка Ubuntu VM<a class="headerlink" href="#8-ubuntu-vm" title="Permanent link">&para;</a></h2>
+<h3 id="81-ssh">8.1 Подключение по SSH<a class="headerlink" href="#81-ssh" title="Permanent link">&para;</a></h3>
+<p>С вашей рабочей машины:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>ssh<span class="w"> </span>admin@&lt;VM_IP&gt;
+</span></code></pre></div>
+<p>Введите пароль созданный на шаге 7.2.</p>
+<p><strong>Если SSH не работает:</strong>
+- Проверьте IP: в Proxmox Web UI → VM 300 → Summary → IPs
+- Или через консоль в VM: <code>ip addr show</code></p>
+<h3 id="82">8.2 Обновление системы<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade<span class="w"> </span>-y
+</span></code></pre></div>
+<p>Если спросит о restart services - выберите <strong>Yes</strong> и <strong>OK</strong> для всех.</p>
+<h3 id="83">8.3 Установка базовых утилит<a class="headerlink" href="#83" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>wget<span class="w"> </span>git<span class="w"> </span>build-essential
+</span></code></pre></div>
+<h3 id="84-gpu">8.4 Проверка видимости GPU<a class="headerlink" href="#84-gpu" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>lspci<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>nvidia
+</span></code></pre></div>
+<p><strong>Должно вывести:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>00:10.0 VGA compatible controller: NVIDIA Corporation GP107 [GeForce GTX 1050 Ti]
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>00:10.1 Audio device: NVIDIA Corporation GP107GL High Definition Audio Controller
+</span></code></pre></div></p>
+<p><strong>Критерий успеха:</strong> GPU виден в VM (PCI адрес будет другой, это нормально).</p>
+<p><strong>Если GPU не виден:</strong>
+- Вернитесь в Proxmox Web UI → VM 300 → Hardware
+- Проверьте что PCI Device добавлен
+- Проверьте что VM полностью выключена (Shutdown) перед изменениями в Hardware
+- Restart VM</p>
+<hr />
+<h2 id="9-nvidia-ubuntu-vm">Этап 9: Установка NVIDIA драйверов в Ubuntu VM<a class="headerlink" href="#9-nvidia-ubuntu-vm" title="Permanent link">&para;</a></h2>
+<h3 id="91">9.1 Определение рекомендуемого драйвера<a class="headerlink" href="#91" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>sudo<span class="w"> </span>ubuntu-drivers<span class="w"> </span>devices
+</span></code></pre></div>
+<p><strong>Пример вывода:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>== /sys/devices/pci0000:00/0000:00:10.0 ==
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>modalias : pci:v000010DEd00001C82sv00001462sd00008C96bc03sc00i00
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>vendor   : NVIDIA Corporation
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>model    : GP107 [GeForce GTX 1050 Ti]
+</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>driver   : nvidia-driver-535 - distro non-free recommended
+</span><span id="__span-35-6"><a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>driver   : nvidia-driver-545 - third-party non-free
+</span><span id="__span-35-7"><a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>driver   : nvidia-driver-470 - distro non-free
+</span></code></pre></div></p>
+<p><strong>Recommended:</strong> <code>nvidia-driver-535</code> (или новее)</p>
+<h3 id="92-nvidia">9.2 Установка NVIDIA драйвера<a class="headerlink" href="#92-nvidia" title="Permanent link">&para;</a></h3>
+<p><strong>Вариант A: Автоматическая установка (рекомендуется)</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>sudo<span class="w"> </span>ubuntu-drivers<span class="w"> </span>autoinstall
+</span></code></pre></div>
+<p>Это установит recommended версию автоматически.</p>
+<p><strong>Вариант B: Ручная установка конкретной версии</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nvidia-driver-535<span class="w"> </span>nvidia-utils-535
+</span></code></pre></div>
+<p>Установка займет 3-5 минут (скачивается ~500MB пакетов).</p>
+<h3 id="93-vm">9.3 Перезагрузка VM<a class="headerlink" href="#93-vm" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>sudo<span class="w"> </span>reboot
+</span></code></pre></div>
+<p>Подождите 1-2 минуты.</p>
+<h3 id="94-nvidia">9.4 Проверка NVIDIA драйвера<a class="headerlink" href="#94-nvidia" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>ssh<span class="w"> </span>admin@&lt;VM_IP&gt;
+</span><span id="__span-39-2"><a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>
+</span><span id="__span-39-3"><a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>nvidia-smi
+</span></code></pre></div>
+<p><strong>Ожидаемый вывод:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>Fri Oct 11 01:00:00 2025
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>+-----------------------------------------------------------------------------------------+
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>| NVIDIA-SMI 535.183.01             Driver Version: 535.183.01   CUDA Version: 12.2     |
+</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>|-----------------------------------------+------------------------+----------------------+
+</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>| GPU  Name                 Persistence-M | Bus-Id        Disp.A  | Volatile Uncorr. ECC |
+</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage  | GPU-Util  Compute M. |
+</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a>|                                         |                       |               MIG M. |
+</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>|=========================================+========================+======================|
+</span><span id="__span-40-9"><a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>|   0  NVIDIA GeForce GTX 1050 Ti     Off | 00000000:00:10.0  Off |                  N/A |
+</span><span id="__span-40-10"><a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>| 40%   35C    P0              N/A /  75W |      0MiB /  4096MiB  |      0%      Default |
+</span><span id="__span-40-11"><a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a>|                                         |                       |                  N/A |
+</span><span id="__span-40-12"><a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a>+-----------------------------------------+------------------------+----------------------+
+</span></code></pre></div></p>
+<p><strong>Критерий успеха:</strong>
+- Видна модель GPU: GeForce GTX 1050 Ti
+- Driver Version: 535.xxx или новее
+- CUDA Version: 12.x
+- Memory: 4096 MiB</p>
+<p><strong>Если ошибка "NVIDIA-SMI has failed":</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1"># Проверка установки</span>
+</span><span id="__span-41-2"><a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>dpkg<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nvidia-driver
+</span><span id="__span-41-3"><a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>
+</span><span id="__span-41-4"><a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="c1"># Переустановка</span>
+</span><span id="__span-41-5"><a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>--reinstall<span class="w"> </span>nvidia-driver-535
+</span><span id="__span-41-6"><a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>
+</span><span id="__span-41-7"><a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="c1"># Проверка загрузки модуля</span>
+</span><span id="__span-41-8"><a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nvidia
+</span><span id="__span-41-9"><a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>
+</span><span id="__span-41-10"><a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a><span class="c1"># Если модуль не загружен</span>
+</span><span id="__span-41-11"><a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>nvidia
+</span><span id="__span-41-12"><a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a>nvidia-smi
+</span></code></pre></div></p>
+<hr />
+<h2 id="10-ollama">Этап 10: Установка и настройка Ollama<a class="headerlink" href="#10-ollama" title="Permanent link">&para;</a></h2>
+<h3 id="101-ollama">10.1 Установка Ollama<a class="headerlink" href="#101-ollama" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1"># Официальный install script</span>
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://ollama.ai/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</span></code></pre></div>
+<p><strong>Что делает скрипт:</strong>
+1. Скачивает бинарник Ollama
+2. Устанавливает в <code>/usr/local/bin/ollama</code>
+3. Создает systemd unit <code>/etc/systemd/system/ollama.service</code>
+4. Запускает сервис</p>
+<p><strong>Критерий успеха:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a>ollama<span class="w"> </span>--version
+</span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="c1"># Вывод: ollama version is 0.x.x</span>
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>systemctl<span class="w"> </span>status<span class="w"> </span>ollama.service
+</span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="c1"># Вывод: active (running)</span>
+</span></code></pre></div></p>
+<h3 id="102-api">10.2 Настройка сетевого доступа к API<a class="headerlink" href="#102-api" title="Permanent link">&para;</a></h3>
+<p>По умолчанию Ollama слушает только на 127.0.0.1. Для доступа из n8n нужно изменить на 0.0.0.0.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>edit<span class="w"> </span>ollama.service
+</span></code></pre></div>
+<p>Откроется редактор. Добавьте:</p>
+<div class="language-ini highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="k">[Service]</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="na">Environment</span><span class="o">=</span><span class="s">&quot;OLLAMA_HOST=0.0.0.0:11434&quot;</span>
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="na">Environment</span><span class="o">=</span><span class="s">&quot;OLLAMA_ORIGINS=*&quot;</span>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="na">Environment</span><span class="o">=</span><span class="s">&quot;CUDA_VISIBLE_DEVICES=0&quot;</span>
+</span></code></pre></div>
+<p><strong>Объяснение:</strong>
+- <code>OLLAMA_HOST=0.0.0.0:11434</code> - слушать на всех интерфейсах
+- <code>OLLAMA_ORIGINS=*</code> - разрешить CORS для любых источников
+- <code>CUDA_VISIBLE_DEVICES=0</code> - явно указать использовать GPU 0</p>
+<p>Сохраните: Ctrl+O, Enter, Ctrl+X</p>
+<p>Применение изменений:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>ollama.service
+</span></code></pre></div>
+<h3 id="103-api-endpoint">10.3 Проверка API endpoint<a class="headerlink" href="#103-api-endpoint" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-47-1"><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="c1"># Локально в VM</span>
+</span><span id="__span-47-2"><a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>curl<span class="w"> </span>http://localhost:11434/api/tags
+</span><span id="__span-47-3"><a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>
+</span><span id="__span-47-4"><a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="c1"># Должен вернуть:</span>
+</span><span id="__span-47-5"><a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a><span class="c1"># {&quot;models&quot;:[]}</span>
+</span></code></pre></div>
+<p>С Proxmox хоста или вашей рабочей машины:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-48-1"><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>curl<span class="w"> </span>http://&lt;VM_IP&gt;:11434/api/tags
+</span><span id="__span-48-2"><a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>
+</span><span id="__span-48-3"><a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="c1"># Должен вернуть тот же JSON</span>
+</span></code></pre></div>
+<p><strong>Критерий успеха:</strong> API отвечает на запросы по сети.</p>
+<p><strong>Если Connection refused:</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-49-1"><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="c1"># Проверка что сервис слушает на 0.0.0.0</span>
+</span><span id="__span-49-2"><a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">11434</span>
+</span><span id="__span-49-3"><a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a>
+</span><span id="__span-49-4"><a id="__codelineno-49-4" name="__codelineno-49-4" href="#__codelineno-49-4"></a><span class="c1"># Должно быть: 0.0.0.0:11434 (не 127.0.0.1)</span>
+</span><span id="__span-49-5"><a id="__codelineno-49-5" name="__codelineno-49-5" href="#__codelineno-49-5"></a>
+</span><span id="__span-49-6"><a id="__codelineno-49-6" name="__codelineno-49-6" href="#__codelineno-49-6"></a><span class="c1"># Проверка переменных окружения</span>
+</span><span id="__span-49-7"><a id="__codelineno-49-7" name="__codelineno-49-7" href="#__codelineno-49-7"></a>systemctl<span class="w"> </span>show<span class="w"> </span>ollama.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Environment
+</span><span id="__span-49-8"><a id="__codelineno-49-8" name="__codelineno-49-8" href="#__codelineno-49-8"></a>
+</span><span id="__span-49-9"><a id="__codelineno-49-9" name="__codelineno-49-9" href="#__codelineno-49-9"></a><span class="c1"># Должно содержать: OLLAMA_HOST=0.0.0.0:11434</span>
+</span><span id="__span-49-10"><a id="__codelineno-49-10" name="__codelineno-49-10" href="#__codelineno-49-10"></a>
+</span><span id="__span-49-11"><a id="__codelineno-49-11" name="__codelineno-49-11" href="#__codelineno-49-11"></a><span class="c1"># Если нет, повторите шаг 10.2</span>
+</span></code></pre></div></p>
+<hr />
+<h2 id="11_1">Этап 11: Загрузка и тестирование модели<a class="headerlink" href="#11_1" title="Permanent link">&para;</a></h2>
+<h3 id="111-vram">11.1 Выбор модели по VRAM<a class="headerlink" href="#111-vram" title="Permanent link">&para;</a></h3>
+<p><strong>Для GTX 1050 Ti (4GB VRAM):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>Размер</th>
+<th>VRAM</th>
+<th>Скорость в VM</th>
+<th>Рекомендация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>phi3:mini</code></td>
+<td>2.3GB</td>
+<td>~2.5GB</td>
+<td>40-50 tok/s</td>
+<td>✅ Лучший баланс</td>
+</tr>
+<tr>
+<td><code>llama3.2:3b</code></td>
+<td>2GB</td>
+<td>~2.2GB</td>
+<td>50-60 tok/s</td>
+<td>✅ Быстрее</td>
+</tr>
+<tr>
+<td><code>qwen2.5:3b</code></td>
+<td>2GB</td>
+<td>~2.2GB</td>
+<td>40-50 tok/s</td>
+<td>✅ Хорошая альтернатива</td>
+</tr>
+<tr>
+<td><code>gemma2:2b</code></td>
+<td>1.6GB</td>
+<td>~1.8GB</td>
+<td>70+ tok/s</td>
+<td>✅ Для простых задач</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Рекомендация:</strong> <code>phi3:mini</code> - отличное качество ответов на русском.</p>
+<h3 id="112">11.2 Загрузка модели<a class="headerlink" href="#112" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-50-1"><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a>ollama<span class="w"> </span>pull<span class="w"> </span>phi3:mini
+</span></code></pre></div>
+<p><strong>Процесс загрузки:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-51-1"><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>pulling manifest
+</span><span id="__span-51-2"><a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>pulling 8c83cdcf6a98... 100% ▕████████████████▏ 2.3 GB
+</span><span id="__span-51-3"><a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a>pulling ed11eda7790d... 100% ▕████████████████▏  106 B
+</span><span id="__span-51-4"><a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a>pulling ca31f59a46fb... 100% ▕████████████████▏  485 B
+</span><span id="__span-51-5"><a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a>verifying sha256 digest
+</span><span id="__span-51-6"><a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a>writing manifest
+</span><span id="__span-51-7"><a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a>removing any unused layers
+</span><span id="__span-51-8"><a id="__codelineno-51-8" name="__codelineno-51-8" href="#__codelineno-51-8"></a>success
+</span></code></pre></div></p>
+<p>Время загрузки: ~2-5 минут (зависит от интернета).</p>
+<h3 id="113">11.3 Проверка загруженной модели<a class="headerlink" href="#113" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-52-1"><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a>ollama<span class="w"> </span>list
+</span></code></pre></div>
+<p><strong>Вывод:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-53-1"><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a>NAME         ID          SIZE    MODIFIED
+</span><span id="__span-53-2"><a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>phi3:mini    1a4e8c5f... 2.3 GB  2 minutes ago
+</span></code></pre></div></p>
+<h3 id="114-gpu">11.4 Тестирование модели с GPU<a class="headerlink" href="#114-gpu" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-54-1"><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a>ollama<span class="w"> </span>run<span class="w"> </span>phi3:mini<span class="w"> </span><span class="s2">&quot;Привет! Представься кратко на русском языке как AI ассистент для умного дома&quot;</span>
+</span></code></pre></div>
+<p><strong>Во время выполнения</strong> откройте второй SSH сеанс и запустите:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-55-1"><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a>watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>nvidia-smi
+</span></code></pre></div>
+<p><strong>Ожидаемое поведение:</strong>
+- GPU-Util поднимется до 80-100% во время генерации
+- Memory-Usage покажет ~2500 MiB
+- Temperature поднимется до 50-65°C</p>
+<p><strong>Критерий успеха:</strong>
+- Модель отвечает на русском языке
+- GPU используется (nvidia-smi показывает нагрузку)
+- Ответ генерируется за 3-5 секунд</p>
+<p><strong>Если GPU не используется (0% utilization):</strong>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-56-1"><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1"># Проверка CUDA доступности</span>
+</span><span id="__span-56-2"><a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>nvidia-smi
+</span><span id="__span-56-3"><a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a>
+</span><span id="__span-56-4"><a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="c1"># Перезапуск с явным указанием GPU</span>
+</span><span id="__span-56-5"><a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>phi3:mini<span class="w"> </span><span class="s2">&quot;test&quot;</span>
+</span><span id="__span-56-6"><a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>
+</span><span id="__span-56-7"><a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a><span class="c1"># Если работает, добавьте в systemd (уже должно быть из 10.2)</span>
+</span><span id="__span-56-8"><a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>systemctl<span class="w"> </span>show<span class="w"> </span>ollama.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>CUDA_VISIBLE_DEVICES
+</span></code></pre></div></p>
+<h3 id="115-api">11.5 Тестирование API<a class="headerlink" href="#115-api" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-57-1"><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a>curl<span class="w"> </span>http://localhost:11434/api/generate<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-57-2"><a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="s1">  &quot;model&quot;: &quot;phi3:mini&quot;,</span>
+</span><span id="__span-57-3"><a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a><span class="s1">  &quot;prompt&quot;: &quot;Кратко опиши свои возможности как AI ассистента&quot;,</span>
+</span><span id="__span-57-4"><a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="s1">  &quot;stream&quot;: false</span>
+</span><span id="__span-57-5"><a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="s1">}&#39;</span>
+</span></code></pre></div>
+<p><strong>Ожидаемый ответ:</strong>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-58-1"><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="p">{</span>
+</span><span id="__span-58-2"><a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;phi3:mini&quot;</span><span class="p">,</span>
+</span><span id="__span-58-3"><a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a><span class="w">  </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-10-11T01:00:00.000Z&quot;</span><span class="p">,</span>
+</span><span id="__span-58-4"><a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a><span class="w">  </span><span class="nt">&quot;response&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Я AI ассистент, способный помогать с различными задачами...&quot;</span><span class="p">,</span>
+</span><span id="__span-58-5"><a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a><span class="w">  </span><span class="nt">&quot;done&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-58-6"><a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a><span class="w">  </span><span class="nt">&quot;total_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4500000000</span><span class="p">,</span>
+</span><span id="__span-58-7"><a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a><span class="w">  </span><span class="nt">&quot;load_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500000000</span><span class="p">,</span>
+</span><span id="__span-58-8"><a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a><span class="w">  </span><span class="nt">&quot;prompt_eval_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100000000</span><span class="p">,</span>
+</span><span id="__span-58-9"><a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a><span class="w">  </span><span class="nt">&quot;eval_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">85</span><span class="p">,</span>
+</span><span id="__span-58-10"><a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a><span class="w">  </span><span class="nt">&quot;eval_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000000000</span>
+</span><span id="__span-58-11"><a id="__codelineno-58-11" name="__codelineno-58-11" href="#__codelineno-58-11"></a><span class="p">}</span>
+</span></code></pre></div></p>
+<p><strong>Производительность:</strong>
+- <code>eval_count</code> / (<code>eval_duration</code> / 1e9) = tokens per second
+- Для phi3:mini ожидается: ~40-50 tokens/sec</p>
+<hr />
+<h2 id="12-n8n">Этап 12: Интеграция с n8n<a class="headerlink" href="#12-n8n" title="Permanent link">&para;</a></h2>
+<h3 id="121-workflow">12.1 Скачивание workflow<a class="headerlink" href="#121-workflow" title="Permanent link">&para;</a></h3>
+<p>На вашей рабочей машине:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-59-1"><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="nb">cd</span><span class="w"> </span>/home/gfer/HASSio
+</span><span id="__span-59-2"><a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a><span class="c1"># Файл уже есть в репозитории</span>
+</span><span id="__span-59-3"><a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a>ls<span class="w"> </span>-lh<span class="w"> </span>docs/integrations/n8n-voice-assistant-ollama.json
+</span></code></pre></div>
+<h3 id="122-n8n">12.2 Импорт в n8n<a class="headerlink" href="#122-n8n" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Откройте n8n Web UI</li>
+<li><strong>Workflows</strong> → <strong>Add workflow</strong> → <strong>Import from File</strong></li>
+<li>Выберите файл <code>n8n-voice-assistant-ollama.json</code></li>
+<li>Workflow откроется с 16 nodes</li>
+</ol>
+<h3 id="123-ollama-node">12.3 Конфигурация Ollama node<a class="headerlink" href="#123-ollama-node" title="Permanent link">&para;</a></h3>
+<p>Найдите node <strong>"Ollama: Model"</strong>:</p>
+<p><strong>Параметры:</strong>
+- <strong>Base URL:</strong> <code>http://&lt;VM_IP&gt;:11434</code> (IP вашей Ollama VM)
+- <strong>Model:</strong> <code>phi3:mini</code></p>
+<p>Тест подключения:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-60-1"><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="c1"># С машины где работает n8n</span>
+</span><span id="__span-60-2"><a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a>curl<span class="w"> </span>http://&lt;VM_IP&gt;:11434/api/tags
+</span></code></pre></div>
+<p>Должен вернуть список моделей.</p>
+<h3 id="124-home-assistant">12.4 Конфигурация Home Assistant<a class="headerlink" href="#124-home-assistant" title="Permanent link">&para;</a></h3>
+<p>Node <strong>"HA: Get All States"</strong>:</p>
+<ul>
+<li><strong>URL:</strong> <code>http://&lt;HA_IP&gt;:8123/api/states</code></li>
+<li><strong>Authentication:</strong> Header Auth</li>
+<li><strong>Credential:</strong> Создайте в n8n:</li>
+<li>Type: HTTP Header Auth</li>
+<li>Name: <code>Authorization</code></li>
+<li>Value: <code>Bearer &lt;YOUR_HA_LONG_LIVED_TOKEN&gt;</code></li>
+</ul>
+<p><strong>Получение HA токена:</strong>
+1. Home Assistant → Профиль (левый нижний угол)
+2. Long-Lived Access Tokens → Create Token
+3. Name: <code>n8n-ollama</code>
+4. Скопируйте токен</p>
+<h3 id="125-telegram">12.5 Конфигурация Telegram<a class="headerlink" href="#125-telegram" title="Permanent link">&para;</a></h3>
+<p>Создайте Telegram Bot:
+1. Telegram → @BotFather → <code>/newbot</code>
+2. Name: <code>My Home Assistant Bot</code>
+3. Username: <code>my_ha_ollama_bot</code>
+4. Получите token: <code>123456:ABCdefGHI...</code></p>
+<p>Получите ваш Telegram ID:
+1. Telegram → @userinfobot → отправьте любое сообщение
+2. Скопируйте ID</p>
+<p>В n8n создайте Telegram credential:
+- Type: Telegram API
+- Access Token: <code>123456:ABCdefGHI...</code></p>
+<p>Node <strong>"Telegram: Trigger"</strong>:
+- <strong>User IDs:</strong> ваш Telegram ID
+- <strong>Credential:</strong> выберите созданный Telegram credential</p>
+<h3 id="126-tool-workflows">12.6 Создание Tool workflows<a class="headerlink" href="#126-tool-workflows" title="Permanent link">&para;</a></h3>
+<p>Для работы AI Agent нужно создать 5 sub-workflows для управления Home Assistant.</p>
+<p><strong>Минимальный пример - Tool "Turn On Light":</strong></p>
+<ol>
+<li>Создайте новый workflow: <strong>+ Add workflow</strong></li>
+<li>Добавьте node <strong>HTTP Request</strong>:</li>
+<li>Method: <code>POST</code></li>
+<li>URL: <code>http://&lt;HA_IP&gt;:8123/api/services/light/turn_on</code></li>
+<li>Authentication: Header Auth (ваш HA credential)</li>
+<li>Body Content Type: JSON</li>
+<li>Body:
+   <div class="language-json highlight"><pre><span></span><code><span id="__span-61-1"><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="p">{</span>
+</span><span id="__span-61-2"><a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a><span class="w">  </span><span class="nt">&quot;entity_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;={{ $json.entity_id }}&quot;</span>
+</span><span id="__span-61-3"><a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a><span class="p">}</span>
+</span></code></pre></div></li>
+<li><strong>Save</strong> workflow</li>
+<li>Скопируйте ID workflow (из URL: <code>.../workflow/&lt;ID&gt;</code>)</li>
+<li>В главном workflow найдите node <strong>"Tool: Turn On Light"</strong></li>
+<li>Параметр <strong>Workflow ID:</strong> вставьте скопированный ID</li>
+</ol>
+<p>Повторите для остальных tools:
+- <code>Tool: Turn Off Light</code> - POST <code>/api/services/light/turn_off</code>
+- <code>Tool: Set Temperature</code> - POST <code>/api/services/climate/set_temperature</code>
+- <code>Tool: Activate Scene</code> - POST <code>/api/services/scene/turn_on</code>
+- <code>Tool: Get Sensor</code> - GET <code>/api/states/{{ $json.entity_id }}</code></p>
+<h3 id="127-workflow">12.7 Активация workflow<a class="headerlink" href="#127-workflow" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Save</strong> главный workflow</li>
+<li>Активируйте toggle справа вверху (Active)</li>
+<li>Откройте Telegram → найдите вашего бота</li>
+<li>Отправьте: <code>/start</code></li>
+</ol>
+<p><strong>Ожидаемый ответ:</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-62-1"><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a>🤖 Текстовый ассистент Home Assistant + Ollama
+</span><span id="__span-62-2"><a id="__codelineno-62-2" name="__codelineno-62-2" href="#__codelineno-62-2"></a>
+</span><span id="__span-62-3"><a id="__codelineno-62-3" name="__codelineno-62-3" href="#__codelineno-62-3"></a>*Команды:*
+</span><span id="__span-62-4"><a id="__codelineno-62-4" name="__codelineno-62-4" href="#__codelineno-62-4"></a>• Включи/выключи свет [комната]
+</span><span id="__span-62-5"><a id="__codelineno-62-5" name="__codelineno-62-5" href="#__codelineno-62-5"></a>...
+</span></code></pre></div></p>
+<hr />
+<h2 id="13">Этап 13: Тестирование системы<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
+<h3 id="131">13.1 Простая команда<a class="headerlink" href="#131" title="Permanent link">&para;</a></h3>
+<p>В Telegram боту:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-63-1"><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a>Привет!
+</span></code></pre></div></p>
+<p>Бот должен ответить через 3-5 секунд.</p>
+<h3 id="132">13.2 Команда управления<a class="headerlink" href="#132" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-64-1"><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a>Включи свет на кухне
+</span></code></pre></div>
+<p>Если у вас есть <code>light.kitchen</code>, бот должен выполнить команду.</p>
+<h3 id="133-gpu">13.3 Мониторинг GPU<a class="headerlink" href="#133-gpu" title="Permanent link">&para;</a></h3>
+<p>Во время работы бота:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-65-1"><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="c1"># В VM</span>
+</span><span id="__span-65-2"><a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a>watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span>nvidia-smi
+</span></code></pre></div>
+<p>Наблюдайте:
+- GPU-Util: 80-100% во время генерации
+- Memory: ~2.5GB используется
+- Temperature: 45-65°C</p>
+<h3 id="134">13.4 Проверка производительности<a class="headerlink" href="#134" title="Permanent link">&para;</a></h3>
+<p>Измерьте время ответа:
+- Простой вопрос: 2-4 секунды
+- Команда с вызовом tool: 4-7 секунд
+- Сложный вопрос: 5-8 секунд</p>
+<p><strong>Для GTX 1050 Ti + phi3:mini это нормально.</strong></p>
+<hr />
+<h2 id="_1">Обслуживание и мониторинг<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="snapshot-vm">Snapshot VM перед изменениями<a class="headerlink" href="#snapshot-vm" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-66-1"><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="c1"># На Proxmox хосте</span>
+</span><span id="__span-66-2"><a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>qm<span class="w"> </span>snapshot<span class="w"> </span><span class="m">300</span><span class="w"> </span>clean-phi3mini-install
+</span></code></pre></div>
+<h3 id="backup-vm">Backup VM<a class="headerlink" href="#backup-vm" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-67-1"><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="c1"># Snapshot backup</span>
+</span><span id="__span-67-2"><a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a>vzdump<span class="w"> </span><span class="m">300</span><span class="w"> </span>--mode<span class="w"> </span>snapshot<span class="w"> </span>--storage<span class="w"> </span><span class="nb">local</span><span class="w"> </span>--compress<span class="w"> </span>zstd
+</span><span id="__span-67-3"><a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a>
+</span><span id="__span-67-4"><a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a><span class="c1"># Backup сохранится в /var/lib/vz/dump/</span>
+</span></code></pre></div>
+<h3 id="ollama">Обновление Ollama<a class="headerlink" href="#ollama" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-68-1"><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>ssh<span class="w"> </span>admin@&lt;VM_IP&gt;
+</span><span id="__span-68-2"><a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>
+</span><span id="__span-68-3"><a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a><span class="c1"># Обновление</span>
+</span><span id="__span-68-4"><a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://ollama.ai/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</span><span id="__span-68-5"><a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>
+</span><span id="__span-68-6"><a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a><span class="c1"># Рестарт</span>
+</span><span id="__span-68-7"><a id="__codelineno-68-7" name="__codelineno-68-7" href="#__codelineno-68-7"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>ollama.service
+</span></code></pre></div>
+<h3 id="gpu">Добавление модели после апгрейда GPU<a class="headerlink" href="#gpu" title="Permanent link">&para;</a></h3>
+<p>После замены GTX 1050 Ti на GTX 1060 (6GB):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-69-1"><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a><span class="c1"># Загрузка более мощной модели</span>
+</span><span id="__span-69-2"><a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>ollama<span class="w"> </span>pull<span class="w"> </span>llama3.1:8b
+</span><span id="__span-69-3"><a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>
+</span><span id="__span-69-4"><a id="__codelineno-69-4" name="__codelineno-69-4" href="#__codelineno-69-4"></a><span class="c1"># Проверка размера</span>
+</span><span id="__span-69-5"><a id="__codelineno-69-5" name="__codelineno-69-5" href="#__codelineno-69-5"></a>ollama<span class="w"> </span>list
+</span><span id="__span-69-6"><a id="__codelineno-69-6" name="__codelineno-69-6" href="#__codelineno-69-6"></a>
+</span><span id="__span-69-7"><a id="__codelineno-69-7" name="__codelineno-69-7" href="#__codelineno-69-7"></a><span class="c1"># Тест</span>
+</span><span id="__span-69-8"><a id="__codelineno-69-8" name="__codelineno-69-8" href="#__codelineno-69-8"></a>ollama<span class="w"> </span>run<span class="w"> </span>llama3.1:8b<span class="w"> </span><span class="s2">&quot;Тест новой модели&quot;</span>
+</span><span id="__span-69-9"><a id="__codelineno-69-9" name="__codelineno-69-9" href="#__codelineno-69-9"></a>
+</span><span id="__span-69-10"><a id="__codelineno-69-10" name="__codelineno-69-10" href="#__codelineno-69-10"></a><span class="c1"># В n8n обновите параметр model на &quot;llama3.1:8b&quot;</span>
+</span></code></pre></div>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="vm-gpu">Проблема: VM не загружается после добавления GPU<a class="headerlink" href="#vm-gpu" title="Permanent link">&para;</a></h3>
+<p><strong>Симптомы:</strong> Black screen, VM зависает при загрузке</p>
+<p><strong>Решение:</strong></p>
+<ol>
+<li>Выключите VM полностью (Shutdown, не Reset)</li>
+<li>Proxmox Web UI → VM 300 → Hardware</li>
+<li>Удалите PCI Device (hostpci0)</li>
+<li>Запустите VM - должна загрузиться</li>
+<li>Проверьте на хосте:
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-70-1"><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a>lspci<span class="w"> </span>-nnk<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">3</span><span class="w"> </span>nvidia
+</span><span id="__span-70-2"><a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a><span class="c1"># Убедитесь: Kernel driver in use: vfio-pci</span>
+</span></code></pre></div></li>
+<li>Выключите VM</li>
+<li>Добавьте PCI Device снова:</li>
+<li>✅ All Functions</li>
+<li>✅ Primary GPU</li>
+<li>✅ PCI-Express</li>
+<li>Запустите VM</li>
+</ol>
+<h3 id="gpu-nvidia-smi">Проблема: GPU виден, но nvidia-smi не работает<a class="headerlink" href="#gpu-nvidia-smi" title="Permanent link">&para;</a></h3>
+<p><strong>Симптомы:</strong> <code>NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver</code></p>
+<p><strong>Решение:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-71-1"><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="c1"># 1. Проверка что драйвер установлен</span>
+</span><span id="__span-71-2"><a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>dpkg<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nvidia-driver-535
+</span><span id="__span-71-3"><a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>
+</span><span id="__span-71-4"><a id="__codelineno-71-4" name="__codelineno-71-4" href="#__codelineno-71-4"></a><span class="c1"># 2. Проверка модулей ядра</span>
+</span><span id="__span-71-5"><a id="__codelineno-71-5" name="__codelineno-71-5" href="#__codelineno-71-5"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nvidia
+</span><span id="__span-71-6"><a id="__codelineno-71-6" name="__codelineno-71-6" href="#__codelineno-71-6"></a>
+</span><span id="__span-71-7"><a id="__codelineno-71-7" name="__codelineno-71-7" href="#__codelineno-71-7"></a><span class="c1"># 3. Загрузка модуля вручную</span>
+</span><span id="__span-71-8"><a id="__codelineno-71-8" name="__codelineno-71-8" href="#__codelineno-71-8"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>nvidia
+</span><span id="__span-71-9"><a id="__codelineno-71-9" name="__codelineno-71-9" href="#__codelineno-71-9"></a>
+</span><span id="__span-71-10"><a id="__codelineno-71-10" name="__codelineno-71-10" href="#__codelineno-71-10"></a><span class="c1"># 4. Проверка</span>
+</span><span id="__span-71-11"><a id="__codelineno-71-11" name="__codelineno-71-11" href="#__codelineno-71-11"></a>nvidia-smi
+</span><span id="__span-71-12"><a id="__codelineno-71-12" name="__codelineno-71-12" href="#__codelineno-71-12"></a>
+</span><span id="__span-71-13"><a id="__codelineno-71-13" name="__codelineno-71-13" href="#__codelineno-71-13"></a><span class="c1"># 5. Если не помогло - переустановка</span>
+</span><span id="__span-71-14"><a id="__codelineno-71-14" name="__codelineno-71-14" href="#__codelineno-71-14"></a>sudo<span class="w"> </span>apt<span class="w"> </span>purge<span class="w"> </span>nvidia-*
+</span><span id="__span-71-15"><a id="__codelineno-71-15" name="__codelineno-71-15" href="#__codelineno-71-15"></a>sudo<span class="w"> </span>apt<span class="w"> </span>autoremove
+</span><span id="__span-71-16"><a id="__codelineno-71-16" name="__codelineno-71-16" href="#__codelineno-71-16"></a>sudo<span class="w"> </span>ubuntu-drivers<span class="w"> </span>autoinstall
+</span><span id="__span-71-17"><a id="__codelineno-71-17" name="__codelineno-71-17" href="#__codelineno-71-17"></a>sudo<span class="w"> </span>reboot
+</span></code></pre></div>
+<h3 id="ollama-cpu-mode">Проблема: Ollama медленно отвечает (CPU mode)<a class="headerlink" href="#ollama-cpu-mode" title="Permanent link">&para;</a></h3>
+<p><strong>Симптомы:</strong> Ответы за 20-30+ секунд, nvidia-smi показывает 0% GPU util</p>
+<p><strong>Решение:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-72-1"><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="c1"># 1. Проверка CUDA</span>
+</span><span id="__span-72-2"><a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a>nvidia-smi
+</span><span id="__span-72-3"><a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>
+</span><span id="__span-72-4"><a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a><span class="c1"># 2. Тест Ollama с явным GPU</span>
+</span><span id="__span-72-5"><a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>ollama<span class="w"> </span>run<span class="w"> </span>phi3:mini<span class="w"> </span><span class="s2">&quot;test&quot;</span>
+</span><span id="__span-72-6"><a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a>
+</span><span id="__span-72-7"><a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a><span class="c1"># Если работает - проблема в systemd unit:</span>
+</span><span id="__span-72-8"><a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>edit<span class="w"> </span>ollama.service
+</span><span id="__span-72-9"><a id="__codelineno-72-9" name="__codelineno-72-9" href="#__codelineno-72-9"></a>
+</span><span id="__span-72-10"><a id="__codelineno-72-10" name="__codelineno-72-10" href="#__codelineno-72-10"></a><span class="c1"># Добавьте:</span>
+</span><span id="__span-72-11"><a id="__codelineno-72-11" name="__codelineno-72-11" href="#__codelineno-72-11"></a><span class="c1"># [Service]</span>
+</span><span id="__span-72-12"><a id="__codelineno-72-12" name="__codelineno-72-12" href="#__codelineno-72-12"></a><span class="c1"># Environment=&quot;CUDA_VISIBLE_DEVICES=0&quot;</span>
+</span><span id="__span-72-13"><a id="__codelineno-72-13" name="__codelineno-72-13" href="#__codelineno-72-13"></a>
+</span><span id="__span-72-14"><a id="__codelineno-72-14" name="__codelineno-72-14" href="#__codelineno-72-14"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+</span><span id="__span-72-15"><a id="__codelineno-72-15" name="__codelineno-72-15" href="#__codelineno-72-15"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>ollama.service
+</span></code></pre></div>
+<h3 id="out-of-memory">Проблема: Out of Memory при загрузке модели<a class="headerlink" href="#out-of-memory" title="Permanent link">&para;</a></h3>
+<p><strong>Симптомы:</strong> Ollama крашится при <code>ollama run</code>, ошибка CUDA OOM</p>
+<p><strong>Решение:</strong></p>
+<ol>
+<li>
+<p>Выберите меньшую модель:
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-73-1"><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="c1"># Вместо phi3:mini попробуйте</span>
+</span><span id="__span-73-2"><a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>ollama<span class="w"> </span>pull<span class="w"> </span>gemma2:2b
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Увеличьте RAM VM (на Proxmox хосте):
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-74-1"><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="c1"># Выключите VM</span>
+</span><span id="__span-74-2"><a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>qm<span class="w"> </span>shutdown<span class="w"> </span><span class="m">300</span>
+</span><span id="__span-74-3"><a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>
+</span><span id="__span-74-4"><a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a><span class="c1"># Увеличьте до 12GB</span>
+</span><span id="__span-74-5"><a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>qm<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="m">300</span><span class="w"> </span>--memory<span class="w"> </span><span class="m">12288</span>
+</span><span id="__span-74-6"><a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>
+</span><span id="__span-74-7"><a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a><span class="c1"># Запустите</span>
+</span><span id="__span-74-8"><a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>qm<span class="w"> </span>start<span class="w"> </span><span class="m">300</span>
+</span></code></pre></div></p>
+</li>
+</ol>
+<h3 id="code-43-device-manager-windows-vm">Проблема: Code 43 в Device Manager (если Windows VM)<a class="headerlink" href="#code-43-device-manager-windows-vm" title="Permanent link">&para;</a></h3>
+<p>Не применимо к Ubuntu, но для справки:
+- Добавьте <code>args: -cpu host,kvm=off</code> в конфиг VM
+- Это скрывает виртуализацию от NVIDIA драйвера</p>
+<hr />
+<h2 id="_2">Производительность и метрики<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="gtx-1050-ti-4gb-phi3mini-vm">GTX 1050 Ti (4GB) + phi3:mini в VM<a class="headerlink" href="#gtx-1050-ti-4gb-phi3mini-vm" title="Permanent link">&para;</a></h3>
+<p><strong>Measured metrics:</strong>
+- Cold start latency: 4-6 секунд
+- Warm latency: 2-3 секунды<br />
+- Throughput: 40-50 tokens/sec
+- VRAM usage: 2.4-2.6GB / 4GB
+- GPU utilization: 85-95% во время inference
+- Power draw: 50-70W (из 75W TDP)</p>
+<p><strong>Сравнение с LXC:</strong> ~5-10% медленнее (приемлемо за безопасность)</p>
+<h3 id="gtx-1060-6gb-llama318b">GTX 1060 (6GB) + llama3.1:8b после апгрейда<a class="headerlink" href="#gtx-1060-6gb-llama318b" title="Permanent link">&para;</a></h3>
+<p><strong>Expected metrics:</strong>
+- Cold start latency: 5-8 секунд
+- Warm latency: 2-4 секунды
+- Throughput: 30-45 tokens/sec
+- VRAM usage: 4.8-5.2GB / 6GB
+- GPU utilization: 80-90%</p>
+<hr />
+<h2 id="_3">Оптимизация производительности<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="cpu-pinning-vm">CPU pinning для VM<a class="headerlink" href="#cpu-pinning-vm" title="Permanent link">&para;</a></h3>
+<p>На Proxmox хосте (если у вас 8+ cores):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-75-1"><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a><span class="c1"># Pin VM к specific cores (например 4-7 на 8-core CPU)</span>
+</span><span id="__span-75-2"><a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>qm<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="m">300</span><span class="w"> </span>--cpulimit<span class="w"> </span><span class="m">4</span>
+</span><span id="__span-75-3"><a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>nano<span class="w"> </span>/etc/pve/qemu-server/300.conf
+</span></code></pre></div>
+<p>Добавьте:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-76-1"><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>affinity: 4-7
+</span></code></pre></div></p>
+<h3 id="huge-pages-8b">Huge pages (для моделей 8B+)<a class="headerlink" href="#huge-pages-8b" title="Permanent link">&para;</a></h3>
+<p>На Proxmox хосте:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-77-1"><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a><span class="c1"># Выделить 4GB huge pages (для llama3.1:8b)</span>
+</span><span id="__span-77-2"><a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>sysctl<span class="w"> </span>vm.nr_hugepages<span class="o">=</span><span class="m">2048</span>
+</span><span id="__span-77-3"><a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>
+</span><span id="__span-77-4"><a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a><span class="c1"># Persistent:</span>
+</span><span id="__span-77-5"><a id="__codelineno-77-5" name="__codelineno-77-5" href="#__codelineno-77-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;vm.nr_hugepages=2048&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/sysctl.conf
+</span></code></pre></div>
+<p>В VM конфиге:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-78-1"><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>hugepages: 1024
+</span></code></pre></div></p>
+<hr />
+<h2 id="_4">Финальная архитектура<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-79-1"><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>┌─────────────────────────────────────────────┐
+</span><span id="__span-79-2"><a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>│  Proxmox VE Host (Debian 12 Bookworm)       │
+</span><span id="__span-79-3"><a id="__codelineno-79-3" name="__codelineno-79-3" href="#__codelineno-79-3"></a>│  ┌────────────────────────────────────────┐ │
+</span><span id="__span-79-4"><a id="__codelineno-79-4" name="__codelineno-79-4" href="#__codelineno-79-4"></a>│  │ IOMMU/VT-d: Enabled                    │ │
+</span><span id="__span-79-5"><a id="__codelineno-79-5" name="__codelineno-79-5" href="#__codelineno-79-5"></a>│  │ VFIO modules: Loaded                   │ │
+</span><span id="__span-79-6"><a id="__codelineno-79-6" name="__codelineno-79-6" href="#__codelineno-79-6"></a>│  │ GPU bound to: vfio-pci                 │ │
+</span><span id="__span-79-7"><a id="__codelineno-79-7" name="__codelineno-79-7" href="#__codelineno-79-7"></a>│  └────────────────────────────────────────┘ │
+</span><span id="__span-79-8"><a id="__codelineno-79-8" name="__codelineno-79-8" href="#__codelineno-79-8"></a>│              ↓ PCI Passthrough              │
+</span><span id="__span-79-9"><a id="__codelineno-79-9" name="__codelineno-79-9" href="#__codelineno-79-9"></a>│  ┌────────────────────────────────────────┐ │
+</span><span id="__span-79-10"><a id="__codelineno-79-10" name="__codelineno-79-10" href="#__codelineno-79-10"></a>│  │ Ubuntu Server 22.04 VM (ID: 300)       │ │
+</span><span id="__span-79-11"><a id="__codelineno-79-11" name="__codelineno-79-11" href="#__codelineno-79-11"></a>│  │ ┌────────────────────────────────────┐ │ │
+</span><span id="__span-79-12"><a id="__codelineno-79-12" name="__codelineno-79-12" href="#__codelineno-79-12"></a>│  │ │ NVIDIA Driver 535+                 │ │ │
+</span><span id="__span-79-13"><a id="__codelineno-79-13" name="__codelineno-79-13" href="#__codelineno-79-13"></a>│  │ │ CUDA 12.2                          │ │ │
+</span><span id="__span-79-14"><a id="__codelineno-79-14" name="__codelineno-79-14" href="#__codelineno-79-14"></a>│  │ └────────────────────────────────────┘ │ │
+</span><span id="__span-79-15"><a id="__codelineno-79-15" name="__codelineno-79-15" href="#__codelineno-79-15"></a>│  │ ┌────────────────────────────────────┐ │ │
+</span><span id="__span-79-16"><a id="__codelineno-79-16" name="__codelineno-79-16" href="#__codelineno-79-16"></a>│  │ │ Ollama Service                     │ │ │
+</span><span id="__span-79-17"><a id="__codelineno-79-17" name="__codelineno-79-17" href="#__codelineno-79-17"></a>│  │ │ API: 0.0.0.0:11434                 │ │ │
+</span><span id="__span-79-18"><a id="__codelineno-79-18" name="__codelineno-79-18" href="#__codelineno-79-18"></a>│  │ │ Model: phi3:mini (2.3GB)           │ │ │
+</span><span id="__span-79-19"><a id="__codelineno-79-19" name="__codelineno-79-19" href="#__codelineno-79-19"></a>│  │ └────────────────────────────────────┘ │ │
+</span><span id="__span-79-20"><a id="__codelineno-79-20" name="__codelineno-79-20" href="#__codelineno-79-20"></a>│  │ Resources:                             │ │
+</span><span id="__span-79-21"><a id="__codelineno-79-21" name="__codelineno-79-21" href="#__codelineno-79-21"></a>│  │ - CPU: 4 cores (type: host)            │ │
+</span><span id="__span-79-22"><a id="__codelineno-79-22" name="__codelineno-79-22" href="#__codelineno-79-22"></a>│  │ - RAM: 8GB                             │ │
+</span><span id="__span-79-23"><a id="__codelineno-79-23" name="__codelineno-79-23" href="#__codelineno-79-23"></a>│  │ - Disk: 50GB VirtIO                   │ │
+</span><span id="__span-79-24"><a id="__codelineno-79-24" name="__codelineno-79-24" href="#__codelineno-79-24"></a>│  │ - GPU: GTX 1050 Ti (passthrough)       │ │
+</span><span id="__span-79-25"><a id="__codelineno-79-25" name="__codelineno-79-25" href="#__codelineno-79-25"></a>│  └────────────────────────────────────────┘ │
+</span><span id="__span-79-26"><a id="__codelineno-79-26" name="__codelineno-79-26" href="#__codelineno-79-26"></a>└─────────────────────────────────────────────┘
+</span><span id="__span-79-27"><a id="__codelineno-79-27" name="__codelineno-79-27" href="#__codelineno-79-27"></a>           │ Network: vmbr0
+</span><span id="__span-79-28"><a id="__codelineno-79-28" name="__codelineno-79-28" href="#__codelineno-79-28"></a>           ↓
+</span><span id="__span-79-29"><a id="__codelineno-79-29" name="__codelineno-79-29" href="#__codelineno-79-29"></a>┌────────────────────────────┐
+</span><span id="__span-79-30"><a id="__codelineno-79-30" name="__codelineno-79-30" href="#__codelineno-79-30"></a>│  n8n Server                │
+</span><span id="__span-79-31"><a id="__codelineno-79-31" name="__codelineno-79-31" href="#__codelineno-79-31"></a>│  HTTP: &lt;VM_IP&gt;:11434       │
+</span><span id="__span-79-32"><a id="__codelineno-79-32" name="__codelineno-79-32" href="#__codelineno-79-32"></a>│  ┌──────────────────────┐  │
+</span><span id="__span-79-33"><a id="__codelineno-79-33" name="__codelineno-79-33" href="#__codelineno-79-33"></a>│  │ Langchain Agent      │  │
+</span><span id="__span-79-34"><a id="__codelineno-79-34" name="__codelineno-79-34" href="#__codelineno-79-34"></a>│  │ - Ollama LLM         │  │
+</span><span id="__span-79-35"><a id="__codelineno-79-35" name="__codelineno-79-35" href="#__codelineno-79-35"></a>│  │ - Memory Buffer      │  │
+</span><span id="__span-79-36"><a id="__codelineno-79-36" name="__codelineno-79-36" href="#__codelineno-79-36"></a>│  │ - HA Tools (5)       │  │
+</span><span id="__span-79-37"><a id="__codelineno-79-37" name="__codelineno-79-37" href="#__codelineno-79-37"></a>│  └──────────────────────┘  │
+</span><span id="__span-79-38"><a id="__codelineno-79-38" name="__codelineno-79-38" href="#__codelineno-79-38"></a>└────────────────────────────┘
+</span><span id="__span-79-39"><a id="__codelineno-79-39" name="__codelineno-79-39" href="#__codelineno-79-39"></a>           ↓
+</span><span id="__span-79-40"><a id="__codelineno-79-40" name="__codelineno-79-40" href="#__codelineno-79-40"></a>┌────────────────────────────┐
+</span><span id="__span-79-41"><a id="__codelineno-79-41" name="__codelineno-79-41" href="#__codelineno-79-41"></a>│  Home Assistant            │
+</span><span id="__span-79-42"><a id="__codelineno-79-42" name="__codelineno-79-42" href="#__codelineno-79-42"></a>│  REST API: :8123           │
+</span><span id="__span-79-43"><a id="__codelineno-79-43" name="__codelineno-79-43" href="#__codelineno-79-43"></a>└────────────────────────────┘
+</span><span id="__span-79-44"><a id="__codelineno-79-44" name="__codelineno-79-44" href="#__codelineno-79-44"></a>           ↓
+</span><span id="__span-79-45"><a id="__codelineno-79-45" name="__codelineno-79-45" href="#__codelineno-79-45"></a>┌────────────────────────────┐
+</span><span id="__span-79-46"><a id="__codelineno-79-46" name="__codelineno-79-46" href="#__codelineno-79-46"></a>│  Telegram Bot              │
+</span><span id="__span-79-47"><a id="__codelineno-79-47" name="__codelineno-79-47" href="#__codelineno-79-47"></a>│  User Interface            │
+</span><span id="__span-79-48"><a id="__codelineno-79-48" name="__codelineno-79-48" href="#__codelineno-79-48"></a>└────────────────────────────┘
+</span></code></pre></div>
+<hr />
+<h2 id="_5">Чеклист успешной установки<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>Пройдитесь по списку, все должно быть ✅:</p>
+<p><strong>Proxmox хост:</strong>
+- ✅ IOMMU enabled в BIOS
+- ✅ GRUB обновлен с intel_iommu=on/amd_iommu=on
+- ✅ VFIO модули загружены (<code>lsmod | grep vfio</code>)
+- ✅ GPU captured by vfio-pci (<code>lspci -k</code>)
+- ✅ Нет NVIDIA драйверов на хосте (<code>dpkg -l | grep nvidia</code> - пусто)</p>
+<p><strong>Ubuntu VM:</strong>
+- ✅ GPU виден в VM (<code>lspci | grep nvidia</code>)
+- ✅ NVIDIA драйвер установлен (<code>nvidia-smi</code> работает)
+- ✅ Ollama сервис запущен (<code>systemctl status ollama</code>)
+- ✅ API доступен (<code>curl http://localhost:11434/api/tags</code>)
+- ✅ Модель загружена (<code>ollama list</code>)
+- ✅ GPU используется (<code>nvidia-smi</code> показывает нагрузку при inference)</p>
+<p><strong>n8n интеграция:</strong>
+- ✅ Workflow импортирован
+- ✅ Ollama node настроен (Base URL правильный)
+- ✅ HA credential создан
+- ✅ Telegram credential создан
+- ✅ 5 Tool workflows созданы
+- ✅ Workflow активирован
+- ✅ Telegram бот отвечает</p>
+<hr />
+<h2 id="_6">Полезные команды для диагностики<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="proxmox">На Proxmox хосте<a class="headerlink" href="#proxmox" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-80-1"><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a><span class="c1"># IOMMU статус</span>
+</span><span id="__span-80-2"><a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>dmesg<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>iommu
+</span><span id="__span-80-3"><a id="__codelineno-80-3" name="__codelineno-80-3" href="#__codelineno-80-3"></a>
+</span><span id="__span-80-4"><a id="__codelineno-80-4" name="__codelineno-80-4" href="#__codelineno-80-4"></a><span class="c1"># VFIO модули</span>
+</span><span id="__span-80-5"><a id="__codelineno-80-5" name="__codelineno-80-5" href="#__codelineno-80-5"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vfio
+</span><span id="__span-80-6"><a id="__codelineno-80-6" name="__codelineno-80-6" href="#__codelineno-80-6"></a>
+</span><span id="__span-80-7"><a id="__codelineno-80-7" name="__codelineno-80-7" href="#__codelineno-80-7"></a><span class="c1"># GPU binding</span>
+</span><span id="__span-80-8"><a id="__codelineno-80-8" name="__codelineno-80-8" href="#__codelineno-80-8"></a>lspci<span class="w"> </span>-nnk<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">3</span><span class="w"> </span>nvidia
+</span><span id="__span-80-9"><a id="__codelineno-80-9" name="__codelineno-80-9" href="#__codelineno-80-9"></a>
+</span><span id="__span-80-10"><a id="__codelineno-80-10" name="__codelineno-80-10" href="#__codelineno-80-10"></a><span class="c1"># IOMMU группы</span>
+</span><span id="__span-80-11"><a id="__codelineno-80-11" name="__codelineno-80-11" href="#__codelineno-80-11"></a><span class="k">for</span><span class="w"> </span>d<span class="w"> </span><span class="k">in</span><span class="w"> </span>/sys/kernel/iommu_groups/*/devices/*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-80-12"><a id="__codelineno-80-12" name="__codelineno-80-12" href="#__codelineno-80-12"></a><span class="w">    </span><span class="nv">n</span><span class="o">=</span><span class="si">${</span><span class="nv">d</span><span class="p">#*/iommu_groups/*</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="nv">n</span><span class="o">=</span><span class="si">${</span><span class="nv">n</span><span class="p">%%/*</span><span class="si">}</span>
+</span><span id="__span-80-13"><a id="__codelineno-80-13" name="__codelineno-80-13" href="#__codelineno-80-13"></a><span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;Group %s: &#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$n</span><span class="s2">&quot;</span>
+</span><span id="__span-80-14"><a id="__codelineno-80-14" name="__codelineno-80-14" href="#__codelineno-80-14"></a><span class="w">    </span>lspci<span class="w"> </span>-nns<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">d</span><span class="p">##*/</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-80-15"><a id="__codelineno-80-15" name="__codelineno-80-15" href="#__codelineno-80-15"></a><span class="k">done</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-n<span class="w"> </span>-k2
+</span><span id="__span-80-16"><a id="__codelineno-80-16" name="__codelineno-80-16" href="#__codelineno-80-16"></a>
+</span><span id="__span-80-17"><a id="__codelineno-80-17" name="__codelineno-80-17" href="#__codelineno-80-17"></a><span class="c1"># Статус VM</span>
+</span><span id="__span-80-18"><a id="__codelineno-80-18" name="__codelineno-80-18" href="#__codelineno-80-18"></a>qm<span class="w"> </span>status<span class="w"> </span><span class="m">300</span>
+</span><span id="__span-80-19"><a id="__codelineno-80-19" name="__codelineno-80-19" href="#__codelineno-80-19"></a>qm<span class="w"> </span>config<span class="w"> </span><span class="m">300</span>
+</span></code></pre></div>
+<h3 id="ubuntu-vm">В Ubuntu VM<a class="headerlink" href="#ubuntu-vm" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-81-1"><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a><span class="c1"># GPU наличие</span>
+</span><span id="__span-81-2"><a id="__codelineno-81-2" name="__codelineno-81-2" href="#__codelineno-81-2"></a>lspci<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>nvidia
+</span><span id="__span-81-3"><a id="__codelineno-81-3" name="__codelineno-81-3" href="#__codelineno-81-3"></a>
+</span><span id="__span-81-4"><a id="__codelineno-81-4" name="__codelineno-81-4" href="#__codelineno-81-4"></a><span class="c1"># NVIDIA драйвер</span>
+</span><span id="__span-81-5"><a id="__codelineno-81-5" name="__codelineno-81-5" href="#__codelineno-81-5"></a>nvidia-smi
+</span><span id="__span-81-6"><a id="__codelineno-81-6" name="__codelineno-81-6" href="#__codelineno-81-6"></a>nvidia-smi<span class="w"> </span>-L
+</span><span id="__span-81-7"><a id="__codelineno-81-7" name="__codelineno-81-7" href="#__codelineno-81-7"></a>
+</span><span id="__span-81-8"><a id="__codelineno-81-8" name="__codelineno-81-8" href="#__codelineno-81-8"></a><span class="c1"># CUDA версия</span>
+</span><span id="__span-81-9"><a id="__codelineno-81-9" name="__codelineno-81-9" href="#__codelineno-81-9"></a>nvcc<span class="w"> </span>--version<span class="w">  </span><span class="c1"># Если установлен CUDA toolkit (опционально)</span>
+</span><span id="__span-81-10"><a id="__codelineno-81-10" name="__codelineno-81-10" href="#__codelineno-81-10"></a>
+</span><span id="__span-81-11"><a id="__codelineno-81-11" name="__codelineno-81-11" href="#__codelineno-81-11"></a><span class="c1"># Ollama сервис</span>
+</span><span id="__span-81-12"><a id="__codelineno-81-12" name="__codelineno-81-12" href="#__codelineno-81-12"></a>systemctl<span class="w"> </span>status<span class="w"> </span>ollama.service
+</span><span id="__span-81-13"><a id="__codelineno-81-13" name="__codelineno-81-13" href="#__codelineno-81-13"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>ollama.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+</span><span id="__span-81-14"><a id="__codelineno-81-14" name="__codelineno-81-14" href="#__codelineno-81-14"></a>
+</span><span id="__span-81-15"><a id="__codelineno-81-15" name="__codelineno-81-15" href="#__codelineno-81-15"></a><span class="c1"># Ollama процесс</span>
+</span><span id="__span-81-16"><a id="__codelineno-81-16" name="__codelineno-81-16" href="#__codelineno-81-16"></a>ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ollama
+</span><span id="__span-81-17"><a id="__codelineno-81-17" name="__codelineno-81-17" href="#__codelineno-81-17"></a>
+</span><span id="__span-81-18"><a id="__codelineno-81-18" name="__codelineno-81-18" href="#__codelineno-81-18"></a><span class="c1"># Сетевой доступ</span>
+</span><span id="__span-81-19"><a id="__codelineno-81-19" name="__codelineno-81-19" href="#__codelineno-81-19"></a>ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">11434</span>
+</span><span id="__span-81-20"><a id="__codelineno-81-20" name="__codelineno-81-20" href="#__codelineno-81-20"></a>
+</span><span id="__span-81-21"><a id="__codelineno-81-21" name="__codelineno-81-21" href="#__codelineno-81-21"></a><span class="c1"># Модели</span>
+</span><span id="__span-81-22"><a id="__codelineno-81-22" name="__codelineno-81-22" href="#__codelineno-81-22"></a>ollama<span class="w"> </span>list
+</span><span id="__span-81-23"><a id="__codelineno-81-23" name="__codelineno-81-23" href="#__codelineno-81-23"></a>
+</span><span id="__span-81-24"><a id="__codelineno-81-24" name="__codelineno-81-24" href="#__codelineno-81-24"></a><span class="c1"># Тест API</span>
+</span><span id="__span-81-25"><a id="__codelineno-81-25" name="__codelineno-81-25" href="#__codelineno-81-25"></a>curl<span class="w"> </span>http://localhost:11434/api/tags
+</span></code></pre></div>
+<hr />
+<h2 id="_7">Источники и благодарности<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>Данное руководство основано на:</p>
+<ul>
+<li>
+<p><strong>Proxmox Official Documentation</strong><br />
+<a href="https://pve.proxmox.com/wiki/PCI_Passthrough">PCI Passthrough Wiki</a></p>
+</li>
+<li>
+<p><strong>Habr Community (русский)</strong><br />
+<a href="https://habr.com/ru/articles/794568/">Проброс видеокарты в Proxmox</a></p>
+</li>
+<li>
+<p><strong>Proxmox Forum</strong><br />
+<a href="https://forum.proxmox.com/threads/ubuntu-22-04-ollama-nvidia-3060-gpu-passthrough-and-drivers-all-looking-good-but.144104/">Ollama + NVIDIA GPU Passthrough Discussion</a></p>
+</li>
+<li>
+<p><strong>Ollama Official</strong><br />
+<a href="https://github.com/ollama/ollama/blob/main/docs/gpu.md">GPU Support Documentation</a></p>
+</li>
+<li>
+<p><strong>VFIO Documentation</strong><br />
+<a href="https://www.kernel.org/doc/html/latest/driver-api/vfio.html">Linux VFIO Documentation</a></p>
+</li>
+</ul>
+<hr />
+<h2 id="_8">Следующие шаги<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<ol>
+<li>✅ BIOS настроен (IOMMU enabled)</li>
+<li>✅ Proxmox настроен (GRUB, VFIO)</li>
+<li>✅ GPU привязан к vfio-pci</li>
+<li>✅ Ubuntu VM создана</li>
+<li>✅ GPU передан в VM</li>
+<li>✅ NVIDIA драйверы в VM</li>
+<li>✅ Ollama установлен</li>
+<li>✅ Модель загружена</li>
+<li>✅ n8n интегрирован</li>
+<li>🔄 Протестируйте различные команды</li>
+<li>🔄 Настройте дополнительные HA Tools</li>
+<li>🔄 После апгрейда GPU установите llama3.1:8b</li>
+</ol>
+<hr />
+<p><strong>Автор:</strong> AI Assistant (Proxmox DevOps Expert)<br />
+<strong>Консолидация:</strong> Community Best Practices + Deep Proxmox Knowledge<br />
+<strong>Проверено на:</strong> Proxmox VE 8.x, NVIDIA GTX 10xx series<br />
+<strong>Версия:</strong> 1.0 Final<br />
+<strong>Дата:</strong> Октябрь 2025</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  К началу
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Gfermoto
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Gfermoto/HASSio_Cursor" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
