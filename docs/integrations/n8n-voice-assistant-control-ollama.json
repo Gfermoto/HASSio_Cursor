@@ -216,90 +216,43 @@
     {
       "parameters": {
         "name": "control_device",
-        "description": "Control Home Assistant devices (turn on/off/toggle). Use for lights, switches, fans, covers, climate devices.",
-        "workflowId": "={{ $parameter.workflowId }}",
+        "description": "Control Home Assistant devices (turn on/off/toggle). Use this for lights, switches, climate, fans. Parameters: entity_id (required, e.g. 'light.living_room'), action ('on' | 'off' | 'toggle'). Returns success message.",
         "specifyInputSchema": true,
         "jsonSchemaExample": "{\n  \"entity_id\": \"light.living_room\",\n  \"action\": \"on\"\n}",
-        "fields": {
-          "values": [
-            {
-              "name": "entity_id",
-              "type": "string",
-              "description": "Device entity ID from Home Assistant (e.g., light.living_room, switch.kitchen)"
-            },
-            {
-              "name": "action",
-              "type": "string",
-              "description": "Action to perform: 'on', 'off', or 'toggle'"
-            }
-          ]
-        }
+        "codeDescription": "const entity_id = $input.item.json.entity_id;\nconst action = $input.item.json.action || 'toggle';\n\nif (!entity_id) {\n  return { error: 'entity_id is required' };\n}\n\nconst domain = entity_id.split('.')[0];\nconst service = action === 'on' ? 'turn_on' : (action === 'off' ? 'turn_off' : 'toggle');\nconst url = `http://YOUR_HA_IP:8123/api/services/${domain}/${service}`;\n\nconst response = await $http.request({\n  method: 'POST',\n  url: url,\n  headers: {\n    'Authorization': 'Bearer YOUR_HA_N8N_TOKEN',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({ entity_id: entity_id })\n});\n\nreturn {\n  success: true,\n  message: `Device ${entity_id} ${action === 'on' ? 'turned on' : (action === 'off' ? 'turned off' : 'toggled')}`\n};"
       },
       "id": "tool-control-device",
       "name": "Tool: Control Device",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
       "position": [2440, 1040]
     },
     {
       "parameters": {
         "name": "set_device_value",
-        "description": "Set values for Home Assistant devices (brightness for lights, temperature for climate, etc).",
-        "workflowId": "={{ $parameter.workflowId }}",
+        "description": "Set values for Home Assistant devices. Use for brightness (0-255 for lights), temperature (for climate). Parameters: entity_id, attribute ('brightness' | 'temperature' | 'hvac_mode'), value (number or string). Returns success message.",
         "specifyInputSchema": true,
-        "jsonSchemaExample": "{\n  \"entity_id\": \"light.living_room\",\n  \"attribute\": \"brightness\",\n  \"value\": \"200\"\n}",
-        "fields": {
-          "values": [
-            {
-              "name": "entity_id",
-              "type": "string",
-              "description": "Device entity ID"
-            },
-            {
-              "name": "attribute",
-              "type": "string",
-              "description": "Attribute to set: 'brightness' (0-255 for lights), 'temperature' (for climate), 'hvac_mode'"
-            },
-            {
-              "name": "value",
-              "type": "string",
-              "description": "Value to set (number or string)"
-            }
-          ]
-        }
+        "jsonSchemaExample": "{\n  \"entity_id\": \"light.living_room\",\n  \"attribute\": \"brightness\",\n  \"value\": 200\n}",
+        "codeDescription": "const entity_id = $input.item.json.entity_id;\nconst attribute = $input.item.json.attribute;\nconst value = $input.item.json.value;\n\nif (!entity_id || !attribute || value === undefined) {\n  return { error: 'entity_id, attribute, and value are required' };\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\nlet serviceData = { entity_id: entity_id };\n\nif (domain === 'light' && attribute === 'brightness') {\n  service = 'light/turn_on';\n  serviceData.brightness = parseInt(value);\n} else if (domain === 'climate' && attribute === 'temperature') {\n  service = 'climate/set_temperature';\n  serviceData.temperature = parseFloat(value);\n} else if (domain === 'climate' && attribute === 'hvac_mode') {\n  service = 'climate/set_hvac_mode';\n  serviceData.hvac_mode = value;\n} else {\n  return { error: `Unknown attribute ${attribute} for domain ${domain}` };\n}\n\nconst url = `http://YOUR_HA_IP:8123/api/services/${service}`;\n\nconst response = await $http.request({\n  method: 'POST',\n  url: url,\n  headers: {\n    'Authorization': 'Bearer YOUR_HA_N8N_TOKEN',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify(serviceData)\n});\n\nreturn {\n  success: true,\n  message: `Value ${attribute} set to ${value} for ${entity_id}`\n};"
       },
       "id": "tool-set-value",
       "name": "Tool: Set Device Value",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
       "position": [2440, 1160]
     },
     {
       "parameters": {
         "name": "call_service",
-        "description": "Call any Home Assistant service (scenes, scripts, automations). Use for complex actions.",
-        "workflowId": "={{ $parameter.workflowId }}",
+        "description": "Call any Home Assistant service (scenes, scripts). Parameters: service (required, e.g. 'scene.turn_on'), entity_id (optional, target entity). Returns success message.",
         "specifyInputSchema": true,
-        "jsonSchemaExample": "{\n  \"service\": \"scene.turn_on\",\n  \"entity_id\": \"scene.movie_time\"\n}",
-        "fields": {
-          "values": [
-            {
-              "name": "service",
-              "type": "string",
-              "description": "Service name (e.g., scene.turn_on, script.good_morning)"
-            },
-            {
-              "name": "entity_id",
-              "type": "string",
-              "description": "Target entity ID (optional)"
-            }
-          ]
-        }
+        "jsonSchemaExample": "{\n  \"service\": \"scene.turn_on\",\n  \"entity_id\": \"scene.tv\"\n}",
+        "codeDescription": "const service = $input.item.json.service;\nconst entity_id = $input.item.json.entity_id;\n\nif (!service) {\n  return { error: 'service is required' };\n}\n\nconst serviceData = {};\nif (entity_id) {\n  serviceData.entity_id = entity_id;\n}\n\nconst url = `http://YOUR_HA_IP:8123/api/services/${service.replace('.', '/')}`;\n\nconst response = await $http.request({\n  method: 'POST',\n  url: url,\n  headers: {\n    'Authorization': 'Bearer YOUR_HA_N8N_TOKEN',\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify(serviceData)\n});\n\nreturn {\n  success: true,\n  message: `Service ${service} called successfully`\n};"
       },
       "id": "tool-call-service",
       "name": "Tool: Call Service",
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
       "position": [2440, 1280]
     },
     {
@@ -328,165 +281,6 @@
           "name": "Telegram Bot"
         }
       }
-    },
-    {
-      "parameters": {},
-      "id": "workflow-control-device",
-      "name": "Workflow: Control Device",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1,
-      "position": [2660, 1040]
-    },
-    {
-      "parameters": {
-        "jsCode": "const entity_id = $input.item.json.entity_id;\nconst action = $input.item.json.action || 'toggle';\n\nif (!entity_id) {\n  throw new Error('entity_id is required');\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\n\nif (action === 'on') {\n  service = `${domain}.turn_on`;\n} else if (action === 'off') {\n  service = `${domain}.turn_off`;\n} else {\n  service = `${domain}.toggle`;\n}\n\nreturn [{\n  json: {\n    domain: domain,\n    service: service,\n    entity_id: entity_id,\n    action: action\n  }\n}];"
-      },
-      "id": "control-parse",
-      "name": "Parse Control Command",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2880, 1040]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.domain }}/{{ $json.action === 'on' ? 'turn_on' : ($json.action === 'off' ? 'turn_off' : 'toggle') }}",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "entity_id",
-              "value": "={{ $json.entity_id }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "control-execute",
-      "name": "Execute Control",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3100, 1040],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
-          "name": "Home Assistant Token"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const entity_id = $('Parse Control Command').item.json.entity_id;\nconst action = $('Parse Control Command').item.json.action;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Device ${entity_id} ${action === 'on' ? 'turned on' : (action === 'off' ? 'turned off' : 'toggled')} successfully`\n  }\n}];"
-      },
-      "id": "control-result",
-      "name": "Control Result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [3320, 1040]
-    },
-    {
-      "parameters": {},
-      "id": "workflow-set-value",
-      "name": "Workflow: Set Value",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1,
-      "position": [2660, 1160]
-    },
-    {
-      "parameters": {
-        "jsCode": "const entity_id = $input.item.json.entity_id;\nconst attribute = $input.item.json.attribute;\nconst value = $input.item.json.value;\n\nif (!entity_id || !attribute || value === undefined) {\n  throw new Error('entity_id, attribute, and value are required');\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\nlet serviceData = { entity_id: entity_id };\n\nif (domain === 'light' && attribute === 'brightness') {\n  service = 'light.turn_on';\n  serviceData.brightness = parseInt(value);\n} else if (domain === 'climate' && attribute === 'temperature') {\n  service = 'climate.set_temperature';\n  serviceData.temperature = parseFloat(value);\n} else if (domain === 'climate' && attribute === 'hvac_mode') {\n  service = 'climate.set_hvac_mode';\n  serviceData.hvac_mode = value;\n} else {\n  service = `${domain}.turn_on`;\n  serviceData[attribute] = value;\n}\n\nreturn [{\n  json: {\n    domain: domain,\n    service: service,\n    serviceData: serviceData\n  }\n}];"
-      },
-      "id": "value-parse",
-      "name": "Parse Value Command",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2880, 1160]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.service }}",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.serviceData) }}",
-        "options": {}
-      },
-      "id": "value-execute",
-      "name": "Execute Set Value",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3100, 1160],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
-          "name": "Home Assistant Token"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const serviceData = $('Parse Value Command').item.json.serviceData;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Value set successfully for ${serviceData.entity_id}`\n  }\n}];"
-      },
-      "id": "value-result",
-      "name": "Value Result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [3320, 1160]
-    },
-    {
-      "parameters": {},
-      "id": "workflow-call-service",
-      "name": "Workflow: Call Service",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1,
-      "position": [2660, 1280]
-    },
-    {
-      "parameters": {
-        "jsCode": "const service = $input.item.json.service;\nconst entity_id = $input.item.json.entity_id;\n\nif (!service) {\n  throw new Error('service is required');\n}\n\nconst serviceData = {};\nif (entity_id) {\n  serviceData.entity_id = entity_id;\n}\n\nreturn [{\n  json: {\n    service: service,\n    serviceData: serviceData\n  }\n}];"
-      },
-      "id": "service-parse",
-      "name": "Parse Service Command",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2880, 1280]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.service }}",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.serviceData) }}",
-        "options": {}
-      },
-      "id": "service-execute",
-      "name": "Execute Service",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3100, 1280],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
-          "name": "Home Assistant Token"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const service = $('Parse Service Command').item.json.service;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Service ${service} called successfully`\n  }\n}];"
-      },
-      "id": "service-result",
-      "name": "Service Result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [3320, 1280]
     }
   ],
   "connections": {
@@ -506,16 +300,7 @@
     "Tool: Set Device Value": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
     "Tool: Call Service": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
     "AI Agent": {"main": [[{"node": "Format Response", "type": "main", "index": 0}]]},
-    "Format Response": {"main": [[{"node": "Send AI Response", "type": "main", "index": 0}]]},
-    "Workflow: Control Device": {"main": [[{"node": "Parse Control Command", "type": "main", "index": 0}]]},
-    "Parse Control Command": {"main": [[{"node": "Execute Control", "type": "main", "index": 0}]]},
-    "Execute Control": {"main": [[{"node": "Control Result", "type": "main", "index": 0}]]},
-    "Workflow: Set Value": {"main": [[{"node": "Parse Value Command", "type": "main", "index": 0}]]},
-    "Parse Value Command": {"main": [[{"node": "Execute Set Value", "type": "main", "index": 0}]]},
-    "Execute Set Value": {"main": [[{"node": "Value Result", "type": "main", "index": 0}]]},
-    "Workflow: Call Service": {"main": [[{"node": "Parse Service Command", "type": "main", "index": 0}]]},
-    "Parse Service Command": {"main": [[{"node": "Execute Service", "type": "main", "index": 0}]]},
-    "Execute Service": {"main": [[{"node": "Service Result", "type": "main", "index": 0}]]}
+    "Format Response": {"main": [[{"node": "Send AI Response", "type": "main", "index": 0}]]}
   },
   "settings": {"executionOrder": "v1"},
   "tags": []
