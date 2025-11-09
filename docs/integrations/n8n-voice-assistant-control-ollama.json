@@ -1,0 +1,522 @@
+{
+  "name": "🎤 Голосовой ассистент с управлением (Whisper + Ollama + HA Control)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 460],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.item.json.message;\nconst voice = message?.voice;\nconst text = message?.text || '';\nconst chatId = message?.chat?.id;\nconst userName = message?.from?.first_name || 'Друг';\n\nif (!chatId) {\n  return [];\n}\n\n// Команды\nif (text === '/start' || text === '/help') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: `👋 Привет, ${userName}!\\n\\n🎤 Я голосовой AI ассистент умного дома с управлением!\\n\\n*Что я умею:*\\n• Понимаю голосовые сообщения (Whisper)\\n• Отвечаю на вопросы (Ollama llama3.1:8b)\\n• Помню контекст диалога\\n• Анализирую датчики Home Assistant\\n• 🆕 УПРАВЛЯЮ УСТРОЙСТВАМИ!\\n\\n*Примеры команд:*\\n🎤 \"Включи свет в гостиной\"\\n🎤 \"Выключи кондиционер\"\\n🎤 \"Сделай поярче\"\\n🎤 \"Температуру на 22 градуса\"\\n\\n*Команды:*\\n/clear - очистить память`\n    }\n  }];\n}\n\nif (text === '/clear') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: '🗑️ Память очищена!'\n    }\n  }];\n}\n\n// Голосовое сообщение\nif (voice && voice.file_id) {\n  return [{\n    json: {\n      isCommand: false,\n      isVoice: true,\n      chatId: chatId,\n      userName: userName,\n      fileId: voice.file_id\n    }\n  }];\n}\n\n// Текстовое сообщение\nif (text) {\n  return [{\n    json: {\n      isCommand: false,\n      isVoice: false,\n      chatId: chatId,\n      userName: userName,\n      userMessage: text\n    }\n  }];\n}\n\nreturn [];"
+      },
+      "id": "process-message",
+      "name": "Process Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isCommand ? 'command' : 'chat' }}",
+              "rightValue": "command",
+              "operator": {"type": "string", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "is-command",
+      "name": "Is Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 460]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "send-command",
+      "name": "Send Command Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 340],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isVoice }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "true"}
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "is-voice",
+      "name": "Is Voice?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [900, 580]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/botYOUR_BOT_TOKEN/getFile?file_id={{ $json.fileId }}",
+        "options": {}
+      },
+      "id": "get-file-url",
+      "name": "Get File Path",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/botYOUR_BOT_TOKEN/{{ $json.result.file_path }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-voice",
+      "name": "Download Voice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_WHISPER_IP:9000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "audio",
+              "inputDataFieldName": "=data",
+              "parameterType": "formBinaryData"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "whisper-transcribe",
+      "name": "Whisper Transcribe",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "const whisperResponse = $input.item.json;\nconst processData = $('Process Message').item.json;\n\nreturn [{\n  json: {\n    chatId: processData.chatId,\n    userName: processData.userName,\n    userMessage: whisperResponse.text || 'Ошибка распознавания'\n  }\n}];"
+      },
+      "id": "extract-voice-text",
+      "name": "Extract Voice Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 480]
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "getAll"
+      },
+      "id": "get-ha-states",
+      "name": "Get HA States",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1780, 680],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const processData = $('Process Message').item.json;\nlet userMessage, chatId, userName;\n\nif (processData.isVoice) {\n  const voiceData = $('Extract Voice Text').item.json;\n  userMessage = voiceData.userMessage;\n  chatId = voiceData.chatId;\n  userName = voiceData.userName;\n} else {\n  userMessage = processData.userMessage;\n  chatId = processData.chatId;\n  userName = processData.userName;\n}\n\nconst haItems = $input.all();\nlet allStates = [];\n\nfor (const item of haItems) {\n  if (Array.isArray(item.json)) {\n    allStates = allStates.concat(item.json);\n  } else if (item.json.entity_id) {\n    allStates.push(item.json);\n  }\n}\n\nif (allStates.length === 0) {\n  return [{\n    json: {\n      userMessage: userMessage,\n      chatId: chatId,\n      userName: userName,\n      devicesContext: 'Нет данных от Home Assistant',\n      controllableDevices: 'Нет доступных устройств',\n      totalDevices: 0,\n      currentTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })\n    }\n  }];\n}\n\nconst relevantDomains = ['sensor', 'binary_sensor', 'climate', 'light', 'switch', 'weather', 'person'];\nconst controllableDomains = ['light', 'switch', 'climate', 'fan', 'cover'];\n\nconst filtered = allStates.filter(state => {\n  const domain = state.entity_id?.split('.')[0];\n  return domain && relevantDomains.includes(domain) && \n         state.state !== 'unavailable' && \n         state.state !== 'unknown';\n});\n\nconst controllable = allStates.filter(state => {\n  const domain = state.entity_id?.split('.')[0];\n  return domain && controllableDomains.includes(domain) &&\n         state.state !== 'unavailable';\n});\n\nconst devicesList = filtered.slice(0, 40).map(state => {\n  const name = state.attributes?.friendly_name || state.entity_id;\n  const value = state.state;\n  const unit = state.attributes?.unit_of_measurement || '';\n  return `${name}: ${value}${unit ? ' ' + unit : ''}`;\n}).join('\\n');\n\nconst controllableList = controllable.slice(0, 30).map(state => {\n  const name = state.attributes?.friendly_name || state.entity_id;\n  const domain = state.entity_id.split('.')[0];\n  return `${name} (${state.entity_id}) [${domain}]`;\n}).join('\\n');\n\nreturn [{\n  json: {\n    userMessage: userMessage,\n    chatId: chatId,\n    userName: userName,\n    devicesContext: devicesList || 'Нет доступных устройств',\n    controllableDevices: controllableList || 'Нет управляемых устройств',\n    totalDevices: filtered.length,\n    currentTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })\n  }\n}];"
+      },
+      "id": "prepare-context",
+      "name": "Prepare AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 680]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Prepare AI Context').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "Ты голосовой AI ассистент умного дома пользователя {{ $('Prepare AI Context').item.json.userName }} с возможностью управления устройствами.\n\n📅 ТЕКУЩЕЕ ВРЕМЯ: {{ $('Prepare AI Context').item.json.currentTime }}\n\n🏠 СОСТОЯНИЕ УСТРОЙСТВ ({{ $('Prepare AI Context').item.json.totalDevices }}):\n{{ $('Prepare AI Context').item.json.devicesContext }}\n\n🎛️ УПРАВЛЯЕМЫЕ УСТРОЙСТВА:\n{{ $('Prepare AI Context').item.json.controllableDevices }}\n\n🔧 УПРАВЛЕНИЕ УСТРОЙСТВАМИ:\nТы можешь управлять устройствами Home Assistant через Tools:\n- Включать/выключать: \"включи свет\", \"выключи кондиционер\" → используй tool \"control_device\"\n- Менять значения: \"сделай поярче\", \"температуру на 22\" → используй tool \"set_device_value\"\n- Запускать сценарии: \"режим кино\" → используй tool \"call_service\"\n\n📋 ТВОИ ПРАВИЛА:\n1. Отвечай КРАТКО и ПО ДЕЛУ на русском языке (для голосового ответа!)\n2. Используй данные о состоянии дома из списка выше\n3. ВСЕГДА подтверждай действие: \"✅ Включил свет в гостиной\"\n4. Если устройство не найдено в списке - скажи какие доступны\n5. Используй русские названия из friendly_name, но для entity_id используй точное имя\n6. Помни контекст предыдущих сообщений\n7. Используй эмодзи (🌡️ 🏠 💡 ⚡ 🎛️)\n8. Если нужно управление - ОБЯЗАТЕЛЬНО используй Tools, не просто говори что сделаешь\n9. Ответ должен быть коротким (2-3 предложения)\n\n💬 ПРИМЕРЫ:\n- \"Включи свет в гостиной\" → [вызов tool control_device] → \"✅ Включил свет в гостиной\"\n- \"Какая температура?\" → \"🌡️ В доме 21°C. В гостиной 22.\"\n- \"Сделай поярче\" → [вызов tool set_device_value] → \"✅ Увеличил яркость\""
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [2220, 680]
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {
+          "baseURL": "http://YOUR_OLLAMA_IP:11434",
+          "temperature": 0.7
+        }
+      },
+      "id": "ollama-model",
+      "name": "Ollama Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [2440, 800]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Prepare AI Context').item.json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "id": "memory-buffer",
+      "name": "Memory Buffer",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [2440, 920]
+    },
+    {
+      "parameters": {
+        "name": "control_device",
+        "description": "Control Home Assistant devices (turn on/off/toggle). Use for lights, switches, fans, covers, climate devices.",
+        "workflowId": "={{ $parameter.workflowId }}",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"entity_id\": \"light.living_room\",\n  \"action\": \"on\"\n}",
+        "fields": {
+          "values": [
+            {
+              "name": "entity_id",
+              "type": "string",
+              "description": "Device entity ID from Home Assistant (e.g., light.living_room, switch.kitchen)"
+            },
+            {
+              "name": "action",
+              "type": "string",
+              "description": "Action to perform: 'on', 'off', or 'toggle'"
+            }
+          ]
+        }
+      },
+      "id": "tool-control-device",
+      "name": "Tool: Control Device",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [2440, 1040]
+    },
+    {
+      "parameters": {
+        "name": "set_device_value",
+        "description": "Set values for Home Assistant devices (brightness for lights, temperature for climate, etc).",
+        "workflowId": "={{ $parameter.workflowId }}",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"entity_id\": \"light.living_room\",\n  \"attribute\": \"brightness\",\n  \"value\": \"200\"\n}",
+        "fields": {
+          "values": [
+            {
+              "name": "entity_id",
+              "type": "string",
+              "description": "Device entity ID"
+            },
+            {
+              "name": "attribute",
+              "type": "string",
+              "description": "Attribute to set: 'brightness' (0-255 for lights), 'temperature' (for climate), 'hvac_mode'"
+            },
+            {
+              "name": "value",
+              "type": "string",
+              "description": "Value to set (number or string)"
+            }
+          ]
+        }
+      },
+      "id": "tool-set-value",
+      "name": "Tool: Set Device Value",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [2440, 1160]
+    },
+    {
+      "parameters": {
+        "name": "call_service",
+        "description": "Call any Home Assistant service (scenes, scripts, automations). Use for complex actions.",
+        "workflowId": "={{ $parameter.workflowId }}",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"service\": \"scene.turn_on\",\n  \"entity_id\": \"scene.movie_time\"\n}",
+        "fields": {
+          "values": [
+            {
+              "name": "service",
+              "type": "string",
+              "description": "Service name (e.g., scene.turn_on, script.good_morning)"
+            },
+            {
+              "name": "entity_id",
+              "type": "string",
+              "description": "Target entity ID (optional)"
+            }
+          ]
+        }
+      },
+      "id": "tool-call-service",
+      "name": "Tool: Call Service",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [2440, 1280]
+    },
+    {
+      "parameters": {
+        "jsCode": "const agentResponse = $input.item.json;\nconst chatId = $('Prepare AI Context').item.json.chatId;\n\nlet responseText = '';\n\nif (agentResponse.output) {\n  responseText = agentResponse.output;\n} else if (agentResponse.text) {\n  responseText = agentResponse.text;\n} else if (typeof agentResponse === 'string') {\n  responseText = agentResponse;\n} else {\n  responseText = '❌ Ошибка: не удалось получить ответ от AI';\n}\n\nreturn [{\n  json: {\n    chatId: chatId,\n    responseText: responseText\n  }\n}];"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 680]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}"
+      },
+      "id": "send-response",
+      "name": "Send AI Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2660, 680],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "workflow-control-device",
+      "name": "Workflow: Control Device",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [2660, 1040]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entity_id = $input.item.json.entity_id;\nconst action = $input.item.json.action || 'toggle';\n\nif (!entity_id) {\n  throw new Error('entity_id is required');\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\n\nif (action === 'on') {\n  service = `${domain}.turn_on`;\n} else if (action === 'off') {\n  service = `${domain}.turn_off`;\n} else {\n  service = `${domain}.toggle`;\n}\n\nreturn [{\n  json: {\n    domain: domain,\n    service: service,\n    entity_id: entity_id,\n    action: action\n  }\n}];"
+      },
+      "id": "control-parse",
+      "name": "Parse Control Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 1040]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.domain }}/{{ $json.action === 'on' ? 'turn_on' : ($json.action === 'off' ? 'turn_off' : 'toggle') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "entity_id",
+              "value": "={{ $json.entity_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "control-execute",
+      "name": "Execute Control",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3100, 1040],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
+          "name": "Home Assistant Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entity_id = $('Parse Control Command').item.json.entity_id;\nconst action = $('Parse Control Command').item.json.action;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Device ${entity_id} ${action === 'on' ? 'turned on' : (action === 'off' ? 'turned off' : 'toggled')} successfully`\n  }\n}];"
+      },
+      "id": "control-result",
+      "name": "Control Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3320, 1040]
+    },
+    {
+      "parameters": {},
+      "id": "workflow-set-value",
+      "name": "Workflow: Set Value",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [2660, 1160]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entity_id = $input.item.json.entity_id;\nconst attribute = $input.item.json.attribute;\nconst value = $input.item.json.value;\n\nif (!entity_id || !attribute || value === undefined) {\n  throw new Error('entity_id, attribute, and value are required');\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\nlet serviceData = { entity_id: entity_id };\n\nif (domain === 'light' && attribute === 'brightness') {\n  service = 'light.turn_on';\n  serviceData.brightness = parseInt(value);\n} else if (domain === 'climate' && attribute === 'temperature') {\n  service = 'climate.set_temperature';\n  serviceData.temperature = parseFloat(value);\n} else if (domain === 'climate' && attribute === 'hvac_mode') {\n  service = 'climate.set_hvac_mode';\n  serviceData.hvac_mode = value;\n} else {\n  service = `${domain}.turn_on`;\n  serviceData[attribute] = value;\n}\n\nreturn [{\n  json: {\n    domain: domain,\n    service: service,\n    serviceData: serviceData\n  }\n}];"
+      },
+      "id": "value-parse",
+      "name": "Parse Value Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 1160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.service }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.serviceData) }}",
+        "options": {}
+      },
+      "id": "value-execute",
+      "name": "Execute Set Value",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3100, 1160],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
+          "name": "Home Assistant Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const serviceData = $('Parse Value Command').item.json.serviceData;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Value set successfully for ${serviceData.entity_id}`\n  }\n}];"
+      },
+      "id": "value-result",
+      "name": "Value Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3320, 1160]
+    },
+    {
+      "parameters": {},
+      "id": "workflow-call-service",
+      "name": "Workflow: Call Service",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [2660, 1280]
+    },
+    {
+      "parameters": {
+        "jsCode": "const service = $input.item.json.service;\nconst entity_id = $input.item.json.entity_id;\n\nif (!service) {\n  throw new Error('service is required');\n}\n\nconst serviceData = {};\nif (entity_id) {\n  serviceData.entity_id = entity_id;\n}\n\nreturn [{\n  json: {\n    service: service,\n    serviceData: serviceData\n  }\n}];"
+      },
+      "id": "service-parse",
+      "name": "Parse Service Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2880, 1280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://YOUR_HA_IP:8123/api/services/{{ $json.service }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.serviceData) }}",
+        "options": {}
+      },
+      "id": "service-execute",
+      "name": "Execute Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3100, 1280],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_HA_TOKEN_CREDENTIAL_ID",
+          "name": "Home Assistant Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const service = $('Parse Service Command').item.json.service;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Service ${service} called successfully`\n  }\n}];"
+      },
+      "id": "service-result",
+      "name": "Service Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3320, 1280]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {"main": [[{"node": "Process Message", "type": "main", "index": 0}]]},
+    "Process Message": {"main": [[{"node": "Is Command?", "type": "main", "index": 0}]]},
+    "Is Command?": {"main": [[{"node": "Send Command Response", "type": "main", "index": 0}],[{"node": "Is Voice?", "type": "main", "index": 0}]]},
+    "Is Voice?": {"main": [[{"node": "Get File Path", "type": "main", "index": 0}],[{"node": "Get HA States", "type": "main", "index": 0}]]},
+    "Get File Path": {"main": [[{"node": "Download Voice", "type": "main", "index": 0}]]},
+    "Download Voice": {"main": [[{"node": "Whisper Transcribe", "type": "main", "index": 0}]]},
+    "Whisper Transcribe": {"main": [[{"node": "Extract Voice Text", "type": "main", "index": 0}]]},
+    "Extract Voice Text": {"main": [[{"node": "Get HA States", "type": "main", "index": 0}]]},
+    "Get HA States": {"main": [[{"node": "Prepare AI Context", "type": "main", "index": 0}]]},
+    "Prepare AI Context": {"main": [[{"node": "AI Agent", "type": "main", "index": 0}]]},
+    "Ollama Model": {"ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]},
+    "Memory Buffer": {"ai_memory": [[{"node": "AI Agent", "type": "ai_memory", "index": 0}]]},
+    "Tool: Control Device": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
+    "Tool: Set Device Value": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
+    "Tool: Call Service": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
+    "AI Agent": {"main": [[{"node": "Format Response", "type": "main", "index": 0}]]},
+    "Format Response": {"main": [[{"node": "Send AI Response", "type": "main", "index": 0}]]},
+    "Workflow: Control Device": {"main": [[{"node": "Parse Control Command", "type": "main", "index": 0}]]},
+    "Parse Control Command": {"main": [[{"node": "Execute Control", "type": "main", "index": 0}]]},
+    "Execute Control": {"main": [[{"node": "Control Result", "type": "main", "index": 0}]]},
+    "Workflow: Set Value": {"main": [[{"node": "Parse Value Command", "type": "main", "index": 0}]]},
+    "Parse Value Command": {"main": [[{"node": "Execute Set Value", "type": "main", "index": 0}]]},
+    "Execute Set Value": {"main": [[{"node": "Value Result", "type": "main", "index": 0}]]},
+    "Workflow: Call Service": {"main": [[{"node": "Parse Service Command", "type": "main", "index": 0}]]},
+    "Parse Service Command": {"main": [[{"node": "Execute Service", "type": "main", "index": 0}]]},
+    "Execute Service": {"main": [[{"node": "Service Result", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": []
+}

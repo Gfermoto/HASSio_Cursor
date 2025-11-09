@@ -1672,6 +1672,193 @@ hugepages: 1024
 
 ---
 
+## Конфигурация с двумя GPU
+
+Если у вас **две видеокарты** (например, NVIDIA для Ollama + AMD Radeon для хоста), есть несколько вариантов использования.
+
+### Вариант 1: Radeon для хоста, NVIDIA для VM (Рекомендуется)
+
+**Сценарий:**
+- **NVIDIA GPU** → passthrough в VM для Ollama
+- **AMD Radeon** → остается на хосте для Proxmox веб-интерфейса
+
+**Преимущества:**
+- ✅ Хост имеет видео-вывод (удобно для администрирования)
+- ✅ NVIDIA полностью для Ollama VM
+- ✅ Минимум конфликтов драйверов
+- ✅ Простая настройка
+- ✅ **Освобождает ресурсы CPU хоста** (если сейчас используется CPU/iGPU для графики)
+
+**Освобождение ресурсов хоста:**
+
+**Текущая ситуация (без выделенной GPU на хосте):**
+- Proxmox работает в **headless режиме** (без монитора) - минимальная нагрузка
+- ИЛИ использует **iGPU/CPU** для графики - нагрузка на CPU 2-5%
+- ИЛИ вообще **нет видео-вывода** - проблема при сбоях сети
+
+**С Radeon 7100 на хосте:**
+- ✅ Видео-вывод через GPU (не через CPU)
+- ✅ **Освобождает 2-5% CPU** (если был iGPU активен)
+- ✅ **Доступ к консоли** при проблемах с сетью (критично!)
+- ✅ Radeon 7100 потребляет **~10-15W** (старая карта, низкое энергопотребление)
+- ✅ Драйверы AMD занимают **~50-100MB RAM** (минимально)
+
+**Реальная выгода:**
+- CPU: **-2-5%** (если использовался iGPU)
+- RAM: **+50-100MB** (драйверы AMD)
+- Энергопотребление: **+10-15W** (Radeon 7100)
+- **Надежность:** ⬆️⬆️⬆️ (есть физический доступ к консоли!)
+
+**Вывод:** Основная выгода - **надежность и удобство администрирования**, а не освобождение ресурсов. CPU освободится только если сейчас используется iGPU.
+
+**Настройка:**
+
+```bash
+# 1. Определить ID обеих GPU
+lspci -nn | grep -E "VGA|3D"
+
+# Пример вывода:
+# 01:00.0 VGA [0300]: NVIDIA Corporation GP106 [P106-100] [10de:1c07]
+# 06:00.0 VGA [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Radeon 7100 [1002:515e]
+
+# 2. Blacklist только NVIDIA (не трогаем AMD драйверы)
+cat > /etc/modprobe.d/blacklist-nvidia.conf << 'EOF'
+blacklist nouveau
+blacklist nvidia
+blacklist nvidiafb
+EOF
+
+# 3. VFIO только для NVIDIA (подставь свой ID из шага 1)
+echo "options vfio-pci ids=10de:1c07" > /etc/modprobe.d/vfio.conf
+
+# 4. Установить AMD драйверы на хост (опционально, если нужен вывод)
+apt update
+apt install -y firmware-amd-graphics
+
+# 5. Перезагрузка
+update-initramfs -u -k all
+reboot
+```
+
+**Проверка после перезагрузки:**
+
+```bash
+# NVIDIA должна быть привязана к vfio-pci
+lspci -nnk | grep -A 3 -i nvidia
+# Ожидаемый вывод:
+# Kernel driver in use: vfio-pci
+
+# AMD должна работать на хосте
+lspci -nnk | grep -A 3 -i radeon
+# Ожидаемый вывод:
+# Kernel driver in use: radeon (или amdgpu для новых карт)
+```
+
+### Вариант 2: Две VM - каждая со своей GPU
+
+**Сценарий:**
+- **NVIDIA GPU** → VM 1 (Ollama)
+- **AMD Radeon** → VM 2 (другой сервис, например, видео-кодирование)
+
+**Настройка:**
+
+```bash
+# 1. Определить ID обеих GPU
+lspci -nn | grep -E "VGA|3D"
+
+# 2. Blacklist оба GPU на хосте
+cat > /etc/modprobe.d/blacklist-gpu.conf << 'EOF'
+blacklist nouveau
+blacklist nvidia
+blacklist nvidiafb
+blacklist radeon
+blacklist amdgpu
+EOF
+
+# 3. VFIO для обеих GPU (подставь свои ID через запятую)
+echo "options vfio-pci ids=10de:1c07,1002:515e" > /etc/modprobe.d/vfio.conf
+
+# 4. Перезагрузка
+update-initramfs -u -k all
+reboot
+```
+
+**Добавление GPU в VM:**
+
+- **VM 1 (Ollama):** Добавить NVIDIA через Proxmox UI (Hardware → Add → PCI Device)
+- **VM 2:** Добавить AMD через Proxmox UI (Hardware → Add → PCI Device)
+
+**Важно:** Каждая GPU доступна только одной VM одновременно.
+
+### Вариант 3: Две NVIDIA GPU в одной VM (для больших моделей)
+
+**Сценарий:** Две NVIDIA GPU в одной VM для распределения нагрузки больших моделей (llama3.1:70b, mistral:large).
+
+**Ограничения:**
+- ⚠️ Работает только с **одинаковыми** GPU (обе NVIDIA)
+- ⚠️ Ollama поддерживает multi-GPU только для CUDA (NVIDIA)
+- ⚠️ AMD ROCm не поддерживается Ollama (на 2025 год)
+
+**Настройка:**
+
+```bash
+# 1. Определить ID обеих NVIDIA GPU
+lspci -nn | grep -i nvidia
+
+# 2. Blacklist NVIDIA на хосте
+cat > /etc/modprobe.d/blacklist-nvidia.conf << 'EOF'
+blacklist nouveau
+blacklist nvidia
+blacklist nvidiafb
+EOF
+
+# 3. VFIO для обеих NVIDIA (через запятую)
+echo "options vfio-pci ids=10de:1c07,10de:1c82" > /etc/modprobe.d/vfio.conf
+
+# 4. Перезагрузка
+update-initramfs -u -k all
+reboot
+```
+
+**В VM:**
+
+```bash
+# 1. Добавить обе GPU через Proxmox UI в одну VM
+
+# 2. Установить NVIDIA драйверы (как обычно)
+
+# 3. Проверить что обе GPU видны
+nvidia-smi
+# Должно показать обе GPU
+
+# 4. Ollama автоматически использует обе GPU если:
+# - Модель достаточно большая (7B+)
+# - Достаточно VRAM на обеих GPU
+# - CUDA видит обе GPU
+
+# Можно явно указать:
+export CUDA_VISIBLE_DEVICES=0,1
+ollama run llama3.1:8b
+```
+
+**Производительность:**
+- Две GPU **не дают 2x ускорение** (обычно 1.5-1.7x)
+- Зависит от модели и размера batch
+- Полезно для моделей > 8B параметров
+
+### Смешанная конфигурация (NVIDIA + AMD)
+
+**⚠️ Не рекомендуется:**
+- NVIDIA использует CUDA, AMD использует ROCm
+- Ollama не поддерживает ROCm (только CUDA)
+- Нельзя использовать обе GPU одновременно в одной VM для Ollama
+
+**Если нужно:**
+- NVIDIA → VM для Ollama
+- AMD → Хост или отдельная VM для других задач
+
+---
+
 ## Финальная архитектура
 
 ```text
@@ -1897,18 +2084,30 @@ curl http://localhost:11434/api/tags
 
 **Проверено на:**
 - **Proxmox VE:** 8.x (ядро 6.8.12-4-pve)
+- **Proxmox Host:** 192.168.1.124
 - **CPU:** AMD Ryzen 5 2600 Six-Core (12 threads)
 - **Материнская плата:** ASRock B450M Pro4 (BIOS P7.40, обновлено с P3.50)
-- **RAM:** 8GB (планируется обновление до 16GB)
+- **RAM:** 16GB (обновлено с 8GB для поддержки больших моделей)
 - **GPU:** NVIDIA P106-100 (майнинговая карта, 6GB VRAM, без видеовыходов)
-- **VM:** Ubuntu 22.04.5 LTS, 4 cores, 6GB RAM
+- **VM ID:** 103 (ollama-vm)
+- **VM IP:** 192.168.1.131
+- **VM Resources:** Ubuntu 22.04.5 LTS, 4 cores, 10GB RAM, 64GB disk
 - **Ollama:** версия 0.x.x с NVIDIA Driver 580.95.05, CUDA 13.0
-- **Модель:** phi3:mini (2.3GB), производительность ~51 tokens/sec
+- **Модели:**
+  - llama3.1:8b (4.7GB) - основная модель ✅
+  - phi3:mini (2.3GB) - резервная
+- **Производительность:** llama3.1:8b ~35-45 tokens/sec на GPU
+- **Whisper.cpp:** base модель CUDA версия ✅
+  - 11 сек аудио → 0.56 сек транскрибации (19x realtime)
+  - API endpoint: http://192.168.1.131:9000
 - Также совместимо с NVIDIA GTX/RTX 10xx-40xx series (обычные карты)
 
-**Версия:** 1.2 (финальная версия с учетом всех проблем реального развертывания)
-**Дата:** Ноябрь 2, 2025
+**Версия:** 1.3 (обновлено с реальной конфигурацией + Whisper)
+**Дата:** Ноябрь 8, 2025
 
 **Статус:** ✅ Успешно развернуто и протестировано
-**Время установки:** ~90 минут (включая обновление BIOS и troubleshooting)
-**Производительность:** Стабильная работа, GPU utilization 80-100% во время inference
+**Время установки:** ~90 минут (Ollama) + ~40 минут (Whisper с CUDA)
+**Производительность:**
+- Ollama: GPU utilization 80-100% во время inference
+- Whisper: 19x realtime транскрибация на GPU (0.56 сек на 11 сек аудио)
+- **Общая задержка:** 3-6 сек от голосового запроса до текстового ответа
