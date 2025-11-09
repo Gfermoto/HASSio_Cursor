@@ -1,0 +1,164 @@
+{
+  "name": "🏠 Персональный ассистент с памятью (Ollama)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 460],
+      "credentials": {
+        "telegramApi": "YOUR_TELEGRAM_CREDENTIAL"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.item.json.message;\nconst text = message?.text || '';\nconst chatId = message?.chat?.id;\nconst userName = message?.from?.first_name || 'Друг';\n\nif (!text || !chatId) {\n  return [];\n}\n\nif (text === '/start' || text === '/help') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: `👋 Привет, ${userName}!\\n\\n🤖 Я AI ассистент умного дома на Ollama (llama3.1:8b)\\n\\n*Что я умею:*\\n• Отвечать на вопросы о доме\\n• Помнить контекст диалога\\n• Анализировать датчики\\n\\n*Примеры вопросов:*\\n• \"Какая температура?\"\\n• \"Что показывают датчики?\"\\n• \"А в спальне?\" (помню контекст!)\\n\\n*Команды:*\\n/clear - очистить память диалога`\n    }\n  }];\n}\n\nif (text === '/clear') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: '🗑️ Память диалога очищена! Начинаем с чистого листа.'\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    isCommand: false,\n    chatId: chatId,\n    userName: userName,\n    userMessage: text\n  }\n}];"
+      },
+      "id": "process-message",
+      "name": "Process Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isCommand ? 'command' : 'chat' }}",
+              "rightValue": "command",
+              "operator": {"type": "string", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "is-command",
+      "name": "Is Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 460]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "send-command",
+      "name": "Send Command Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 340],
+      "credentials": {
+        "telegramApi": "YOUR_TELEGRAM_CREDENTIAL"
+      }
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "getAll"
+      },
+      "id": "get-ha-states",
+      "name": "Get HA States",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [900, 580],
+      "credentials": {
+        "homeAssistantApi": "YOUR_HA_CREDENTIAL"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const processData = $('Process Message').item.json;\nconst userMessage = processData.userMessage;\nconst chatId = processData.chatId;\nconst userName = processData.userName;\n\nconst haItems = $input.all();\nlet allStates = [];\n\nfor (const item of haItems) {\n  if (Array.isArray(item.json)) {\n    allStates = allStates.concat(item.json);\n  } else if (item.json.entity_id) {\n    allStates.push(item.json);\n  }\n}\n\nif (allStates.length === 0) {\n  return [{\n    json: {\n      userMessage: userMessage,\n      chatId: chatId,\n      userName: userName,\n      devicesContext: 'Нет данных от Home Assistant',\n      totalDevices: 0,\n      currentTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })\n    }\n  }];\n}\n\nconst relevantDomains = ['sensor', 'binary_sensor', 'climate', 'light', 'switch', 'weather', 'person'];\n\nconst filtered = allStates.filter(state => {\n  const domain = state.entity_id?.split('.')[0];\n  return domain && relevantDomains.includes(domain) && \n         state.state !== 'unavailable' && \n         state.state !== 'unknown';\n});\n\nconst devicesList = filtered.slice(0, 40).map(state => {\n  const name = state.attributes?.friendly_name || state.entity_id;\n  const value = state.state;\n  const unit = state.attributes?.unit_of_measurement || '';\n  return `${name}: ${value}${unit ? ' ' + unit : ''}`;\n}).join('\\n');\n\nreturn [{\n  json: {\n    userMessage: userMessage,\n    chatId: chatId,\n    userName: userName,\n    devicesContext: devicesList || 'Нет доступных устройств',\n    totalDevices: filtered.length,\n    currentTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })\n  }\n}];"
+      },
+      "id": "prepare-context",
+      "name": "Prepare AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 580]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Prepare AI Context').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "Ты персональный AI ассистент умного дома пользователя {{ $('Prepare AI Context').item.json.userName }}.\n\n📅 ТЕКУЩЕЕ ВРЕМЯ: {{ $('Prepare AI Context').item.json.currentTime }}\n\n🏠 ДОСТУПНЫЕ УСТРОЙСТВА ({{ $('Prepare AI Context').item.json.totalDevices }}):\n{{ $('Prepare AI Context').item.json.devicesContext }}\n\n📋 ТВОИ ПРАВИЛА:\n1. Отвечай КРАТКО и ПО ДЕЛУ на русском языке\n2. Используй данные о состоянии дома из списка выше\n3. Если спрашивают про конкретное устройство - ищи его в списке\n4. Если данных нет в списке - честно скажи об этом\n5. Помни контекст предыдущих сообщений в диалоге\n6. Используй эмодзи для лучшей читаемости (🌡️ 🏠 💡 ⚡ 🌤️)\n7. Не придумывай данные - только то что видишь\n\n💬 ПРИМЕРЫ ХОРОШИХ ОТВЕТОВ:\n- \"Какая температура?\" → \"🌡️ Средняя температура в доме 21°C. Гостиная: 22°C, Спальня: 20°C, Кухня: 21°C\"\n- \"А в ванной?\" → \"🌡️ В ванной 23°C\" (используй контекст что речь о температуре)\n- \"Что включено?\" → \"💡 Включено: Свет в гостиной, Свет на кухне. Выключено остальное.\""
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [1340, 580]
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {
+          "baseURL": "http://YOUR_OLLAMA_IP:11434",
+          "temperature": 0.7
+        }
+      },
+      "id": "ollama-model",
+      "name": "Ollama Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [1560, 700]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Prepare AI Context').item.json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "id": "memory-buffer",
+      "name": "Memory Buffer",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [1560, 820]
+    },
+    {
+      "parameters": {
+        "jsCode": "const agentResponse = $input.item.json;\nconst chatId = $('Prepare AI Context').item.json.chatId;\n\nlet responseText = '';\n\nif (agentResponse.output) {\n  responseText = agentResponse.output;\n} else if (agentResponse.text) {\n  responseText = agentResponse.text;\n} else if (typeof agentResponse === 'string') {\n  responseText = agentResponse;\n} else {\n  responseText = '❌ Ошибка: не удалось получить ответ от AI';\n}\n\nreturn [{\n  json: {\n    chatId: chatId,\n    responseText: responseText\n  }\n}];"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 580]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}"
+      },
+      "id": "send-response",
+      "name": "Send AI Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1780, 580],
+      "credentials": {
+        "telegramApi": "YOUR_TELEGRAM_CREDENTIAL"
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {"main": [[{"node": "Process Message", "type": "main", "index": 0}]]},
+    "Process Message": {"main": [[{"node": "Is Command?", "type": "main", "index": 0}]]},
+    "Is Command?": {"main": [[{"node": "Send Command Response", "type": "main", "index": 0}],[{"node": "Get HA States", "type": "main", "index": 0}]]},
+    "Get HA States": {"main": [[{"node": "Prepare AI Context", "type": "main", "index": 0}]]},
+    "Prepare AI Context": {"main": [[{"node": "AI Agent", "type": "main", "index": 0}]]},
+    "Ollama Model": {"ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]},
+    "Memory Buffer": {"ai_memory": [[{"node": "AI Agent", "type": "ai_memory", "index": 0}]]},
+    "AI Agent": {"main": [[{"node": "Format Response", "type": "main", "index": 0}]]},
+    "Format Response": {"main": [[{"node": "Send AI Response", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": []
+}

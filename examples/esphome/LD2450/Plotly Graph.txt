@@ -1,0 +1,522 @@
+type: custom:plotly-graph
+title: "LD2450 - LD2450"
+refresh_interval: 2
+hours_to_show: current_day
+ha_theme: true
+layout:
+  legend:
+    'y': 8000
+    orientation: h
+  autosize: true
+  margin:
+    autoexpand: true
+    l: 50
+    r: 20
+    t: 20
+    b: 40
+  showlegend: true
+  xaxis:
+    dtick: 1000
+    gridcolor: RGBA(200,200,200,0.15)
+    zerolinecolor: RGBA(200,200,200,0.15)
+    type: number
+    fixedrange: true
+    range:
+      - -4000
+      - 4000
+  yaxis:
+    dtick: 1000
+    gridcolor: RGBA(200,200,200,0.15)
+    zerolinecolor: RGBA(200,200,200,0.15)
+    scaleanchor: x
+    scaleratio: 1
+    fixedrange: true
+    range:
+      - 8000
+      - 0
+entities:
+  - entity: ''
+    name: Person1
+    show_value: true
+    unit_of_measurement: mm
+    marker:
+      size: 12
+    line:
+      shape: spline
+      width: 5
+    x:
+      - $ex hass.states["sensor.ld2450_radar_target1_x"].state
+    'y':
+      - $ex hass.states["sensor.ld2450_radar_target1_y"].state
+  - entity: ''
+    name: Person2
+    show_value: true
+    unit_of_measurement: mm
+    marker:
+      size: 12
+    line:
+      shape: spline
+      width: 5
+    x:
+      - $ex hass.states["sensor.ld2450_radar_target2_x"].state
+    'y':
+      - $ex hass.states["sensor.ld2450_radar_target2_y"].state
+  - entity: ''
+    name: Person3
+    show_value: true
+    unit_of_measurement: mm
+    marker:
+      size: 12
+    line:
+      shape: spline
+      width: 5
+    x:
+      - $ex hass.states["sensor.ld2450_radar_target3_x"].state
+    'y':
+      - $ex hass.states["sensor.ld2450_radar_target3_y"].state
+  - entity: ''
+    name: Zone1
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone1_presence"].state == "on" ?
+      "RGBA(0,250,0,0.4)" : "RGBA(0,250,0,0.1)"
+    line:
+      color: RGBA(0,250,0,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone1_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_x"].state*1 -
+        hass.states["number.ld2450_radar_zone1_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_x"].state*1 -
+        hass.states["number.ld2450_radar_zone1_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone1_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_x"].state*1 +
+        hass.states["number.ld2450_radar_zone1_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone1_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone1_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_y"].state*1 +
+        hass.states["number.ld2450_radar_zone1_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_y"].state*1 +
+        hass.states["number.ld2450_radar_zone1_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone1_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone1_y"].state*1 +
+        hass.states["number.ld2450_radar_zone1_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone1_y"].state*1
+  - entity: ''
+    name: Zone2
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone2_presence"].state == "on" ?
+      "RGBA(250,110,0,0.4)" : "RGBA(250,110,0,0.1)"
+    line:
+      color: RGBA(250,110,0,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone2_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_x"].state*1 -
+        hass.states["number.ld2450_radar_zone2_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_x"].state*1 -
+        hass.states["number.ld2450_radar_zone2_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone2_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_x"].state*1 +
+        hass.states["number.ld2450_radar_zone2_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone2_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone2_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_y"].state*1 +
+        hass.states["number.ld2450_radar_zone2_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_y"].state*1 +
+        hass.states["number.ld2450_radar_zone2_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone2_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone2_y"].state*1 +
+        hass.states["number.ld2450_radar_zone2_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone2_y"].state*1
+  - entity: ''
+    name: Zone3
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone3_presence"].state == "on" ?
+      "RGBA(0,0,250,0.4)" : "RGBA(0,0,250,0.1)"
+    line:
+      color: RGBA(0,0,250,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone3_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_x"].state*1 -
+        hass.states["number.ld2450_radar_zone3_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_x"].state*1 -
+        hass.states["number.ld2450_radar_zone3_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone3_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_x"].state*1 +
+        hass.states["number.ld2450_radar_zone3_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone3_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone3_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_y"].state*1 +
+        hass.states["number.ld2450_radar_zone3_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_y"].state*1 +
+        hass.states["number.ld2450_radar_zone3_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone3_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone3_y"].state*1 +
+        hass.states["number.ld2450_radar_zone3_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone3_y"].state*1
+  - entity: ''
+    name: Zone4
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone4_presence"].state == "on" ?
+      "RGBA(250,210,0,0.4)" : "RGBA(250,210,0,0.1)"
+    line:
+      color: RGBA(250,210,0,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone4_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_x"].state*1 -
+        hass.states["number.ld2450_radar_zone4_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_x"].state*1 -
+        hass.states["number.ld2450_radar_zone4_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone4_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_x"].state*1 +
+        hass.states["number.ld2450_radar_zone4_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone4_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone4_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_y"].state*1 +
+        hass.states["number.ld2450_radar_zone4_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_y"].state*1 +
+        hass.states["number.ld2450_radar_zone4_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone4_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone4_y"].state*1 +
+        hass.states["number.ld2450_radar_zone4_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone4_y"].state*1
+  - entity: ''
+    name: Zone5
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone5_presence"].state == "on" ?
+      "RGBA(0,150,0,0.4)" : "RGBA(0,150,0,0.1)"
+    line:
+      color: RGBA(0,150,0,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone5_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_x"].state*1 -
+        hass.states["number.ld2450_radar_zone5_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_x"].state*1 -
+        hass.states["number.ld2450_radar_zone5_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone5_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_x"].state*1 +
+        hass.states["number.ld2450_radar_zone5_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone5_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone5_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_y"].state*1 +
+        hass.states["number.ld2450_radar_zone5_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_y"].state*1 +
+        hass.states["number.ld2450_radar_zone5_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone5_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone5_y"].state*1 +
+        hass.states["number.ld2450_radar_zone5_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone5_y"].state*1
+  - entity: ''
+    name: Zone6
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["binary_sensor.ld2450_radar_zone6_presence"].state == "on" ?
+      "RGBA(250,50,130,0.4)" : "RGBA(250,50,130,0.1)"
+    line:
+      color: RGBA(250,50,130,0.9)
+      shape: line
+      width: 2
+    x:
+      - $ex hass.states["number.ld2450_radar_zone6_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_x"].state*1 -
+        hass.states["number.ld2450_radar_zone6_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_x"].state*1 -
+        hass.states["number.ld2450_radar_zone6_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone6_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_x"].state*1 +
+        hass.states["number.ld2450_radar_zone6_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone6_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zone6_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_y"].state*1 +
+        hass.states["number.ld2450_radar_zone6_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_y"].state*1 +
+        hass.states["number.ld2450_radar_zone6_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zone6_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zone6_y"].state*1 +
+        hass.states["number.ld2450_radar_zone6_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zone6_y"].state*1
+  - entity: ''
+    name: Zout1
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["switch.ld2450_radar_zout1_enable"].state == "on" ?
+      hass.states["binary_sensor.ld2450_radar_zout1_presence"].state == "on" ?
+      "RGBA(250,0,0,0.4)" : "RGBA(250,0,0,0.2)" : "RGBA(0,0,0,0)"
+    line:
+      color: >-
+        $ex hass.states["switch.ld2450_radar_zout1_enable"].state == "on" ?
+        "RGBA(0,150,0,0.9)" : "RGBA(0,0,0,0)"
+      width: 3
+      dash: dash
+    x:
+      - $ex hass.states["number.ld2450_radar_zout1_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_x"].state*1 -
+        hass.states["number.ld2450_radar_zout1_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_x"].state*1 -
+        hass.states["number.ld2450_radar_zout1_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout1_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_x"].state*1 +
+        hass.states["number.ld2450_radar_zout1_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout1_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zout1_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_y"].state*1 +
+        hass.states["number.ld2450_radar_zout1_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_y"].state*1 +
+        hass.states["number.ld2450_radar_zout1_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout1_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout1_y"].state*1 +
+        hass.states["number.ld2450_radar_zout1_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout1_y"].state*1
+  - entity: ''
+    name: Zout2
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["switch.ld2450_radar_zout2_enable"].state == "on" ?
+      hass.states["binary_sensor.ld2450_radar_zout2_presence"].state == "on" ?
+      "RGBA(250,0,0,0.4)" : "RGBA(250,0,0,0.2)" : "RGBA(0,0,0,0)"
+    line:
+      color: >-
+        $ex hass.states["switch.ld2450_radar_zout2_enable"].state == "on" ?
+        "RGBA(250,110,0,0.9)" : "RGBA(0,0,0,0)"
+      width: 3
+      dash: dash
+    x:
+      - $ex hass.states["number.ld2450_radar_zout2_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_x"].state*1 -
+        hass.states["number.ld2450_radar_zout2_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_x"].state*1 -
+        hass.states["number.ld2450_radar_zout2_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout2_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_x"].state*1 +
+        hass.states["number.ld2450_radar_zout2_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout2_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zout2_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_y"].state*1 +
+        hass.states["number.ld2450_radar_zout2_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_y"].state*1 +
+        hass.states["number.ld2450_radar_zout2_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout2_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout2_y"].state*1 +
+        hass.states["number.ld2450_radar_zout2_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout2_y"].state*1
+  - entity: ''
+    name: Zout3
+    mode: lines
+    fill: toself
+    fillcolor: >-
+      $ex hass.states["switch.ld2450_radar_zout3_enable"].state == "on" ?
+      hass.states["binary_sensor.ld2450_radar_zout3_presence"].state == "on" ?
+      "RGBA(250,0,0,0.4)" : "RGBA(250,0,0,0.2)" : "RGBA(0,0,0,0)"
+    line:
+      color: >-
+        $ex hass.states["switch.ld2450_radar_zout3_enable"].state == "on" ?
+        "RGBA(0,0,250,0.9)" : "RGBA(0,0,0,0)"
+      width: 3
+      dash: dash
+    x:
+      - $ex hass.states["number.ld2450_radar_zout3_x"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_x"].state*1 -
+        hass.states["number.ld2450_radar_zout3_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_x"].state*1 -
+        hass.states["number.ld2450_radar_zout3_width"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout3_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_x"].state*1 +
+        hass.states["number.ld2450_radar_zout3_height"].state *
+        Math.cos((hass.states["number.ld2450_radar_angle"].state*1-90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout3_x"].state*1
+    'y':
+      - $ex hass.states["number.ld2450_radar_zout3_y"].state*1
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_y"].state*1 +
+        hass.states["number.ld2450_radar_zout3_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_y"].state*1 +
+        hass.states["number.ld2450_radar_zout3_width"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state)*3.1415/180) +
+        hass.states["number.ld2450_radar_zout3_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - >-
+        $ex hass.states["number.ld2450_radar_zout3_y"].state*1 +
+        hass.states["number.ld2450_radar_zout3_height"].state *
+        Math.sin((hass.states["number.ld2450_radar_angle"].state*1+90)*3.1415/180)
+      - $ex hass.states["number.ld2450_radar_zout3_y"].state*1
+  - entity: ''
+    name: Coverage
+    mode: lines
+    line:
+      width: 1
+      color: rgba(100, 100, 100, .6)
+      dash: dot
+    x:
+      - 0
+      - 1000
+      - 3700
+      - 3500
+      - 2000
+      - 0
+      - -2000
+      - -3500
+      - -3700
+      - -1000
+      - 0
+    'y':
+      - 0
+      - 500
+      - 3700
+      - 6000
+      - 7400
+      - 8000
+      - 7400
+      - 6000
+      - 3700
+      - 500
+      - 0
+raw_plotly_config: true

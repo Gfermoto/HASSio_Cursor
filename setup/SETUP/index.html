@@ -1,0 +1,2888 @@
+
+<!doctype html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Профессиональные инструменты для управления и аудита Home Assistant">
+      
+      
+        <meta name="author" content="Gfermoto">
+      
+      
+        <link rel="canonical" href="https://gfermoto.github.io/HASSio_Cursor/setup/SETUP/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../post-setup/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Детальная установка - HASSio Cursor</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Перейти к содержанию
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Верхний колонтитул">
+    <a href="../.." title="HASSio Cursor" class="md-header__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            HASSio Cursor
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Детальная установка
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Тёмная тема"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Тёмная тема" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Светлая тема"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Светлая тема" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Поиск" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Поиск">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Очистить" aria-label="Очистить" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Инициализация поиска
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Вкладки" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  🏠 Главная
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../quickstart/" class="md-tabs__link">
+          
+  
+  
+  📖 Установка
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/first-audit/" class="md-tabs__link">
+          
+  
+  
+  📚 Руководства
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../examples/heating/" class="md-tabs__link">
+          
+  
+  
+  💡 Примеры
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/COMMANDS/" class="md-tabs__link">
+          
+  
+  
+  📋 Справочник
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../analyzers/" class="md-tabs__link">
+          
+  
+  
+  📊 Анализаторы
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../integrations/n8n-ai-agents/" class="md-tabs__link">
+          
+  
+  
+  🔗 Интеграции
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Навигация" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="HASSio Cursor" class="md-nav__button md-logo" aria-label="HASSio Cursor" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    HASSio Cursor
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Gfermoto/HASSio_Cursor" title="Перейти к репозиторию" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Gfermoto/HASSio_Cursor
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🏠 Главная
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    📖 Установка
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            📖 Установка
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Быстрый старт
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Детальная установка
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Детальная установка
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      📑 Содержание
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Предварительные требования
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Шаг 1: Установка зависимостей (WSL)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ssh-add-on-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Шаг 2: Установка SSH add-on в Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Шаг 2: Установка SSH add-on в Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1. Открыть Home Assistant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-add-ons" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2. Перейти в Add-ons
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-terminal-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3. Найти и установить Terminal &amp; SSH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ssh-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.4. Настроить SSH add-on
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-ssh-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.5. Запустить SSH add-on
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-samba-add-on-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      📁 Шаг 3: Установка Samba add-on в Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📁 Шаг 3: Установка Samba add-on в Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-add-on-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Вернуться в Add-on Store
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-samba-share" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Найти и установить Samba share
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Настроить Samba
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4. Запустить Samba
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ip-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌐 Шаг 4: Узнать IP адрес Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 Шаг 4: Узнать IP адрес Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      В Home Assistant
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Шаг 5: Локальная настройка (WSL)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Шаг 5: Локальная настройка (WSL)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-samba-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1. Настроить SAMBA credentials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-ssh-config-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2. Обновить SSH config с вашим IP
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌍 Шаг 6: Проброс портов на роутере
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌍 Шаг 6: Проброс портов на роутере">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1. Войти в роутер
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-port-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2. Найти раздел Port Forwarding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.3. Создать правило для SSH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.4. Создать правила для SAMBA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.5. Сохранить настройки
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Шаг 7: Проверка SSH подключения
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ Шаг 7: Проверка SSH подключения">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.1. Первое подключение
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.2. Проверка работы
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.3. Выход
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      📁 Шаг 8: Монтирование SAMBA
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📁 Шаг 8: Монтирование SAMBA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.1. Монтирование
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.2. Проверка
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Шаг 9: Финальная проверка
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Начало работы
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      🆘 Решение проблем
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Решение проблем">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSH не подключается
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSH не подключается">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 1: Add-on запущен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 2: Порт открыт?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 3: Ключ добавлен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 4: Попробуйте с паролем
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      SAMBA не монтируется
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SAMBA не монтируется">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-on_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 1: Add-on запущен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 2: Credentials правильные?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 3: Порт открыт?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 4: Попробуйте вручную
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP не работает
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP не работает">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка: Файл конфигурации
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      📝 Важные заметки
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Важные заметки">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#samba_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      О SAMBA монтировании
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      О SSH ключах
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      О паролях
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Чек-лист настройки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎓 Дополнительная информация
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../post-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    После установки
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../portforward-mikrotik/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Проброс портов MikroTik
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zerotier-mixed-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ZeroTier смешанный режим
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssh-tunnel-samba/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SSH туннель для SAMBA
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📚 Руководства
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            📚 Руководства
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/first-audit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Первый аудит
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/heating-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Оптимизация отопления
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность умного дома
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    💡 Примеры
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            💡 Примеры
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/heating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Отопление
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Безопасность
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/energy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Энергосбережение
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📋 Справочник
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            📋 Справочник
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/COMMANDS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Команды
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Рабочий процесс
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    📊 Анализаторы
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            📊 Анализаторы
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../analyzers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Обзор
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    🔗 Интеграции
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            🔗 Интеграции
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-ai-agents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤖 AI Агенты n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    📚 Подключение n8n
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/n8n-butler-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    🤵 Пошаговое развертывание
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Содержание">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Содержание
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      📑 Содержание
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Предварительные требования
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      📦 Шаг 1: Установка зависимостей (WSL)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-ssh-add-on-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔐 Шаг 2: Установка SSH add-on в Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Шаг 2: Установка SSH add-on в Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1. Открыть Home Assistant
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-add-ons" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2. Перейти в Add-ons
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-terminal-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3. Найти и установить Terminal &amp; SSH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ssh-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.4. Настроить SSH add-on
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-ssh-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.5. Запустить SSH add-on
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-samba-add-on-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      📁 Шаг 3: Установка Samba add-on в Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📁 Шаг 3: Установка Samba add-on в Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-add-on-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1. Вернуться в Add-on Store
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-samba-share" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2. Найти и установить Samba share
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3. Настроить Samba
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4. Запустить Samba
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-ip-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌐 Шаг 4: Узнать IP адрес Home Assistant
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌐 Шаг 4: Узнать IP адрес Home Assistant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      В Home Assistant
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-wsl" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Шаг 5: Локальная настройка (WSL)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Шаг 5: Локальная настройка (WSL)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-samba-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.1. Настроить SAMBA credentials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-ssh-config-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.2. Обновить SSH config с вашим IP
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      🌍 Шаг 6: Проброс портов на роутере
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🌍 Шаг 6: Проброс портов на роутере">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1. Войти в роутер
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-port-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2. Найти раздел Port Forwarding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.3. Создать правило для SSH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.4. Создать правила для SAMBA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.5. Сохранить настройки
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Шаг 7: Проверка SSH подключения
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ Шаг 7: Проверка SSH подключения">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.1. Первое подключение
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.2. Проверка работы
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73" class="md-nav__link">
+    <span class="md-ellipsis">
+      7.3. Выход
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      📁 Шаг 8: Монтирование SAMBA
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📁 Шаг 8: Монтирование SAMBA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.1. Монтирование
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82" class="md-nav__link">
+    <span class="md-ellipsis">
+      8.2. Проверка
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Шаг 9: Финальная проверка
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎯 Начало работы
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      🆘 Решение проблем
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Решение проблем">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSH не подключается
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSH не подключается">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 1: Add-on запущен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 2: Порт открыт?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 3: Ключ добавлен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 4: Попробуйте с паролем
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#samba" class="md-nav__link">
+    <span class="md-ellipsis">
+      SAMBA не монтируется
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SAMBA не монтируется">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-on_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 1: Add-on запущен?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 2: Credentials правильные?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 3: Порт открыт?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка 4: Попробуйте вручную
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCP не работает
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCP не работает">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Проверка: Файл конфигурации
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      📝 Важные заметки
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Важные заметки">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#samba_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      О SAMBA монтировании
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      О SSH ключах
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      О паролях
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✅ Чек-лист настройки
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎓 Дополнительная информация
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">🔧 Пошаговая настройка подключения<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>Полная инструкция по настройке MCP, SSH и SAMBA для работы с Home Assistant через Cursor AI.</p>
+<hr />
+<h2 id="_2">📑 Содержание<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#предварительные-требования">Предварительные требования</a></li>
+<li><a href="#шаг-1-установка-зависимостей-wsl">📦 Шаг 1: Установка зависимостей (WSL)</a></li>
+<li><a href="#шаг-2-установка-ssh-add-on-в-home-assistant">🔐 Шаг 2: Установка SSH add-on в Home Assistant</a></li>
+<li><a href="#21-открыть-home-assistant">2.1. Открыть Home Assistant</a></li>
+<li><a href="#22-перейти-в-add-ons">2.2. Перейти в Add-ons</a></li>
+<li><a href="#23-найти-и-установить-terminal-ssh">2.3. Найти и установить Terminal &amp; SSH</a></li>
+<li><a href="#24-настроить-ssh-add-on">2.4. Настроить SSH add-on</a></li>
+<li><a href="#25-запустить-ssh-add-on">2.5. Запустить SSH add-on</a></li>
+<li><a href="#шаг-3-установка-samba-add-on-в-home-assistant">📁 Шаг 3: Установка Samba add-on в Home Assistant</a></li>
+<li><a href="#31-вернуться-в-add-on-store">3.1. Вернуться в Add-on Store</a></li>
+<li><a href="#32-найти-и-установить-samba-share">3.2. Найти и установить Samba share</a></li>
+<li><a href="#33-настроить-samba">3.3. Настроить Samba</a></li>
+<li><a href="#34-запустить-samba">3.4. Запустить Samba</a></li>
+<li><a href="#шаг-4-узнать-ip-адрес-home-assistant">🌐 Шаг 4: Узнать IP адрес Home Assistant</a></li>
+<li><a href="#в-home-assistant">В Home Assistant</a></li>
+<li><a href="#шаг-5-локальная-настройка-wsl">💻 Шаг 5: Локальная настройка (WSL)</a></li>
+<li><a href="#51-настроить-samba-credentials">5.1. Настроить SAMBA credentials</a></li>
+<li><a href="#52-обновить-ssh-config-с-вашим-ip">5.2. Обновить SSH config с вашим IP</a></li>
+<li><a href="#шаг-6-проброс-портов-на-роутере">🌍 Шаг 6: Проброс портов на роутере</a></li>
+<li><a href="#61-войти-в-роутер">6.1. Войти в роутер</a></li>
+<li><a href="#62-найти-раздел-port-forwarding">6.2. Найти раздел Port Forwarding</a></li>
+<li><a href="#63-создать-правило-для-ssh">6.3. Создать правило для SSH</a></li>
+<li><a href="#64-создать-правила-для-samba">6.4. Создать правила для SAMBA</a></li>
+<li><a href="#65-сохранить-настройки">6.5. Сохранить настройки</a></li>
+<li><a href="#шаг-7-проверка-ssh-подключения">✅ Шаг 7: Проверка SSH подключения</a></li>
+<li><a href="#71-первое-подключение">7.1. Первое подключение</a></li>
+<li><a href="#72-проверка-работы">7.2. Проверка работы</a></li>
+<li><a href="#73-выход">7.3. Выход</a></li>
+<li><a href="#шаг-8-монтирование-samba">📁 Шаг 8: Монтирование SAMBA</a></li>
+<li><a href="#81-монтирование">8.1. Монтирование</a></li>
+<li><a href="#82-проверка">8.2. Проверка</a></li>
+<li><a href="#шаг-9-финальная-проверка">✅ Шаг 9: Финальная проверка</a></li>
+<li><a href="#начало-работы">🎯 Начало работы</a></li>
+<li><a href="#решение-проблем">🆘 Решение проблем</a></li>
+<li><a href="#ssh-не-подключается">SSH не подключается</a></li>
+<li><a href="#samba-не-монтируется">SAMBA не монтируется</a></li>
+<li><a href="#mcp-не-работает">MCP не работает</a></li>
+<li><a href="#важные-заметки">📝 Важные заметки</a></li>
+<li><a href="#о-samba-монтировании">О SAMBA монтировании</a></li>
+<li><a href="#о-ssh-ключах">О SSH ключах</a></li>
+<li><a href="#о-паролях">О паролях</a></li>
+<li><a href="#чек-лист-настройки">✅ Чек-лист настройки</a></li>
+<li><a href="#дополнительная-информация">🎓 Дополнительная информация</a></li>
+</ul>
+<hr />
+<h2 id="_3">Предварительные требования<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li>✅ Home Assistant доступен в вашей сети (домен или локальный IP)</li>
+<li>✅ Есть доступ к роутеру для проброса портов</li>
+<li>✅ WSL2/Linux окружение</li>
+</ul>
+<hr />
+<h2 id="1-wsl">📦 Шаг 1: Установка зависимостей (WSL)<a class="headerlink" href="#1-wsl" title="Permanent link">&para;</a></h2>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>~/HASSio
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>scripts/*.sh
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>./scripts/setup.sh
+</span></code></pre></div>
+<p><strong>Что произойдёт:</strong></p>
+<ul>
+<li>Установятся системные пакеты (ssh, cifs-utils, git)</li>
+<li>Установятся Python пакеты (yamllint, pyyaml, requests)</li>
+<li>Создастся SSH ключ в <code>.ssh/id_hassio</code></li>
+<li>Покажется публичный ключ для копирования</li>
+</ul>
+<p><strong>В конце скопируйте SSH ключ!</strong> Он выглядит так:</p>
+<p>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBsd... hassio-20251007</p>
+<hr />
+<h2 id="2-ssh-add-on-home-assistant">🔐 Шаг 2: Установка SSH add-on в Home Assistant<a class="headerlink" href="#2-ssh-add-on-home-assistant" title="Permanent link">&para;</a></h2>
+<h3 id="21-home-assistant">2.1. Открыть Home Assistant<a class="headerlink" href="#21-home-assistant" title="Permanent link">&para;</a></h3>
+<p>Откройте в браузере: <strong>ваш_домен_или_IP</strong></p>
+<h3 id="22-add-ons">2.2. Перейти в Add-ons<a class="headerlink" href="#22-add-ons" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Нажмите ⚙️ <strong>Settings</strong> (слева внизу в меню)</li>
+<li>Нажмите <strong>Add-ons</strong></li>
+<li>Нажмите синюю кнопку <strong>ADD-ON STORE</strong> (справа внизу)</li>
+</ol>
+<h3 id="23-terminal-ssh">2.3. Найти и установить Terminal &amp; SSH<a class="headerlink" href="#23-terminal-ssh" title="Permanent link">&para;</a></h3>
+<ol>
+<li>В поле поиска вверху наберите: <code>ssh</code></li>
+<li>Найдите <strong>Terminal &amp; SSH</strong> (официальный add-on от Home Assistant)</li>
+<li>Нажмите на него</li>
+<li>Нажмите синюю кнопку <strong>INSTALL</strong></li>
+<li>Дождитесь установки (2-5 минут, внизу будет прогресс)</li>
+</ol>
+<h3 id="24-ssh-add-on">2.4. Настроить SSH add-on<a class="headerlink" href="#24-ssh-add-on" title="Permanent link">&para;</a></h3>
+<ol>
+<li>После установки перейдите на вкладку <strong>Configuration</strong> (вверху)</li>
+<li>Вставьте следующую конфигурацию:</li>
+</ol>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">authorized_keys</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ssh-ed25519</span><span class="nv"> </span><span class="s">ВАААШ_КЛЮЧ_ИЗ_ШАГА_1</span><span class="nv"> </span><span class="s">hassio-20251007&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ваш_надёжный_пароль_123&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">apks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">server</span><span class="p">:</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">tcp_forwarding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span></code></pre></div>
+<p><strong>ВАЖНО:</strong></p>
+<ul>
+<li>Замените <code>ssh-ed25519 ВАААШ_КЛЮЧ...</code> на <strong>ВАШ ключ из шага 1.1</strong> (всю строку целиком!)</li>
+<li>Замените <code>ваш_надёжный_пароль_123</code> на свой пароль</li>
+<li>
+<p>Ключ должен быть <strong>одной строкой</strong> (Home Assistant может разбить его при сохранении - это нормально!)</p>
+</li>
+<li>
+<p>Нажмите <strong>SAVE</strong> (справа вверху)</p>
+</li>
+</ul>
+<h3 id="25-ssh-add-on">2.5. Запустить SSH add-on<a class="headerlink" href="#25-ssh-add-on" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Перейдите на вкладку <strong>Info</strong></li>
+<li>Включите следующие опции:</li>
+<li>☑️ <strong>Start on boot</strong> (автозапуск)</li>
+<li>☑️ <strong>Watchdog</strong> (автоперезапуск при сбое)</li>
+<li>Нажмите синюю кнопку <strong>START</strong></li>
+<li>Перейдите на вкладку <strong>Log</strong></li>
+<li>Найдите строку: <code>Server listening on :: port 22</code></li>
+<li>✅ Если есть - SSH запущен успешно!</li>
+<li>❌ Если ошибки - скопируйте их и спросите AI в Cursor</li>
+</ol>
+<hr />
+<h2 id="3-samba-add-on-home-assistant">📁 Шаг 3: Установка Samba add-on в Home Assistant<a class="headerlink" href="#3-samba-add-on-home-assistant" title="Permanent link">&para;</a></h2>
+<h3 id="31-add-on-store">3.1. Вернуться в Add-on Store<a class="headerlink" href="#31-add-on-store" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Settings</strong> → <strong>Add-ons</strong> → <strong>ADD-ON STORE</strong></li>
+</ol>
+<h3 id="32-samba-share">3.2. Найти и установить Samba share<a class="headerlink" href="#32-samba-share" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Поиск: <code>samba</code></li>
+<li>Найдите <strong>Samba share</strong> (официальный)</li>
+<li>Нажмите на него</li>
+<li><strong>INSTALL</strong></li>
+<li>Дождитесь установки</li>
+</ol>
+<h3 id="33-samba">3.3. Настроить Samba<a class="headerlink" href="#33-samba" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Вкладка <strong>Configuration</strong></li>
+<li>Вставьте:</li>
+</ol>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">homeassistant</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_secure_password</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">workgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WORKGROUP</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">local_master</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">enabled_shares</span><span class="p">:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nt">compatibility_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nt">apple_compatibility_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="nt">veto_files</span><span class="p">:</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">._*</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.DS_Store</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Thumbs.db</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="nt">allow_hosts</span><span class="p">:</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.0/8</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.16.0.0/12</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.0/16</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fe80::/10</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+</span></code></pre></div>
+<p><strong>Пояснения:</strong></p>
+<ul>
+<li><code>username</code> - имя пользователя для подключения</li>
+<li><code>password</code> - пароль (можете изменить на свой!)</li>
+<li>
+<p><code>enabled_shares</code> - открываем только config и backup (безопасно)</p>
+</li>
+<li>
+<p>Нажмите <strong>SAVE</strong></p>
+</li>
+</ul>
+<h3 id="34-samba">3.4. Запустить Samba<a class="headerlink" href="#34-samba" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Вкладка <strong>Info</strong></li>
+<li>Включите: ☑️ <strong>Start on boot</strong>, ☑️ <strong>Watchdog</strong></li>
+<li>Нажмите <strong>START</strong></li>
+<li>Вкладка <strong>Log</strong> → проверьте: <code>smbd version ... started</code> ✅</li>
+</ol>
+<hr />
+<h2 id="4-ip-home-assistant">🌐 Шаг 4: Узнать IP адрес Home Assistant<a class="headerlink" href="#4-ip-home-assistant" title="Permanent link">&para;</a></h2>
+<h3 id="home-assistant">В Home Assistant<a class="headerlink" href="#home-assistant" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Settings</strong> (⚙️)</li>
+<li><strong>System</strong></li>
+<li><strong>Network</strong></li>
+<li>Найдите первый IP адрес в списке</li>
+</ol>
+<p><strong>Пример:</strong> <code>192.168.1.50</code></p>
+<p><strong>ЗАПИШИТЕ ЕГО - он понадобится дальше!</strong></p>
+<hr />
+<h2 id="5-wsl">💻 Шаг 5: Локальная настройка (WSL)<a class="headerlink" href="#5-wsl" title="Permanent link">&para;</a></h2>
+<h3 id="51-samba-credentials">5.1. Настроить SAMBA credentials<a class="headerlink" href="#51-samba-credentials" title="Permanent link">&para;</a></h3>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>~/HASSio
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>chmod<span class="w"> </span>+x<span class="w"> </span>scripts/*.sh
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>./scripts/setup_samba.sh
+</span></code></pre></div>
+<p><strong>Что произойдёт:</strong></p>
+<ul>
+<li>Создастся файл <code>.samba-credentials</code> с логином и паролем</li>
+<li>Покажется содержимое для проверки</li>
+</ul>
+<h3 id="52-ssh-config-ip">5.2. Обновить SSH config с вашим IP<a class="headerlink" href="#52-ssh-config-ip" title="Permanent link">&para;</a></h3>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>nano<span class="w"> </span>.ssh/config
+</span></code></pre></div>
+<p>Найдите строку:</p>
+<p>HostName 192.168.1.50</p>
+<p>Замените <code>192.168.1.50</code> на <strong>ВАШ IP из шага 4</strong>!</p>
+<p><strong>Сохранить:</strong></p>
+<ul>
+<li>Нажмите <code>Ctrl+O</code></li>
+<li>Нажмите <code>Enter</code></li>
+<li>Нажмите <code>Ctrl+X</code></li>
+</ul>
+<hr />
+<h2 id="6">🌍 Шаг 6: Проброс портов на роутере<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>📖 <strong>Для MikroTik:</strong> См. <a href="../portforward-mikrotik/">подробную инструкцию для MikroTik с Reverse Proxy</a></p>
+</blockquote>
+<h3 id="61">6.1. Войти в роутер<a class="headerlink" href="#61" title="Permanent link">&para;</a></h3>
+<p>Откройте в браузере адрес роутера:</p>
+<ul>
+<li>Обычно: <code>192.168.1.1</code> или <code>192.168.0.1</code> или <code>192.168.88.1</code></li>
+<li>Введите логин и пароль администратора роутера</li>
+</ul>
+<h3 id="62-port-forwarding">6.2. Найти раздел Port Forwarding<a class="headerlink" href="#62-port-forwarding" title="Permanent link">&para;</a></h3>
+<p>Ищите один из разделов (зависит от роутера):</p>
+<ul>
+<li><strong>Port Forwarding</strong></li>
+<li><strong>Virtual Server</strong></li>
+<li><strong>NAT Forwarding</strong></li>
+<li><strong>Firewall → NAT</strong> (Mikrotik)</li>
+</ul>
+<h3 id="63-ssh">6.3. Создать правило для SSH<a class="headerlink" href="#63-ssh" title="Permanent link">&para;</a></h3>
+<p><strong>Добавить новое правило:</strong></p>
+<p>Название/Name: HA-SSH
+Внешний порт/External Port: 2222
+Внутренний IP/Internal IP: 192.168.X.X  ← ВАШ IP из шага 4!
+Внутренний порт/Internal Port: 22
+Протокол/Protocol: TCP
+Статус/Status: Включено/Enabled</p>
+<h3 id="64-samba">6.4. Создать правила для SAMBA<a class="headerlink" href="#64-samba" title="Permanent link">&para;</a></h3>
+<p><strong>Добавить 4 правила:</strong></p>
+<p><strong>Правило 1:</strong></p>
+<p>Название: HA-SAMBA-445
+Внешний порт: 445
+Внутренний IP: 192.168.X.X  ← ВАШ IP!
+Внутренний порт: 445
+Протокол: TCP</p>
+<p><strong>Правило 2:</strong></p>
+<p>Название: HA-SAMBA-139
+Внешний порт: 139
+Внутренний IP: 192.168.X.X
+Внутренний порт: 139
+Протокол: TCP</p>
+<p><strong>Правило 3:</strong></p>
+<p>Название: HA-SAMBA-137
+Внешний порт: 137
+Внутренний IP: 192.168.X.X
+Внутренний порт: 137
+Протокол: UDP</p>
+<p><strong>Правило 4:</strong></p>
+<p>Название: HA-SAMBA-138
+Внешний порт: 138
+Внутренний IP: 192.168.X.X
+Внутренний порт: 138
+Протокол: UDP</p>
+<h3 id="65">6.5. Сохранить настройки<a class="headerlink" href="#65" title="Permanent link">&para;</a></h3>
+<p>Нажмите <strong>Save</strong> / <strong>Apply</strong> / <strong>OK</strong> (зависит от роутера)</p>
+<hr />
+<h2 id="7-ssh">✅ Шаг 7: Проверка SSH подключения<a class="headerlink" href="#7-ssh" title="Permanent link">&para;</a></h2>
+<h3 id="71">7.1. Первое подключение<a class="headerlink" href="#71" title="Permanent link">&para;</a></h3>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">cd</span><span class="w"> </span>~/HASSio
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ssh<span class="w"> </span>-F<span class="w"> </span>.ssh/config<span class="w"> </span>hassio
+</span></code></pre></div>
+<p><strong>Что должно произойти:</strong></p>
+<ol>
+<li>Появится вопрос: <code>Are you sure you want to continue connecting (yes/no)?</code></li>
+<li>Напечатайте: <code>yes</code></li>
+<li>Нажмите <code>Enter</code></li>
+<li>Вы должны попасть в консоль Home Assistant</li>
+<li>Приветствие: <code>Welcome to the Home Assistant command line.</code></li>
+</ol>
+<h3 id="72">7.2. Проверка работы<a class="headerlink" href="#72" title="Permanent link">&para;</a></h3>
+<p>Выполните в консоли HA:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ha<span class="w"> </span>core<span class="w"> </span>info
+</span></code></pre></div>
+<p>Должна показаться информация о версии Home Assistant.</p>
+<h3 id="73">7.3. Выход<a class="headerlink" href="#73" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">exit</span>
+</span></code></pre></div>
+<p><strong>Если подключение не удалось:</strong></p>
+<ul>
+<li><code>Connection refused</code> → проверьте проброс портов (шаг 6)</li>
+<li><code>Permission denied</code> → проверьте SSH ключ в add-on (шаг 2.4)</li>
+<li><code>Connection timed out</code> → проверьте что add-on запущен</li>
+</ul>
+<hr />
+<h2 id="8-samba">📁 Шаг 8: Монтирование SAMBA<a class="headerlink" href="#8-samba" title="Permanent link">&para;</a></h2>
+<h3 id="81">8.1. Монтирование<a class="headerlink" href="#81" title="Permanent link">&para;</a></h3>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd</span><span class="w"> </span>~/HASSio
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>./mount.sh
+</span></code></pre></div>
+<p><strong>Что должно произойти:</strong></p>
+<p>🔌 Монтирование шары 'config'...
+✅ Смонтировано!
+✅ Создана ссылка: ~/HASSio/config → /mnt/hassio</p>
+<p>📂 Содержимое /mnt/hassio (папка config из HA):
+configuration.yaml
+automations.yaml
+scripts.yaml
+...</p>
+<h3 id="82">8.2. Проверка<a class="headerlink" href="#82" title="Permanent link">&para;</a></h3>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>ls<span class="w"> </span>config/
+</span></code></pre></div>
+<p>Должны увидеть файлы конфигурации Home Assistant:</p>
+<ul>
+<li>configuration.yaml</li>
+<li>automations.yaml</li>
+<li>scripts.yaml</li>
+<li>и т.д.</li>
+</ul>
+<p><strong>Если ошибка:</strong></p>
+<ul>
+<li>Проверьте что Samba add-on запущен (шаг 3.4)</li>
+<li>Проверьте пароль в <code>.samba-credentials</code></li>
+<li>Проверьте проброс портов SAMBA (шаг 6.4)</li>
+</ul>
+<hr />
+<h2 id="9">✅ Шаг 9: Финальная проверка<a class="headerlink" href="#9" title="Permanent link">&para;</a></h2>
+<p>Выполните:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./check.sh
+</span></code></pre></div>
+<p><strong>Должно показать:</strong></p>
+<p>✅ SSH работает
+✅ SAMBA смонтирован
+✅ Доступ к configuration.yaml
+✅ MCP настроен</p>
+<p><strong>Если всё ✅ - поздравляю, настройка завершена!</strong> 🎉</p>
+<hr />
+<h2 id="_4">🎯 Начало работы<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>Теперь можете:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Редактировать конфиги</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>code<span class="w"> </span>config/configuration.yaml
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Развернуть изменения</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>./scripts/deploy.sh
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># Просмотр логов</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>./scripts/view_logs.sh
+</span></code></pre></div>
+<hr />
+<h2 id="_5">🆘 Решение проблем<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="ssh">SSH не подключается<a class="headerlink" href="#ssh" title="Permanent link">&para;</a></h3>
+<h4 id="1-add-on">Проверка 1: Add-on запущен?<a class="headerlink" href="#1-add-on" title="Permanent link">&para;</a></h4>
+<p>Home Assistant → Add-ons → Terminal &amp; SSH → вкладка Info
+Статус должен быть: "Started"</p>
+<h4 id="2">Проверка 2: Порт открыт?<a class="headerlink" href="#2" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>nc<span class="w"> </span>-zv<span class="w"> </span>your-domain.com<span class="w"> </span><span class="m">2222</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="c1"># Должно быть: succeeded!</span>
+</span></code></pre></div>
+<h4 id="3">Проверка 3: Ключ добавлен?<a class="headerlink" href="#3" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>cat<span class="w"> </span>.ssh/id_hassio.pub
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="c1"># Убедитесь что этот ключ в Configuration add-on</span>
+</span></code></pre></div>
+<h4 id="4">Проверка 4: Попробуйте с паролем<a class="headerlink" href="#4" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ssh<span class="w"> </span>-F<span class="w"> </span>.ssh/config<span class="w"> </span>-o<span class="w"> </span><span class="nv">PreferredAuthentications</span><span class="o">=</span>password<span class="w"> </span>hassio
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1"># Введите пароль из configuration add-on</span>
+</span></code></pre></div>
+<hr />
+<h3 id="samba">SAMBA не монтируется<a class="headerlink" href="#samba" title="Permanent link">&para;</a></h3>
+<h4 id="1-add-on_1">Проверка 1: Add-on запущен?<a class="headerlink" href="#1-add-on_1" title="Permanent link">&para;</a></h4>
+<p>Home Assistant → Add-ons → Samba share → Info
+Статус: "Started"</p>
+<h4 id="2-credentials">Проверка 2: Credentials правильные?<a class="headerlink" href="#2-credentials" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>cat<span class="w"> </span>.samba-credentials
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="c1"># Должно совпадать с Configuration add-on</span>
+</span></code></pre></div>
+<h4 id="3_1">Проверка 3: Порт открыт?<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>nc<span class="w"> </span>-zv<span class="w"> </span>your-domain.com<span class="w"> </span><span class="m">445</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="c1"># Должно быть: succeeded!</span>
+</span></code></pre></div>
+<h4 id="4_1">Проверка 4: Попробуйте вручную<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>sudo<span class="w"> </span>mount<span class="w"> </span>-t<span class="w"> </span>cifs<span class="w"> </span>//your-domain.com/config<span class="w"> </span>/mnt/hassio<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span>-o<span class="w"> </span><span class="nv">username</span><span class="o">=</span>homeassistant,password<span class="o">=</span>your_password,uid<span class="o">=</span><span class="m">1000</span>,gid<span class="o">=</span><span class="m">1000</span>
+</span></code></pre></div>
+<hr />
+<h3 id="mcp">MCP не работает<a class="headerlink" href="#mcp" title="Permanent link">&para;</a></h3>
+<h4 id="_6">Проверка: Файл конфигурации<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>cat<span class="w"> </span>.cursor/mcp.json
+</span></code></pre></div>
+<p>Должен содержать:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="nt">&quot;home-assistant&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mcp-proxy&quot;</span><span class="p">,</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://your-domain.com/mcp_server/sse&quot;</span><span class="p">],</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">      </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">        </span><span class="nt">&quot;API_ACCESS_TOKEN&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">    </span><span class="nt">&quot;HASSio_Cursor Docs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://gitmcp.io/Gfermoto/HASSio_Cursor&quot;</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>Перезапустите Cursor</strong> если MCP не работает.</p>
+<hr />
+<h2 id="_7">📝 Важные заметки<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="samba_1">О SAMBA монтировании<a class="headerlink" href="#samba_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>/mnt/hassio</code> - физическая точка монтирования</li>
+<li><code>~/HASSio/config/</code> - символическая ссылка на <code>/mnt/hassio</code></li>
+<li>Оба пути ведут к <strong>одним и тем же файлам</strong>!</li>
+</ul>
+<h3 id="ssh_1">О SSH ключах<a class="headerlink" href="#ssh_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Приватный ключ: <code>.ssh/id_hassio</code> (никому не показывайте!)</li>
+<li>Публичный ключ: <code>.ssh/id_hassio.pub</code> (можно делиться)</li>
+<li>Публичный ключ добавляется в Home Assistant</li>
+</ul>
+<h3 id="_8">О паролях<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>SSH пароль - запасной вариант если ключ не работает</li>
+<li>SAMBA пароль - для монтирования конфигов</li>
+<li>Оба пароля можно менять в любой момент</li>
+</ul>
+<hr />
+<h2 id="-">✅ Чек-лист настройки<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
+<p>Отметьте выполненные пункты:</p>
+<ul>
+<li>[ ] Выполнен <code>./setup.sh</code></li>
+<li>[ ] SSH ключ скопирован</li>
+<li>[ ] SSH add-on установлен в HA</li>
+<li>[ ] SSH ключ добавлен в Configuration</li>
+<li>[ ] SSH add-on запущен</li>
+<li>[ ] Samba add-on установлен в HA</li>
+<li>[ ] Samba add-on запущен</li>
+<li>[ ] IP адрес Home Assistant узнан</li>
+<li>[ ] Проброс портов SSH настроен</li>
+<li>[ ] Проброс портов SAMBA настроен</li>
+<li>[ ] <code>.samba-credentials</code> создан</li>
+<li>[ ] SSH config обновлен с правильным IP</li>
+<li>[ ] SSH подключение работает</li>
+<li>[ ] SAMBA монтируется</li>
+<li>[ ] <code>./check.sh</code> показывает все ✅</li>
+</ul>
+<hr />
+<h2 id="_9">🎓 Дополнительная информация<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="../../reference/COMMANDS/">COMMANDS.md</a></strong> - Справочник всех команд</li>
+<li><strong><a href="../../reference/WORKFLOW/">WORKFLOW.md</a></strong> - Рабочий процесс разработки</li>
+<li><a href="../../README.md"><strong>README.md</strong></a> - Обзор проекта</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  К началу
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Gfermoto
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Gfermoto/HASSio_Cursor" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0415\u0449\u0451 1 \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.more.other": "\u0415\u0449\u0451 # \u043d\u0430 \u044d\u0442\u043e\u0439 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0435", "search.result.none": "\u0421\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0435", "search.result.other": "\u041d\u0430\u0439\u0434\u0435\u043d\u043e \u0441\u043e\u0432\u043f\u0430\u0434\u0435\u043d\u0438\u0439: #", "search.result.placeholder": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0434\u043b\u044f \u043f\u043e\u0438\u0441\u043a\u0430", "search.result.term.missing": "\u041e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u0435\u0442", "select.version": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0435\u0440\u0441\u0438\u044e"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

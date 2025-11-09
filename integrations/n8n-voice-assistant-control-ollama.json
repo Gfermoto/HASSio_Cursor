@@ -1,0 +1,275 @@
+{
+  "name": "🎤 Голосовой ассистент с управлением (Whisper + Ollama + HA Control)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 460],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.item.json.message;\nconst voice = message?.voice;\nconst text = message?.text || '';\nconst chatId = message?.chat?.id;\nconst userName = message?.from?.first_name || 'Друг';\n\nif (!chatId) {\n  return [];\n}\n\nif (text === '/start' || text === '/help') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: `👋 Привет, ${userName}!\\n\\n🎤 Голосовой AI ассистент с управлением!\\n\\n*Умею:*\\n• Голос + текст (Whisper)\\n• Отвечаю (Ollama llama3.1:8b)\\n• Помню диалог\\n• 🆕 УПРАВЛЯЮ устройствами!\\n\\n*Примеры:*\\n🎤 \"Включи люстру\"\\n🎤 \"Выключи фасад\"\\n🎤 \"Какая температура?\"\\n\\n/clear - очистить память`\n    }\n  }];\n}\n\nif (text === '/clear') {\n  return [{\n    json: {\n      isCommand: true,\n      chatId: chatId,\n      responseText: '🗑️ Память очищена!'\n    }\n  }];\n}\n\nif (voice && voice.file_id) {\n  return [{\n    json: {\n      isCommand: false,\n      isVoice: true,\n      chatId: chatId,\n      userName: userName,\n      fileId: voice.file_id\n    }\n  }];\n}\n\nif (text) {\n  return [{\n    json: {\n      isCommand: false,\n      isVoice: false,\n      chatId: chatId,\n      userName: userName,\n      userMessage: text\n    }\n  }];\n}\n\nreturn [];"
+      },
+      "id": "process-message",
+      "name": "Process Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isCommand ? 'command' : 'chat' }}",
+              "rightValue": "command",
+              "operator": {"type": "string", "operation": "equals"}
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "is-command",
+      "name": "Is Command?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 460]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}",
+        "additionalFields": {"parse_mode": "Markdown"}
+      },
+      "id": "send-command",
+      "name": "Send Command Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 340],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"typeValidation": "strict"},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isVoice }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "true"}
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "is-voice",
+      "name": "Is Voice?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [900, 580]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/botYOUR_BOT_TOKEN/getFile?file_id={{ $json.fileId }}",
+        "options": {}
+      },
+      "id": "get-file-url",
+      "name": "Get File Path",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 480]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/botYOUR_BOT_TOKEN/{{ $json.result.file_path }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-voice",
+      "name": "Download Voice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_WHISPER_IP:9000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "audio",
+              "inputDataFieldName": "=data",
+              "parameterType": "formBinaryData"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "whisper-transcribe",
+      "name": "Whisper Transcribe",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "const whisperResponse = $input.item.json;\nconst processData = $('Process Message').item.json;\n\nreturn [{\n  json: {\n    chatId: processData.chatId,\n    userName: processData.userName,\n    userMessage: whisperResponse.text || 'Ошибка распознавания'\n  }\n}];"
+      },
+      "id": "extract-voice-text",
+      "name": "Extract Voice Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 480]
+    },
+    {
+      "parameters": {
+        "resource": "state",
+        "operation": "getAll"
+      },
+      "id": "get-ha-states",
+      "name": "Get HA States",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1780, 680],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const processData = $('Process Message').item.json;\nlet userMessage, chatId, userName;\n\nif (processData.isVoice) {\n  const voiceData = $('Extract Voice Text').item.json;\n  userMessage = voiceData.userMessage;\n  chatId = voiceData.chatId;\n  userName = voiceData.userName;\n} else {\n  userMessage = processData.userMessage;\n  chatId = processData.chatId;\n  userName = processData.userName;\n}\n\nconst haItems = $input.all();\nlet allStates = [];\n\nfor (const item of haItems) {\n  if (Array.isArray(item.json)) {\n    allStates = allStates.concat(item.json);\n  } else if (item.json.entity_id) {\n    allStates.push(item.json);\n  }\n}\n\nconst controllableDomains = ['light', 'switch', 'climate', 'scene'];\nconst controllable = allStates.filter(state => {\n  const domain = state.entity_id?.split('.')[0];\n  return domain && controllableDomains.includes(domain) && state.state !== 'unavailable';\n});\n\nconst devicesList = controllable.slice(0, 50).map(state => {\n  const name = state.attributes?.friendly_name || state.entity_id;\n  return `${name}: ${state.entity_id}`;\n}).join('\\n');\n\nconst relevantDomains = ['sensor', 'binary_sensor', 'climate', 'light', 'switch', 'weather'];\nconst stateSensors = allStates.filter(state => {\n  const domain = state.entity_id?.split('.')[0];\n  return domain && relevantDomains.includes(domain) && state.state !== 'unavailable' && state.state !== 'unknown';\n});\n\nconst stateList = stateSensors.slice(0, 30).map(state => {\n  const name = state.attributes?.friendly_name || state.entity_id;\n  const value = state.state;\n  const unit = state.attributes?.unit_of_measurement || '';\n  return `${name}: ${value}${unit ? ' ' + unit : ''}`;\n}).join('\\n');\n\nreturn [{\n  json: {\n    userMessage: userMessage,\n    chatId: chatId,\n    userName: userName,\n    controllableDevices: devicesList,\n    stateInfo: stateList,\n    totalDevices: controllable.length,\n    currentTime: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })\n  }\n}];"
+      },
+      "id": "prepare-context",
+      "name": "Prepare AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 680]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Prepare AI Context').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "Ты русскоязычный голосовой AI ассистент умного дома. ВСЕГДА отвечай ТОЛЬКО на русском языке!\n\nПОЛЬЗОВАТЕЛЬ: {{ $('Prepare AI Context').item.json.userName }}\nВРЕМЯ: {{ $('Prepare AI Context').item.json.currentTime }}\n\n🏠 ДАТЧИКИ (для справки):\n{{ $('Prepare AI Context').item.json.stateInfo }}\n\n🎛️ УПРАВЛЯЕМЫЕ УСТРОЙСТВА ({{ $('Prepare AI Context').item.json.totalDevices }} шт):\n{{ $('Prepare AI Context').item.json.controllableDevices }}\n\n🔧 КАК УПРАВЛЯТЬ:\nИспользуй Tools для управления устройствами:\n- **control_ha_device** - включить/выключить устройство\n  Параметры: entity_id (из списка выше), action (on/off/toggle)\n\n📋 ПРАВИЛА:\n1. ВСЕГДА отвечай на русском!\n2. Используй ТОЛЬКО entity_id из списка выше\n3. Для управления - вызывай Tool, затем подтверждай\n4. Для вопросов - отвечай на основе данных датчиков\n5. КРАТКО (2-3 предложения)\n\n💬 ПРИМЕРЫ:\nВопрос: \"Включи люстру\"\n→ Вызов Tool: control_ha_device({entity_id: \"switch.sonoff_100169e371_1\", action: \"on\"})\n→ Ответ пользователю: \"✅ Включил люстру\"\n\nВопрос: \"Какая температура?\"\n→ БЕЗ Tool, просто ответ: \"🌡️ В доме около 21°C...\""
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [2220, 680]
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {
+          "baseURL": "http://YOUR_OLLAMA_IP:11434",
+          "temperature": 0.7
+        }
+      },
+      "id": "ollama-model",
+      "name": "Ollama Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [2440, 800]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Prepare AI Context').item.json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "id": "memory-buffer",
+      "name": "Memory Buffer",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [2440, 920]
+    },
+    {
+      "parameters": {
+        "name": "control_ha_device",
+        "description": "Control Home Assistant device (light/switch/climate). Parameters: entity_id (required, exact ID from available devices list), action (required: 'on' or 'off' or 'toggle'). Returns success confirmation.",
+        "workflowId": "CONTROL_HA_DEVICE_WORKFLOW_ID"
+      },
+      "id": "tool-control-ha",
+      "name": "Tool: Control HA Device",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.1,
+      "position": [2440, 1040]
+    },
+    {
+      "parameters": {
+        "jsCode": "const agentResponse = $input.item.json;\nconst chatId = $('Prepare AI Context').item.json.chatId;\n\nlet responseText = '';\n\nif (agentResponse.output) {\n  responseText = agentResponse.output;\n} else if (agentResponse.text) {\n  responseText = agentResponse.text;\n} else if (typeof agentResponse === 'string') {\n  responseText = agentResponse;\n} else {\n  responseText = '❌ Ошибка AI';\n}\n\nreturn [{\n  json: {\n    chatId: chatId,\n    responseText: responseText\n  }\n}];"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 680]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.responseText }}"
+      },
+      "id": "send-response",
+      "name": "Send AI Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2660, 680],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {"main": [[{"node": "Process Message", "type": "main", "index": 0}]]},
+    "Process Message": {"main": [[{"node": "Is Command?", "type": "main", "index": 0}]]},
+    "Is Command?": {"main": [[{"node": "Send Command Response", "type": "main", "index": 0}],[{"node": "Is Voice?", "type": "main", "index": 0}]]},
+    "Is Voice?": {"main": [[{"node": "Get File Path", "type": "main", "index": 0}],[{"node": "Get HA States", "type": "main", "index": 0}]]},
+    "Get File Path": {"main": [[{"node": "Download Voice", "type": "main", "index": 0}]]},
+    "Download Voice": {"main": [[{"node": "Whisper Transcribe", "type": "main", "index": 0}]]},
+    "Whisper Transcribe": {"main": [[{"node": "Extract Voice Text", "type": "main", "index": 0}]]},
+    "Extract Voice Text": {"main": [[{"node": "Get HA States", "type": "main", "index": 0}]]},
+    "Get HA States": {"main": [[{"node": "Prepare AI Context", "type": "main", "index": 0}]]},
+    "Prepare AI Context": {"main": [[{"node": "AI Agent", "type": "main", "index": 0}]]},
+    "Ollama Model": {"ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]},
+    "Memory Buffer": {"ai_memory": [[{"node": "AI Agent", "type": "ai_memory", "index": 0}]]},
+    "Tool: Control HA Device": {"ai_tool": [[{"node": "AI Agent", "type": "ai_tool", "index": 0}]]},
+    "AI Agent": {"main": [[{"node": "Format Response", "type": "main", "index": 0}]]},
+    "Format Response": {"main": [[{"node": "Send AI Response", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": []
+}
