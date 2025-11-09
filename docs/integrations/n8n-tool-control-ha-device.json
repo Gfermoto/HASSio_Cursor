@@ -1,0 +1,69 @@
+{
+  "name": "🔧 Tool: Control HA Device",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "execute-workflow-trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [240, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "const entity_id = $input.item.json.entity_id;\nconst action = $input.item.json.action || 'toggle';\n\nif (!entity_id) {\n  return [{\n    json: {\n      error: 'entity_id is required',\n      success: false\n    }\n  }];\n}\n\nconst domain = entity_id.split('.')[0];\nlet service = '';\n\nif (action === 'on') {\n  service = 'turn_on';\n} else if (action === 'off') {\n  service = 'turn_off';\n} else {\n  service = 'toggle';\n}\n\nreturn [{\n  json: {\n    domain: domain,\n    service: service,\n    entity_id: entity_id,\n    action: action\n  }\n}];"
+      },
+      "id": "parse-command",
+      "name": "Parse Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "={{ $json.domain }}",
+        "service": "={{ $json.service }}",
+        "serviceAttributes": {
+          "attributes": [
+            {
+              "name": "entity_id",
+              "value": "={{ $json.entity_id }}"
+            }
+          ]
+        }
+      },
+      "id": "ha-call-service",
+      "name": "HA Call Service",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [680, 460],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "YOUR_HA_CREDENTIAL_ID",
+          "name": "Home Assistant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const entity_id = $('Parse Command').item.json.entity_id;\nconst action = $('Parse Command').item.json.action;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Device ${entity_id} ${action === 'on' ? 'turned on' : (action === 'off' ? 'turned off' : 'toggled')} successfully`\n  }\n}];"
+      },
+      "id": "format-result",
+      "name": "Format Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 460]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {"main": [[{"node": "Parse Command", "type": "main", "index": 0}]]},
+    "Parse Command": {"main": [[{"node": "HA Call Service", "type": "main", "index": 0}]]},
+    "HA Call Service": {"main": [[{"node": "Format Result", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
